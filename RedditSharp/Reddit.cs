@@ -1,10 +1,10 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RedditSharp.Things;
 using System;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
-using RedditSharp.Things;
 using System.Threading.Tasks;
 using DefaultWebAgent = RedditSharp.WebAgent;
 

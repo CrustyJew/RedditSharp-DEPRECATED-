@@ -31,7 +31,6 @@ namespace RedditSharp.Things
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
-
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);

@@ -46,13 +46,18 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private Reddit Reddit { get; set; }
 
-        protected async Task<VotableThing> Init(Reddit reddit, IWebAgent webAgent, JToken json)
+        protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await CommonInit(reddit, webAgent, json);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings));
             return this;
         }
-
+        protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
+        {
+            CommonInit(reddit, webAgent, json).RunSynchronously();
+            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings));
+            return this;
+        }
         private async Task CommonInit(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await Init(reddit, json);

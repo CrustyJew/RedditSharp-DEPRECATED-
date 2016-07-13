@@ -25,15 +25,15 @@ namespace RedditSharp.Things
 
         public async Task<Comment> Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            var data = CommonInit(reddit, json, webAgent, sender);
+            var data = await CommonInit(reddit, json, webAgent, sender);
             await ParseCommentsAsync(reddit, json, webAgent, sender);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
 
-        private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        private async Task<JToken> CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            Init(reddit, webAgent, json);
+            await Init(reddit, webAgent, json);
             var data = json["data"];
             Reddit = reddit;
             WebAgent = webAgent;

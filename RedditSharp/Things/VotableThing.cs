@@ -46,22 +46,16 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private Reddit Reddit { get; set; }
 
-        protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
+        protected async Task<VotableThing> Init(Reddit reddit, IWebAgent webAgent, JToken json)
         {
-            CommonInit(reddit, webAgent, json);
-            JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
-            return this;
-        }
-        protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
-        {
-            CommonInit(reddit, webAgent, json);
+            await CommonInit(reddit, webAgent, json);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings));
             return this;
         }
 
-        private void CommonInit(Reddit reddit, IWebAgent webAgent, JToken json)
+        private async Task CommonInit(Reddit reddit, IWebAgent webAgent, JToken json)
         {
-            base.Init(reddit, json);
+            await Init(reddit, json);
             Reddit = reddit;
             WebAgent = webAgent;
         }
@@ -105,7 +99,9 @@ namespace RedditSharp.Things
             }
             set { this.SetVote(value); }
         }
-
+        /// <summary>
+        /// Upvotes something
+        /// </summary>
         public void Upvote()
         {
             this.SetVote(VoteType.Upvote);
@@ -187,7 +183,11 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
-
+        /// <summary>
+        /// Reports someone
+        /// </summary>
+        /// <param name="reportType">What you're reporting them for <see cref="ReportType"/></param>
+        /// <param name="otherReason">If your reason is "Other", say why you're reporting them</param>
         public void Report(ReportType reportType, string otherReason = null)
         {
             var request = WebAgent.CreatePost(ReportUrl);
@@ -222,7 +222,10 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
-
+        /// <summary>
+        /// Distingiush a comment
+        /// </summary>
+        /// <param name="distinguishType">Type you want to distinguish <see cref="DistinguishType"/></param>
         public void Distinguish(DistinguishType distinguishType)
         {
             if (Reddit.User == null)

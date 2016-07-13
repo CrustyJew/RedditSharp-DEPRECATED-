@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
@@ -23,14 +23,7 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
-        public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
-        {
-            var data = CommonInit(reddit, json, webAgent, sender);
-            ParseComments(reddit, json, webAgent, sender);
-            JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-        public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        public async Task<Comment> Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = CommonInit(reddit, json, webAgent, sender);
             await ParseCommentsAsync(reddit, json, webAgent, sender);
@@ -40,11 +33,11 @@ namespace RedditSharp.Things
 
         private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            base.Init(reddit, webAgent, json);
+            Init(reddit, webAgent, json);
             var data = json["data"];
             Reddit = reddit;
             WebAgent = webAgent;
-            this.Parent = sender;
+            Parent = sender;
 
             // Handle Reddit's API being horrible
             if (data["context"] != null)
@@ -64,7 +57,7 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add(new Comment().Init(reddit, comment, webAgent, sender));
+                    subComments.Add(new Comment().Init(reddit, comment, webAgent, sender).Result);
             }
             Comments = subComments.ToArray();
         }
@@ -77,7 +70,7 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add(await new Comment().InitAsync(reddit, comment, webAgent, sender));
+                    subComments.Add(await new Comment().Init(reddit, comment, webAgent, sender));
             }
             Comments = subComments.ToArray();            
         }
@@ -127,7 +120,7 @@ namespace RedditSharp.Things
                     linkId = this.LinkId.Substring(index + 1);
                 }
 
-                return String.Format("{0}://{1}/r/{2}/comments/{3}/_/{4}",
+                return string.Format("{0}://{1}/r/{2}/comments/{3}/_/{4}",
                                      RedditSharp.WebAgent.Protocol, RedditSharp.WebAgent.RootDomain,
                                      this.Subreddit, this.Parent != null ? this.Parent.Id : linkId, this.Id);
             }
@@ -155,7 +148,7 @@ namespace RedditSharp.Things
                 var json = JObject.Parse(data);
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-                return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
+                return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this).Result;
             }
             catch (WebException ex)
             {

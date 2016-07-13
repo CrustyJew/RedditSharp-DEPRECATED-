@@ -51,28 +51,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModActionType.cs" />
+    <Compile Include="Moderator Actions\ModActionType.cs" />
     <Compile Include="Things\Contributor.cs" />
     <Compile Include="Things\ModAction.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="SpamFilterSettings.cs" />
     <Compile Include="Things\AuthenticatedUser.cs" />
     <Compile Include="AuthProvider.cs" />
-    <Compile Include="Captcha.cs" />
-    <Compile Include="CaptchaFailedException.cs" />
-    <Compile Include="CaptchaResponse.cs" />
-    <Compile Include="ConsoleCaptchaSolver.cs" />
+    <Compile Include="Catchpha\Captcha.cs" />
+    <Compile Include="Catchpha\CaptchaFailedException.cs" />
+    <Compile Include="Catchpha\CaptchaResponse.cs" />
+    <Compile Include="Catchpha\ConsoleCaptchaSolver.cs" />
     <Compile Include="DuplicateLinkException.cs" />
-    <Compile Include="ICaptchaSolver.cs" />
+    <Compile Include="Interfaces\ICaptchaSolver.cs" />
     <Compile Include="Things\Comment.cs" />
     <Compile Include="Things\CreatedThing.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FlairTemplate.cs" />
-    <Compile Include="IWebAgent.cs" />
+    <Compile Include="Interfaces\IWebAgent.cs" />
     <Compile Include="LinkData.cs" />
     <Compile Include="Listing.cs" />
-    <Compile Include="ModeratorPermission.cs" />
-    <Compile Include="ModeratorUser.cs" />
+    <Compile Include="Moderator Actions\ModeratorPermission.cs" />
+    <Compile Include="Moderator Actions\ModeratorUser.cs" />
     <Compile Include="MultipartFormBuilder.cs" />
     <Compile Include="FlairType.cs" />
     <Compile Include="Things\Post.cs" />
@@ -84,9 +84,9 @@
     <Compile Include="Things\RedditUser.cs" />
     <Compile Include="SubmitData.cs" />
     <Compile Include="Things\Subreddit.cs" />
-    <Compile Include="SubredditImage.cs" />
-    <Compile Include="SubredditSettings.cs" />
-    <Compile Include="SubredditStyle.cs" />
+    <Compile Include="Subreddit Information\SubredditImage.cs" />
+    <Compile Include="Subreddit Information\SubredditSettings.cs" />
+    <Compile Include="Subreddit Information\SubredditStyle.cs" />
     <Compile Include="TextData.cs" />
     <Compile Include="Things\Thing.cs" />
     <Compile Include="UnixTimeStamp.cs" />
@@ -95,15 +95,16 @@
     <Compile Include="Things\VotableThing.cs" />
     <Compile Include="RateLimitException.cs" />
     <Compile Include="WebAgent.cs" />
-    <Compile Include="Wiki.cs" />
-    <Compile Include="WikiPage.cs" />
+    <Compile Include="Wiki\Wiki.cs" />
+    <Compile Include="Wiki\WikiPage.cs" />
     <Compile Include="Things\WikiPageRevision.cs" />
-    <Compile Include="WikiPageSettings.cs" />
+    <Compile Include="Wiki\WikiPageSettings.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="TBUserNote.cs" />
     <Compile Include="ToolBoxUserNotes.cs" />
     <Compile Include="ToolBoxUserNotesException.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

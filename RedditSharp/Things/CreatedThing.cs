@@ -9,13 +9,7 @@ namespace RedditSharp.Things
     {
         private Reddit Reddit { get; set; }
 
-        protected CreatedThing Init(Reddit reddit, JToken json)
-        {
-            CommonInit(reddit, json);
-            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-        protected async Task<CreatedThing> InitAsync(Reddit reddit, JToken json)
+        protected async Task<CreatedThing> Init(Reddit reddit, JToken json)
         {
             CommonInit(reddit, json);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
@@ -24,7 +18,7 @@ namespace RedditSharp.Things
 
         private void CommonInit(Reddit reddit, JToken json)
         {
-            base.Init(json);
+            Init(json);
             Reddit = reddit;
         }
 

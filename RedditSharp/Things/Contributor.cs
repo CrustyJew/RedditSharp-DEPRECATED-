@@ -22,7 +22,7 @@ namespace RedditSharp.Things
 
         private void CommonInit(JToken json) 
         {
-            base.Init(json);
+            Init(json);
         }
     }
 }

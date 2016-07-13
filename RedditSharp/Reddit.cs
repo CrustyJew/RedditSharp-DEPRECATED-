@@ -379,7 +379,7 @@ namespace RedditSharp
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
-            return Thing.Parse(this, json["data"]["children"][0], WebAgent).Result;
+            return Thing.Parse(this, json["data"]["children"][0], WebAgent);
         }
 
         public Comment GetComment(string subreddit, string name, string linkName)
@@ -495,7 +495,7 @@ namespace RedditSharp
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
-            var ret = await Thing.Parse(this, json, WebAgent);
+            var ret = await Thing.ParseAsync(this, json, WebAgent);
             return (T)ret;
         }
 

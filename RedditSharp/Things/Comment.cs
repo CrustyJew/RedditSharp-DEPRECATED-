@@ -33,7 +33,7 @@ namespace RedditSharp.Things
 
         private async Task<JToken> CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            await Init(reddit, webAgent, json);
+            await InitAsync(reddit, webAgent, json);
             var data = json["data"];
             Reddit = reddit;
             WebAgent = webAgent;

@@ -47,7 +47,7 @@ namespace RedditSharp.Things
 
         private async Task CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
         {
-            await base.Init(reddit, webAgent, post);
+            await base.InitAsync(reddit, webAgent, post);
             Reddit = reddit;
             WebAgent = webAgent;
         }

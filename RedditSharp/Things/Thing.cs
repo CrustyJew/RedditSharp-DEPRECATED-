@@ -67,7 +67,7 @@ namespace RedditSharp.Things
                 case "t5":
                     return await new Subreddit().Init(reddit, json, webAgent);
                 case "modaction":
-                    return await new ModAction().Init(reddit, json, webAgent);
+                    return await new ModAction().InitAsync(reddit, json, webAgent);
                 default:
                     return null;
             }
@@ -85,15 +85,15 @@ namespace RedditSharp.Things
             switch (kind)
             {
                 case "t1":
-                    return new Comment().Init(reddit, json, webAgent, null);
+                    return new Comment().Init(reddit, json, webAgent, null).Result;
                 case "t2":
-                    return new RedditUser().Init(reddit, json, webAgent);
+                    return new RedditUser().Init(reddit, json, webAgent).Result;
                 case "t3":
-                    return new Post().Init(reddit, json, webAgent);
+                    return new Post().Init(reddit, json, webAgent).Result;
                 case "t4":
-                    return new PrivateMessage().Init(reddit, json, webAgent);
+                    return new PrivateMessage().Init(reddit, json, webAgent).Result;
                 case "t5":
-                    return new Subreddit().Init(reddit, json, webAgent);
+                    return new Subreddit().Init(reddit, json, webAgent).Result;
                 case "modaction":
                     return new ModAction().Init(reddit, json, webAgent);
                 default:

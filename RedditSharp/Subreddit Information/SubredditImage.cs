@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+
 namespace RedditSharp
 {
     public class SubredditImage
@@ -35,10 +37,10 @@ namespace RedditSharp
         public Uri Url { get; set; }
         public SubredditStyle SubredditStyle { get; set; }
 
-        public void Delete()
+        public async Task Delete()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);
-            var stream = request.GetRequestStream();
+            var stream = await request.GetRequestStreamAsync();
             WebAgent.WritePostBody(stream, new
             {
                 img_name = Name,
@@ -46,7 +48,7 @@ namespace RedditSharp
                 r = SubredditStyle.Subreddit.Name
             });
             stream.Close();
-            var response = request.GetResponse();
+            var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             SubredditStyle.Images.Remove(this);
         }

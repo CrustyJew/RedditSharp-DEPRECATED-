@@ -69,7 +69,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Flairs\FlairTemplate.cs" />
     <Compile Include="Interfaces\IWebAgent.cs" />
-    <Compile Include="LinkData.cs" />
+    <Compile Include="Data\LinkData.cs" />
     <Compile Include="Listing.cs" />
     <Compile Include="Moderator Actions\ModeratorPermission.cs" />
     <Compile Include="Moderator Actions\ModeratorUser.cs" />
@@ -82,12 +82,12 @@
     <Compile Include="RedditAPINameAttribute.cs" />
     <Compile Include="Exceptions\RedditException.cs" />
     <Compile Include="Things\RedditUser.cs" />
-    <Compile Include="SubmitData.cs" />
+    <Compile Include="Data\SubmitData.cs" />
     <Compile Include="Things\Subreddit.cs" />
     <Compile Include="Subreddit Information\SubredditImage.cs" />
     <Compile Include="Subreddit Information\SubredditSettings.cs" />
     <Compile Include="Subreddit Information\SubredditStyle.cs" />
-    <Compile Include="TextData.cs" />
+    <Compile Include="Data\TextData.cs" />
     <Compile Include="Things\Thing.cs" />
     <Compile Include="DateTime\UnixTimeStamp.cs" />
     <Compile Include="DateTime\UnixTimestampConverter.cs" />

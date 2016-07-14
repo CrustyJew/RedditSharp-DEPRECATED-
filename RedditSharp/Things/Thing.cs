@@ -57,15 +57,15 @@ namespace RedditSharp.Things
             switch (kind)
             {
                 case "t1":
-                    return await new Comment().Init(reddit, json, webAgent, null);
+                    return await new Comment().InitAsync(reddit, json, webAgent, null);
                 case "t2":
-                    return await new RedditUser().Init(reddit, json, webAgent);
+                    return await new RedditUser().InitAsync(reddit, json, webAgent);
                 case "t3":
-                    return await new Post().Init(reddit, json, webAgent);
+                    return await new Post().InitAsync(reddit, json, webAgent);
                 case "t4":
-                    return await new PrivateMessage().Init(reddit, json, webAgent);
+                    return await new PrivateMessage().InitAsync(reddit, json, webAgent);
                 case "t5":
-                    return await new Subreddit().Init(reddit, json, webAgent);
+                    return await new Subreddit().InitAsync(reddit, json, webAgent);
                 case "modaction":
                     return await new ModAction().InitAsync(reddit, json, webAgent);
                 default:
@@ -85,15 +85,15 @@ namespace RedditSharp.Things
             switch (kind)
             {
                 case "t1":
-                    return new Comment().Init(reddit, json, webAgent, null).Result;
+                    return new Comment().Init(reddit, json, webAgent, null);
                 case "t2":
-                    return new RedditUser().Init(reddit, json, webAgent).Result;
+                    return new RedditUser().Init(reddit, json, webAgent);
                 case "t3":
-                    return new Post().Init(reddit, json, webAgent).Result;
+                    return new Post().Init(reddit, json, webAgent);
                 case "t4":
-                    return new PrivateMessage().Init(reddit, json, webAgent).Result;
+                    return new PrivateMessage().Init(reddit, json, webAgent);
                 case "t5":
-                    return new Subreddit().Init(reddit, json, webAgent).Result;
+                    return new Subreddit().Init(reddit, json, webAgent);
                 case "modaction":
                     return new ModAction().Init(reddit, json, webAgent);
                 default:

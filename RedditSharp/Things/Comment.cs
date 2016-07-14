@@ -23,11 +23,19 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
-        public async Task<Comment> Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = await CommonInit(reddit, json, webAgent, sender);
-            await ParseCommentsAsync(reddit, json, webAgent, sender);
+            await ParseComments(reddit, json, webAgent, sender);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
+            return this;
+        }
+
+        public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        {
+            var data = CommonInit(reddit, json, webAgent, sender);
+            ParseComments(reddit, json, webAgent, sender).RunSynchronously();
+            Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
 
@@ -49,7 +57,7 @@ namespace RedditSharp.Things
             return data;
         }
 
-        private void ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
+        private async Task ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
         {
             // Parse sub comments
             var replies = data["data"]["replies"];
@@ -57,22 +65,9 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add(new Comment().Init(reddit, comment, webAgent, sender).Result);
+                    subComments.Add(await new Comment().InitAsync(reddit, comment, webAgent, sender));
             }
             Comments = subComments.ToArray();
-        }
-
-        private async Task ParseCommentsAsync(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
-        {
-            // Parse sub comments
-            var replies = data["data"]["replies"];
-            var subComments = new List<Comment>();
-            if (replies != null && replies.Count() > 0)
-            {
-                foreach (var comment in replies["data"]["children"])
-                    subComments.Add(await new Comment().Init(reddit, comment, webAgent, sender));
-            }
-            Comments = subComments.ToArray();            
         }
 
         [JsonProperty("author")]
@@ -148,7 +143,7 @@ namespace RedditSharp.Things
                 var json = JObject.Parse(data);
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-                return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this).Result;
+                return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
             }
             catch (WebException ex)
             {

@@ -347,7 +347,7 @@ namespace RedditSharp.Things
         }
 
 
-        public async Task<Subreddit> Init(Reddit reddit, JToken json, IWebAgent webAgent)
+        public async Task<Subreddit> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
@@ -355,7 +355,14 @@ namespace RedditSharp.Things
 
             return this;
         }
+        public Subreddit Init(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            CommonInit(reddit, json, webAgent);
+            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
+            SetName();
 
+            return this;
+        }
         private void SetName()
         {
             Name = Url.ToString();
@@ -766,7 +773,7 @@ namespace RedditSharp.Things
                 throw new DuplicateLinkException(String.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
 
-            return new Post().Init(Reddit, json["json"], WebAgent).Result;
+            return new Post().Init(Reddit, json["json"], WebAgent);
         }
         private async Task<Post> SubmitAsync(SubmitData data)
         {
@@ -800,7 +807,7 @@ namespace RedditSharp.Things
                 throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
 
-            return new Post().Init(Reddit, json["json"], WebAgent).Result;
+            return new Post().Init(Reddit, json["json"], WebAgent);
         }
         /// <summary>
         /// Submits a link post in the current subreddit using the logged-in user

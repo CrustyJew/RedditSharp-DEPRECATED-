@@ -96,13 +96,18 @@ namespace RedditSharp.Things
         /// <param name="json"></param>
         /// <param name="webAgent"></param>
         /// <returns>A private message</returns>
-        public async Task<PrivateMessage> Init(Reddit reddit, JToken json, IWebAgent webAgent)
+        public async Task<PrivateMessage> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
-
+        public PrivateMessage Init(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            CommonInit(reddit, json, webAgent);
+            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
+            return this;
+        }
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);
@@ -117,7 +122,7 @@ namespace RedditSharp.Things
                     {
                         var replies = new List<PrivateMessage>();
                         foreach (var reply in data["replies"]["data"]["children"])
-                            replies.Add(new PrivateMessage().Init(reddit, reply, webAgent).Result);
+                            replies.Add(new PrivateMessage().Init(reddit, reply, webAgent));
                         Replies = replies.ToArray();
                     }
                 }
@@ -148,6 +153,18 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
+        public async Task SetAsReadAsync()
+        {
+            var request = WebAgent.CreatePost(SetAsReadUrl);
+            WebAgent.WritePostBody(await request.GetRequestStreamAsync(), new
+            {
+                id = FullName,
+                uh = Reddit.User.Modhash,
+                api_type = "json"
+            });
+            var response = await request.GetResponseAsync();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
+        }
         /// <summary>
         /// Reply to the message
         /// </summary>
@@ -166,6 +183,23 @@ namespace RedditSharp.Things
             });
             stream.Close();
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var json = JObject.Parse(data);
+        }
+        public async Task ReplyAsync(string message)
+        {
+            if (Reddit.User == null)
+                throw new AuthenticationException("No user logged in.");
+            var request = WebAgent.CreatePost(CommentUrl);
+            var stream = await request.GetRequestStreamAsync();
+            WebAgent.WritePostBody(stream, new
+            {
+                text = message,
+                thing_id = FullName,
+                uh = Reddit.User.Modhash
+            });
+            stream.Close();
+            var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JObject.Parse(data);
         }

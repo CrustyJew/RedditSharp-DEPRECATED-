@@ -16,14 +16,20 @@ namespace RedditSharp.Things
 
         private const int MAX_LIMIT = 100;
 
-        public async Task<RedditUser> Init(Reddit reddit, JToken json, IWebAgent webAgent)
+        public async Task<RedditUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings));
             return this;
         }
-
+        public RedditUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            CommonInit(reddit, json, webAgent);
+            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+                reddit.JsonSerializerSettings));
+            return this;
+        }
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);

@@ -30,7 +30,6 @@ namespace RedditSharp.Things
 
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
-        // AWAITABLES DON'T HAVE TO BE CALLED ASYNCRONOUSLY
         /// <summary>
         /// Initialize
         /// </summary>
@@ -38,13 +37,18 @@ namespace RedditSharp.Things
         /// <param name="post"></param>
         /// <param name="webAgent"></param>
         /// <returns></returns>
-        public async Task<Post> Init(Reddit reddit, JToken post, IWebAgent webAgent)
+        public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             await CommonInit(reddit, post, webAgent);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
-
+        public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
+        {
+            CommonInit(reddit, post, webAgent).RunSynchronously();
+            Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
+            return this;
+        }
         private async Task CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             await base.InitAsync(reddit, webAgent, post);
@@ -163,7 +167,7 @@ namespace RedditSharp.Things
             var json = JObject.Parse(data);
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-            return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this).Result;
+            return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
         }
 
         private string SimpleAction(string endpoint)
@@ -364,7 +368,7 @@ namespace RedditSharp.Things
             var comments = new List<Comment>();
             foreach (var comment in postJson)
             {
-                comments.Add(new Comment().Init(Reddit, comment, WebAgent, this).Result);
+                comments.Add(new Comment().Init(Reddit, comment, WebAgent, this));
             }
 
             return comments;

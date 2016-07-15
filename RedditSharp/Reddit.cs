@@ -215,7 +215,7 @@ namespace RedditSharp
             var response = request.GetResponse();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JObject.Parse(result);
-            return new RedditUser().Init(this, json, WebAgent).Result;
+            return new RedditUser().Init(this, json, WebAgent);
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace RedditSharp
             var response = (HttpWebResponse)request.GetResponse();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JObject.Parse(result);
-            User = new AuthenticatedUser().Init(this, json, WebAgent).Result;
+            User = new AuthenticatedUser().Init(this, json, WebAgent);
         }
 
         #region Obsolete Getter Methods
@@ -288,7 +288,7 @@ namespace RedditSharp
 
         public Post GetPost(Uri uri)
         {
-            return new Post().Init(this, GetToken(uri), WebAgent).Result;
+            return new Post().Init(this, GetToken(uri), WebAgent);
         }
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace RedditSharp
             var response = request.GetResponse();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JObject.Parse(result);
-            return new AuthenticatedUser().Init(this, json, WebAgent).Result;
+            return new AuthenticatedUser().Init(this, json, WebAgent);
             // TODO: Error
         }
 
@@ -409,7 +409,7 @@ namespace RedditSharp
             var json = JToken.Parse(data);
 
             var sender = new Post().Init(this, json[0]["data"]["children"][0], WebAgent);
-            return new Comment().Init(this, json[1]["data"]["children"][0], WebAgent, sender.Result).Result;
+            return new Comment().Init(this, json[1]["data"]["children"][0], WebAgent, sender);
         }
 
         public Listing<T> SearchByUrl<T>(string url) where T : Thing
@@ -489,7 +489,7 @@ namespace RedditSharp
 
         #region Helpers
 
-        protected async internal Task<T> GetThing<T>(string url) where T : Thing
+        protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
             var request = WebAgent.CreateGet(url);
             var response = request.GetResponse();
@@ -498,7 +498,15 @@ namespace RedditSharp
             var ret = await Thing.ParseAsync(this, json, WebAgent);
             return (T)ret;
         }
-
+        protected internal T GetThing<T>(string url) where T : Thing
+        {
+            var request = WebAgent.CreateGet(url);
+            var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var json = JToken.Parse(data);
+            var ret = Thing.Parse(this, json, WebAgent);
+            return (T)ret;
+        }
         #endregion
     }
 }

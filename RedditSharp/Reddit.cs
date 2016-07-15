@@ -245,7 +245,7 @@ namespace RedditSharp
         public Subreddit GetSubreddit(string name)
         {
             name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
-            return GetThing<Subreddit>(string.Format(SubredditAboutUrl, name)).Result;
+            return GetThing<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace RedditSharp
             if (name.StartsWith("/r/"))
                 name = name.Substring(3);
             name = name.TrimEnd('/');
-            return await GetThing<Subreddit>(string.Format(SubredditAboutUrl, name));
+            return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
         public Domain GetDomain(string domain)

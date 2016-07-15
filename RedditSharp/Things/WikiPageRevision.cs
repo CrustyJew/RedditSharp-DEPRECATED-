@@ -34,7 +34,7 @@ namespace RedditSharp.Things
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);
-            Author = new RedditUser().Init(reddit, json["author"], webAgent).Result;
+            Author = new RedditUser().Init(reddit, json["author"], webAgent);
         }
     }
 }

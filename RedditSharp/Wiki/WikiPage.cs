@@ -25,7 +25,7 @@ namespace RedditSharp
 
         protected internal WikiPage(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            RevisionBy = new RedditUser().Init(reddit, json["revision_by"], webAgent).Result;
+            RevisionBy = new RedditUser().Init(reddit, json["revision_by"], webAgent);
             JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
         }
     }

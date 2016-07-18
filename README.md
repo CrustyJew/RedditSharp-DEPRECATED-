@@ -1,3 +1,7 @@
+**This is a hard fork and IS maintained**. 
+
+Due to the project being abandoned and the previous owner's refusal to transfer the repository to someone else to maintain it, I've created this fork to continue on support for the project.
+
 # RedditSharp
 
 A partial implementation of the [Reddit](http://reddit.com) API. Includes support for many API endpoints, as well as

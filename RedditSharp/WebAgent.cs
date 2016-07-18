@@ -38,15 +38,15 @@ namespace RedditSharp
         public enum RateLimitMode
         {
             /// <summary>
-            /// Limits requests to one every two seconds
+            /// Limits requests to one every one second
             /// </summary>
             Pace,
             /// <summary>
-            /// Restricts requests to five per ten seconds
+            /// Restricts requests to ten per ten seconds
             /// </summary>
             SmallBurst,
             /// <summary>
-            /// Restricts requests to thirty per minute
+            /// Restricts requests to sixty per minute
             /// </summary>
             Burst,
             /// <summary>
@@ -173,7 +173,7 @@ namespace RedditSharp
             switch (RateLimit)
             {
                 case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 2)// Rate limiting
+                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 1)// Rate limiting
                         Thread.Sleep(250);
                     _lastRequest = DateTime.UtcNow;
                     break;
@@ -183,7 +183,7 @@ namespace RedditSharp
                         _burstStart = DateTime.UtcNow;
                         _requestsThisBurst = 0;
                     }
-                    if (_requestsThisBurst >= 5) //limit has been reached
+                    if (_requestsThisBurst >= 10) //limit has been reached
                     {
                         while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
                             Thread.Sleep(250);
@@ -199,7 +199,7 @@ namespace RedditSharp
                         _burstStart = DateTime.UtcNow;
                         _requestsThisBurst = 0;
                     }
-                    if (_requestsThisBurst >= 30) //limit has been reached
+                    if (_requestsThisBurst >= 60) //limit has been reached
                     {
                         while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
                             Thread.Sleep(250);

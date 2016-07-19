@@ -11,7 +11,7 @@ namespace RedditSharp
         private const string ToolBoxUserNotesWiki = "/r/{0}/wiki/usernotes";
         public static IEnumerable<TBUserNote> GetUserNotes(IWebAgent webAgent, string subName)
         {
-            var request = webAgent.CreateGet(String.Format(ToolBoxUserNotesWiki, subName));
+            var request = webAgent.CreateGet(string.Format(ToolBoxUserNotesWiki, subName));
             var reqResponse = webAgent.ExecuteRequest(request);
             var response = JObject.Parse(reqResponse["data"]["content_md"].Value<string>());
 

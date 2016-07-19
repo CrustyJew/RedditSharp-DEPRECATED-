@@ -8,6 +8,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRedditSharp", "TestRedditSharp\TestRedditSharp.csproj", "{0101B252-0CCE-4572-8882-D5851FE41E4F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTesting", "UnitTesting\UnitTesting.csproj", "{A4640FC9-F8A5-4B11-A9FE-8FEB626B2080}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A368CB75-75F0-4489-904D-B5CEBB0FE624} = {A368CB75-75F0-4489-904D-B5CEBB0FE624}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

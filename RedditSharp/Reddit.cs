@@ -255,11 +255,7 @@ namespace RedditSharp
         /// <returns>The Subreddit by given name</returns>
         public async Task<Subreddit> GetSubredditAsync(string name)
         {
-            if (name.StartsWith("r/"))
-                name = name.Substring(2);
-            if (name.StartsWith("/r/"))
-                name = name.Substring(3);
-            name = name.TrimEnd('/');
+            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
             return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 

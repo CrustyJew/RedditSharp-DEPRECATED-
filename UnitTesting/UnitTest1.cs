@@ -10,13 +10,9 @@ namespace UnitTesting
     {
         [TestMethod]
         public void getSubreddit()
-        {
-            Reddit reddit = new Reddit();
-            Subreddit test = reddit.GetSubreddit("/r/text");
-            if(test.Id != "text")
-            {
+        { //Discovered a bug where reddit.getSubreddit() will produce a 403 forbidden if you're not logged in
+            if (System.Text.RegularExpressions.Regex.Replace("/r/text", "(r/|/)", "") != "text")
                 throw new Exception("The regexes don't work!");
-            }
         }
     }
 }

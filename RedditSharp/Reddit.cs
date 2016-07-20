@@ -303,14 +303,14 @@ namespace RedditSharp
             if (User == null)
                 throw new Exception("User can not be null.");
 
-            if (!String.IsNullOrWhiteSpace(fromSubReddit))
+            if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
                 var subReddit = this.GetSubreddit(fromSubReddit);
                 var modNameList = subReddit.Moderators.Select(b => b.Name).ToList();
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(
-                        String.Format(
+                        string.Format(
                             @"User {0} is not a moderator of subreddit {1}.",
                             User.Name,
                             subReddit.Name));

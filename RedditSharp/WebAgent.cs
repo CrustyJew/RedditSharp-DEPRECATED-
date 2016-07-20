@@ -127,7 +127,7 @@ namespace RedditSharp
         {
             EnforceRateLimit();
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            var result = GetResponsestring(response.GetResponseStream());
+            var result = GetResponseString(response.GetResponseStream());
 
             JToken json;
             if (!string.IsNullOrEmpty(result))
@@ -278,7 +278,7 @@ namespace RedditSharp
             return request;
         }
 
-        public virtual string GetResponsestring(Stream stream)
+        public virtual string GetResponseString(Stream stream)
         {
             var data = new StreamReader(stream).ReadToEnd();
             stream.Close();

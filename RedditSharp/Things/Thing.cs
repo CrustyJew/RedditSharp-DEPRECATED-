@@ -115,7 +115,7 @@ namespace RedditSharp.Things
             {
                 if (typeof(T) == typeof(WikiPageRevision))
                 {
-                    return await new WikiPageRevision().Init(reddit, json, webAgent);
+                    return await new WikiPageRevision().InitAsync(reddit, json, webAgent);
                 }
                 else if (typeof(T) == typeof(ModAction))
                 {
@@ -131,7 +131,7 @@ namespace RedditSharp.Things
             {
                 if (typeof(T) == typeof(WikiPageRevision))
                 {
-                    return new WikiPageRevision().Init(reddit, json, webAgent).Result;
+                    return new WikiPageRevision().Init(reddit, json, webAgent);
                 }
                 else if (typeof(T) == typeof(ModAction))
                 {

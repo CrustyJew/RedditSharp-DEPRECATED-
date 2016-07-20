@@ -8,7 +8,7 @@ namespace RedditSharp
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(String) || objectType == typeof(Uri);
+            return objectType == typeof(string) || objectType == typeof(Uri);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

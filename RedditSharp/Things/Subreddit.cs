@@ -494,7 +494,7 @@ namespace RedditSharp.Things
 
         public string GetFlairText(string user)
         {
-            var request = WebAgent.CreateGet(String.Format(FlairListUrl + "?name=" + user, Name));
+            var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
@@ -502,7 +502,7 @@ namespace RedditSharp.Things
         }
         public async Task<string> GetFlairTextAsync(string user)
         {
-            var request = WebAgent.CreateGet(String.Format(FlairListUrl + "?name=" + user, Name));
+            var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
             var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
@@ -510,7 +510,7 @@ namespace RedditSharp.Things
         }
         public string GetFlairCssClass(string user)
         {
-            var request = WebAgent.CreateGet(String.Format(FlairListUrl + "?name=" + user, Name));
+            var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
@@ -518,7 +518,7 @@ namespace RedditSharp.Things
         }
         public async Task<string> GetFlairCssClassAsync(string user)
         {
-            var request = WebAgent.CreateGet(String.Format(FlairListUrl + "?name=" + user, Name));
+            var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
             var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
@@ -770,7 +770,7 @@ namespace RedditSharp.Things
             }
             else if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "ALREADY_SUB")
             {
-                throw new DuplicateLinkException(String.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
+                throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
 
             return new Post().Init(Reddit, json["json"], WebAgent);

@@ -196,7 +196,7 @@ namespace RedditSharp.Things
 
             if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
                 throw new AuthenticationException(
-                    String.Format(
+                    string.Format(
                         @"User {0} is not a moderator of subreddit {1}.", 
                         Reddit.User.Name,
                         this.Subreddit.Name));

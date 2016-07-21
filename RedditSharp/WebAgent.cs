@@ -39,15 +39,15 @@ namespace RedditSharp
         public enum RateLimitMode
         {
             /// <summary>
-            /// Limits requests to one every one second
+            /// Limits requests to one every two seconds (one if OAuth)
             /// </summary>
             Pace,
             /// <summary>
-            /// Restricts requests to ten per ten seconds
+            /// Restricts requests to five per ten seconds (ten if OAuth)
             /// </summary>
             SmallBurst,
             /// <summary>
-            /// Restricts requests to sixty per minute
+            /// Restricts requests to thirty per minute (sixty if OAuth)
             /// </summary>
             Burst,
             /// <summary>
@@ -171,10 +171,11 @@ namespace RedditSharp
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected virtual void EnforceRateLimit()
         {
+            var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
             switch (RateLimit)
             {
                 case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 1)// Rate limiting
+                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0/limitRequestsPerMinute)// Rate limiting
                         Thread.Sleep(250);
                     _lastRequest = DateTime.UtcNow;
                     break;
@@ -184,7 +185,7 @@ namespace RedditSharp
                         _burstStart = DateTime.UtcNow;
                         _requestsThisBurst = 0;
                     }
-                    if (_requestsThisBurst >= 10) //limit has been reached
+                    if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
                     {
                         while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
                             Thread.Sleep(250);
@@ -200,7 +201,7 @@ namespace RedditSharp
                         _burstStart = DateTime.UtcNow;
                         _requestsThisBurst = 0;
                     }
-                    if (_requestsThisBurst >= 60) //limit has been reached
+                    if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
                     {
                         while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
                             Thread.Sleep(250);
@@ -234,7 +235,7 @@ namespace RedditSharp
                 var cookieHeader = Cookies.GetCookieHeader(new Uri("http://reddit.com"));
                 request.Headers.Set("Cookie", cookieHeader);
             }
-            if (RootDomain == "oauth.reddit.com")// use OAuth
+            if (IsOAuth())// use OAuth
             {
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
@@ -253,7 +254,7 @@ namespace RedditSharp
                 var cookieHeader = Cookies.GetCookieHeader(new Uri("http://reddit.com"));
                 request.Headers.Set("Cookie", cookieHeader);
             }
-            if (RootDomain == "oauth.reddit.com")// use OAuth
+            if (IsOAuth())// use OAuth
             {
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
@@ -307,6 +308,11 @@ namespace RedditSharp
             var raw = Encoding.UTF8.GetBytes(value);
             stream.Write(raw, 0, raw.Length);
             stream.Close();
+        }
+
+        private static bool IsOAuth()
+        {
+            return RootDomain == "oauth.reddit.com";
         }
     }
 }

@@ -23,7 +23,9 @@ namespace RedditSharp.Things
                     return new Subreddit().Init(reddit, json, webAgent);
                 case "modaction":
                     return new ModAction().Init(reddit, json, webAgent);
-                default:
+				case "more":
+					return new More().Init(reddit, json, webAgent);
+				default:
                     return null;
             }
         }

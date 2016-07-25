@@ -396,24 +396,28 @@ namespace RedditSharp.Things
 			}
 
 
-			while (moreComments != null)
+			if (moreComments != null)
 			{
-				IEnumerable<Thing> things = moreComments.Things();
-				moreComments = null;
-				foreach (Thing t in things)
+				IEnumerator<Thing> things = moreComments.Things().GetEnumerator();
+				things.MoveNext();
+				Thing currentThing = null;
+				while (currentThing != things.Current)
 				{
-					if (t is More)
+					currentThing = things.Current;
+					if (things.Current is Comment)
 					{
-						moreComments = (More)t;
+						Comment next = ((Comment)things.Current).PopulateComments(things);
+						yield return next;
 					}
-					else
+					if (things.Current is More)
 					{
-						yield return (Comment)t;
+						More more = (More)things.Current;
+						things = more.Things().GetEnumerator();
+						things.MoveNext();
 					}
 				}
 			}
 
-			IEnumerable<Thing> a = null;
 
 
 		}

@@ -54,6 +54,7 @@
     <Compile Include="ModActionType.cs" />
     <Compile Include="Things\Contributor.cs" />
     <Compile Include="Things\ModAction.cs" />
+    <Compile Include="Things\More.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="SpamFilterSettings.cs" />
     <Compile Include="Things\AuthenticatedUser.cs" />

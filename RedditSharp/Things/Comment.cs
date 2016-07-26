@@ -38,7 +38,55 @@ namespace RedditSharp.Things
             return this;
         }
 
-        private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+		public Comment PopulateComments(IEnumerator<Thing> things)
+		{
+			Thing first = things.Current;
+			Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>();
+			comments[this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>());
+			things.MoveNext();
+			while (first is Comment || first is More)
+			{
+				first = things.Current;
+				if (first is Comment)
+				{
+					Comment comment = (Comment)first;
+					comments[comment.FullName] = Tuple.Create<Comment, List<Comment>>(comment, new List<Comment>());
+					if (comments.ContainsKey(comment.ParentId))
+					{
+						comments[comment.ParentId].Item2.Add(comment);
+					}
+					else if (comment.ParentId == this.ParentId)
+					{
+						//only want sub comments.
+						break;
+					}
+				}
+				else if (first is More)
+				{
+					More more = (More)first;
+					if (comments.ContainsKey(more.ParentId))
+					{
+						comments[more.ParentId].Item1.More = more;
+					}
+					else if (more.ParentId == this.ParentId)
+					{
+						// This is more for parent.
+						// Need to process the comments dictionary.
+						break;
+					}
+				}
+				things.MoveNext();
+
+			}
+			foreach (KeyValuePair<string, Tuple<Comment, List<Comment>>> kvp in comments)
+			{
+				kvp.Value.Item1.Comments = kvp.Value.Item2.ToArray();
+			}
+
+			return this;
+		}
+
+		private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             base.Init(reddit, webAgent, json);
             var data = json["data"];
@@ -109,7 +157,10 @@ namespace RedditSharp.Things
         [JsonProperty("num_reports")]
         public int? NumReports { get; set; }
 
-        [JsonIgnore]
+		[JsonIgnore]
+		public More More { get; set; }
+
+		[JsonIgnore]
         public IList<Comment> Comments { get; private set; }
 
         [JsonIgnore]

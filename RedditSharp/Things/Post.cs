@@ -45,7 +45,7 @@ namespace RedditSharp.Things
         }
         public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
         {
-            CommonInit(reddit, post, webAgent).RunSynchronously();
+            CommonInit(reddit, post, webAgent).Wait();
             JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }

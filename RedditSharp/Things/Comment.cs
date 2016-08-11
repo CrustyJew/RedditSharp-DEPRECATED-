@@ -34,7 +34,7 @@ namespace RedditSharp.Things
         public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = CommonInit(reddit, json, webAgent, sender);
-            ParseComments(reddit, json, webAgent, sender).RunSynchronously();
+            ParseComments(reddit, json, webAgent, sender).Wait();
             JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }

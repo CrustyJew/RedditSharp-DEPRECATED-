@@ -54,7 +54,7 @@ namespace RedditSharp.Things
         }
         protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
         {
-            CommonInit(reddit, webAgent, json).RunSynchronously();
+            CommonInit(reddit, webAgent, json).Wait();
             JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
             return this;
         }

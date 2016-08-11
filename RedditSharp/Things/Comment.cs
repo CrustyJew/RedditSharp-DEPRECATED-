@@ -27,7 +27,7 @@ namespace RedditSharp.Things
         {
             var data = await CommonInit(reddit, json, webAgent, sender);
             await ParseComments(reddit, json, webAgent, sender);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
+            await JsonConvert.PopulateObjectAsync(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 
@@ -35,7 +35,7 @@ namespace RedditSharp.Things
         {
             var data = CommonInit(reddit, json, webAgent, sender);
             ParseComments(reddit, json, webAgent, sender).RunSynchronously();
-            Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
+            JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 

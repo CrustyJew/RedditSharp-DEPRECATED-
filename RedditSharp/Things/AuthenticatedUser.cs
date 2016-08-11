@@ -19,15 +19,15 @@ namespace RedditSharp.Things
         public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             await CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings));
+            await JsonConvert.PopulateObjectAsync(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+                reddit.JsonSerializerSettings);
             return this;
         }
         public new AuthenticatedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent).RunSynchronously();
-            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings));
+            JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+                reddit.JsonSerializerSettings);
             return this;
         }
         private async Task CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)

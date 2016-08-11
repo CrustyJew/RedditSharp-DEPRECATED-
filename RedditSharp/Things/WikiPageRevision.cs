@@ -28,13 +28,13 @@ namespace RedditSharp.Things
         internal async Task<WikiPageRevision> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
+            await JsonConvert.PopulateObjectAsync(json.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
         internal WikiPageRevision Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
+            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)

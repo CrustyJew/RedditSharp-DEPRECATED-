@@ -99,13 +99,13 @@ namespace RedditSharp.Things
         public async Task<PrivateMessage> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
+            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
         public PrivateMessage Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
+            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)

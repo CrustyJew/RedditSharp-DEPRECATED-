@@ -1,9 +1,9 @@
+using Newtonsoft.Json.Linq;
+using RedditSharp.Things;
 using System;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
-using Newtonsoft.Json.Linq;
-using RedditSharp.Things;
 
 namespace RedditSharp
 {
@@ -82,7 +82,7 @@ namespace RedditSharp
         /// <returns></returns>
         public string GetAuthUrl(string state, Scope scope, bool permanent = false)
         {
-            return String.Format("https://ssl.reddit.com/api/v1/authorize?client_id={0}&response_type=code&state={1}&redirect_uri={2}&duration={3}&scope={4}", _clientId, state, _redirectUri, permanent ? "permanent" : "temporary", scope.ToString().Replace(" ",""));
+            return string.Format("https://ssl.reddit.com/api/v1/authorize?client_id={0}&response_type=code&state={1}&redirect_uri={2}&duration={3}&scope={4}", _clientId, state, _redirectUri, permanent ? "permanent" : "temporary", scope.ToString().Replace(" ",""));
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace RedditSharp
         public AuthenticatedUser GetUser(string accessToken)
         {
             var request = _webAgent.CreateGet(OauthGetMeUrl);
-            request.Headers["Authorization"] = String.Format("bearer {0}", accessToken);
+            request.Headers["Authorization"] = string.Format("bearer {0}", accessToken);
             var response = (HttpWebResponse)request.GetResponse();
             var result = _webAgent.GetResponseString(response.GetResponseStream());
             var thingjson = "{\"kind\": \"t2\", \"data\": " + result + "}";

@@ -1,5 +1,5 @@
+using Newtonsoft.Json.Linq;
 using System;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Web;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp
 {
@@ -101,7 +100,7 @@ namespace RedditSharp
             Uri uri;
             if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
             {
-                if (!Uri.TryCreate(String.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
+                if (!Uri.TryCreate(string.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
                     throw new Exception("Could not parse Uri");
             }
             var request = CreateGet(uri);
@@ -218,7 +217,7 @@ namespace RedditSharp
         {
             EnforceRateLimit();
             bool prependDomain;
-            // IsWellFormedUriString returns true on Mono for some reason when using a string like "/api/me"
+            // IsWellFormedUristring returns true on Mono for some reason when using a string like "/api/me"
             if (Type.GetType("Mono.Runtime") != null)
                 prependDomain = !url.StartsWith("http://") && !url.StartsWith("https://");
             else
@@ -226,7 +225,7 @@ namespace RedditSharp
 
             HttpWebRequest request;
             if (prependDomain)
-                request = (HttpWebRequest)WebRequest.Create(String.Format("{0}://{1}{2}", Protocol, RootDomain, url));
+                request = (HttpWebRequest)WebRequest.Create(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
             else
                 request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = Cookies;

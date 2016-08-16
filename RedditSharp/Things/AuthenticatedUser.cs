@@ -16,24 +16,23 @@ namespace RedditSharp.Things
         private const string InboxUrl = "/message/inbox.json";
         private const string SentUrl = "/message/sent.json";
 
+        public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            await CommonInit(reddit, json, webAgent);
+            await JsonConvert.PopulateObjectAsync(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+                reddit.JsonSerializerSettings);
+            return this;
+        }
         public new AuthenticatedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            CommonInit(reddit, json, webAgent);
+            CommonInit(reddit, json, webAgent).RunSynchronously();
             JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings);
             return this;
         }
-        public async new Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        private async Task CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(reddit, json, webAgent);
+            await base.InitAsync(reddit, json, webAgent);
         }
 
         public Listing<Subreddit> ModeratorSubreddits

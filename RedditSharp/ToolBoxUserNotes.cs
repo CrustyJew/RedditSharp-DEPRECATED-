@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO.Compression;
+using System.Linq;
 
 namespace RedditSharp
 {
@@ -13,7 +11,7 @@ namespace RedditSharp
         private const string ToolBoxUserNotesWiki = "/r/{0}/wiki/usernotes";
         public static IEnumerable<TBUserNote> GetUserNotes(IWebAgent webAgent, string subName)
         {
-            var request = webAgent.CreateGet(String.Format(ToolBoxUserNotesWiki, subName));
+            var request = webAgent.CreateGet(string.Format(ToolBoxUserNotesWiki, subName));
             var reqResponse = webAgent.ExecuteRequest(request);
             var response = JObject.Parse(reqResponse["data"]["content_md"].Value<string>());
 

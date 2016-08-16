@@ -58,19 +58,18 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
-        public ModAction Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
         public async Task<ModAction> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             CommonInit(reddit, post, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
+            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
-
+        public ModAction Init(Reddit reddit, JToken post, IWebAgent webAgent)
+        {
+            CommonInit(reddit, post, webAgent);
+            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            return this;
+        }
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);

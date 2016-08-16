@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
@@ -23,28 +23,29 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
-        public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
-        {
-            var data = CommonInit(reddit, json, webAgent, sender);
-            ParseComments(reddit, json, webAgent, sender);
-            JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
         public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            var data = CommonInit(reddit, json, webAgent, sender);
-            await ParseCommentsAsync(reddit, json, webAgent, sender);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
+            var data = await CommonInit(reddit, json, webAgent, sender);
+            await ParseComments(reddit, json, webAgent, sender);
+            await JsonConvert.PopulateObjectAsync(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 
-        private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            base.Init(reddit, webAgent, json);
+            var data = CommonInit(reddit, json, webAgent, sender);
+            ParseComments(reddit, json, webAgent, sender).Wait();
+            JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
+            return this;
+        }
+
+        private async Task<JToken> CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        {
+            await InitAsync(reddit, webAgent, json);
             var data = json["data"];
             Reddit = reddit;
             WebAgent = webAgent;
-            this.Parent = sender;
+            Parent = sender;
 
             // Handle Reddit's API being horrible
             if (data["context"] != null)
@@ -56,20 +57,7 @@ namespace RedditSharp.Things
             return data;
         }
 
-        private void ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
-        {
-            // Parse sub comments
-            var replies = data["data"]["replies"];
-            var subComments = new List<Comment>();
-            if (replies != null && replies.Count() > 0)
-            {
-                foreach (var comment in replies["data"]["children"])
-                    subComments.Add(new Comment().Init(reddit, comment, webAgent, sender));
-            }
-            Comments = subComments.ToArray();
-        }
-
-        private async Task ParseCommentsAsync(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
+        private async Task ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
         {
             // Parse sub comments
             var replies = data["data"]["replies"];
@@ -79,7 +67,7 @@ namespace RedditSharp.Things
                 foreach (var comment in replies["data"]["children"])
                     subComments.Add(await new Comment().InitAsync(reddit, comment, webAgent, sender));
             }
-            Comments = subComments.ToArray();            
+            Comments = subComments.ToArray();
         }
 
         [JsonProperty("author")]
@@ -127,7 +115,7 @@ namespace RedditSharp.Things
                     linkId = this.LinkId.Substring(index + 1);
                 }
 
-                return String.Format("{0}://{1}/r/{2}/comments/{3}/_/{4}",
+                return string.Format("{0}://{1}/r/{2}/comments/{3}/_/{4}",
                                      RedditSharp.WebAgent.Protocol, RedditSharp.WebAgent.RootDomain,
                                      this.Subreddit, this.Parent != null ? this.Parent.Id : linkId, this.Id);
             }

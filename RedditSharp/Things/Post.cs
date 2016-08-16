@@ -30,23 +30,28 @@ namespace RedditSharp.Things
 
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
-
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="post"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
+        public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
+        {
+            await CommonInit(reddit, post, webAgent);
+            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            return this;
+        }
         public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
         {
-            CommonInit(reddit, post, webAgent);
+            CommonInit(reddit, post, webAgent).Wait();
             JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
-        public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
+        private async Task CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
         {
-            CommonInit(reddit, post, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            base.Init(reddit, webAgent, post);
+            await base.InitAsync(reddit, webAgent, post);
             Reddit = reddit;
             WebAgent = webAgent;
         }
@@ -109,7 +114,7 @@ namespace RedditSharp.Things
         public Uri Permalink { get; set; }
 
         [JsonProperty("score")]
-        public int Score { get; set; }
+        public new int Score { get; set; }
 
         [JsonProperty("selftext")]
         public string SelfText { get; set; }
@@ -191,7 +196,7 @@ namespace RedditSharp.Things
 
             if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
                 throw new AuthenticationException(
-                    String.Format(
+                    string.Format(
                         @"User {0} is not a moderator of subreddit {1}.", 
                         Reddit.User.Name,
                         this.Subreddit.Name));
@@ -317,7 +322,11 @@ namespace RedditSharp.Things
             JToken post = Reddit.GetToken(this.Url);
             JsonConvert.PopulateObject(post["data"].ToString(), this, Reddit.JsonSerializerSettings);
         }
-
+        /// <summary>
+        /// Sets your claim
+        /// </summary>
+        /// <param name="flairText">Text to set your flair</param>
+        /// <param name="flairClass">class of the flair</param>
         public void SetFlair(string flairText, string flairClass)
         {
             if (Reddit.User == null)

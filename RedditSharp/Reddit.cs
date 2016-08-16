@@ -1,10 +1,10 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RedditSharp.Things;
 using System;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
-using RedditSharp.Things;
 using System.Threading.Tasks;
 using DefaultWebAgent = RedditSharp.WebAgent;
 
@@ -244,11 +244,7 @@ namespace RedditSharp
 
         public Subreddit GetSubreddit(string name)
         {
-            if (name.StartsWith("r/"))
-                name = name.Substring(2);
-            if (name.StartsWith("/r/"))
-                name = name.Substring(3);
-            name = name.TrimEnd('/');
+            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
             return GetThing<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
@@ -259,11 +255,7 @@ namespace RedditSharp
         /// <returns>The Subreddit by given name</returns>
         public async Task<Subreddit> GetSubredditAsync(string name)
         {
-            if (name.StartsWith("r/"))
-                name = name.Substring(2);
-            if (name.StartsWith("/r/"))
-                name = name.Substring(3);
-            name = name.TrimEnd('/');
+            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
             return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
@@ -311,14 +303,14 @@ namespace RedditSharp
             if (User == null)
                 throw new Exception("User can not be null.");
 
-            if (!String.IsNullOrWhiteSpace(fromSubReddit))
+            if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
                 var subReddit = this.GetSubreddit(fromSubReddit);
                 var modNameList = subReddit.Moderators.Select(b => b.Name).ToList();
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(
-                        String.Format(
+                        string.Format(
                             @"User {0} is not a moderator of subreddit {1}.",
                             User.Name,
                             subReddit.Name));
@@ -502,16 +494,15 @@ namespace RedditSharp
             var ret = await Thing.ParseAsync(this, json, WebAgent);
             return (T)ret;
         }
-
         protected internal T GetThing<T>(string url) where T : Thing
         {
             var request = WebAgent.CreateGet(url);
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
-            return (T)Thing.Parse(this, json, WebAgent);
+            var ret = Thing.Parse(this, json, WebAgent);
+            return (T)ret;
         }
-
         #endregion
     }
 }

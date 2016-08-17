@@ -25,7 +25,7 @@ namespace RedditSharp.Things
         }
         public new AuthenticatedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            CommonInit(reddit, json, webAgent).RunSynchronously();
+            CommonInit(reddit, json, webAgent).Wait();
             JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings);
             return this;

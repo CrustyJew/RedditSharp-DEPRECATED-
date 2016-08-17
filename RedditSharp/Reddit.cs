@@ -493,7 +493,7 @@ namespace RedditSharp
         protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
             var request = WebAgent.CreateGet(url);
-            var response = request.GetResponse();
+            var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
             var ret = await Thing.ParseAsync(this, json, WebAgent);

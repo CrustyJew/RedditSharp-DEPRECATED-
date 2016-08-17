@@ -39,17 +39,23 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
-            await CommonInit(reddit, post, webAgent);
+            await CommonInitAsync(reddit, post, webAgent);
             await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
         public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
         {
-            CommonInit(reddit, post, webAgent).Wait();
+            CommonInit(reddit, post, webAgent);
             JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
-        private async Task CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
+        private void CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
+        {
+            base.Init(reddit, webAgent, post);
+            Reddit = reddit;
+            WebAgent = webAgent;
+        }
+        private async Task CommonInitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             await base.InitAsync(reddit, webAgent, post);
             Reddit = reddit;

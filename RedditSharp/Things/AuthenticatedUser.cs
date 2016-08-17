@@ -18,23 +18,26 @@ namespace RedditSharp.Things
 
         public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            await CommonInit(reddit, json, webAgent);
+            await CommonInitAsync(reddit, json, webAgent);
             await JsonConvert.PopulateObjectAsync(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings);
             return this;
         }
         public new AuthenticatedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            CommonInit(reddit, json, webAgent).Wait();
+            CommonInit(reddit, json, webAgent);
             JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings);
             return this;
         }
-        private async Task CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
+        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            await base.InitAsync(reddit, json, webAgent);
+            base.Init(reddit, json, webAgent);
         }
-
+        private async Task CommonInitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            await base.InitAsync(reddit, json, webAgent).ConfigureAwait(false);
+        }
         public Listing<Subreddit> ModeratorSubreddits
         {
             get

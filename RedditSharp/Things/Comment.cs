@@ -25,8 +25,8 @@ namespace RedditSharp.Things
 
         public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            var data = await CommonInit(reddit, json, webAgent, sender);
-            await ParseComments(reddit, json, webAgent, sender);
+            var data = await CommonInitAsync(reddit, json, webAgent, sender);
+            await ParseCommentsAsync(reddit, json, webAgent, sender);
             await JsonConvert.PopulateObjectAsync(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
@@ -34,14 +34,14 @@ namespace RedditSharp.Things
         public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = CommonInit(reddit, json, webAgent, sender);
-            ParseComments(reddit, json, webAgent, sender).Wait();
+            ParseComments(reddit, json, webAgent, sender);
             JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 
-        private async Task<JToken> CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
-            await InitAsync(reddit, webAgent, json);
+            Init(reddit, webAgent, json);
             var data = json["data"];
             Reddit = reddit;
             WebAgent = webAgent;
@@ -56,8 +56,38 @@ namespace RedditSharp.Things
          
             return data;
         }
+        private async Task<JToken> CommonInitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
+        {
+            await InitAsync(reddit, webAgent, json);
+            var data = json["data"];
+            Reddit = reddit;
+            WebAgent = webAgent;
+            Parent = sender;
 
-        private async Task ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
+            // Handle Reddit's API being horrible
+            if (data["context"] != null)
+            {
+                var context = data["context"].Value<string>();
+                LinkId = context.Split('/')[4];
+            }
+
+            return data;
+        }
+
+        private void ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
+        {
+            // Parse sub comments
+            var replies = data["data"]["replies"];
+            var subComments = new List<Comment>();
+            if (replies != null && replies.Count() > 0)
+            {
+                foreach (var comment in replies["data"]["children"])
+                    subComments.Add( new Comment().Init(reddit, comment, webAgent, sender));
+            }
+            Comments = subComments.ToArray();
+        }
+
+        private async Task ParseCommentsAsync(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
         {
             // Parse sub comments
             var replies = data["data"]["replies"];

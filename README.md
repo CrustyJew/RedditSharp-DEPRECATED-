@@ -8,8 +8,10 @@ A partial implementation of the [Reddit](http://reddit.com) API. Includes suppor
 LINQ-style paging of results.
 
 ```csharp
-var reddit = new Reddit();
-var user = reddit.LogIn("username", "password");
+var webAgent = new BotWebAgent("BotUsername", "BotPass", "ClientID", "ClientSecret", "RedirectUri");
+//This will check if the access token is about to expire before each request and automatically request a new one for you
+//"false" means that it will NOT load the logged in user profile so reddit.User will be null
+var reddit = new Reddit(webAgent, false);
 var subreddit = reddit.GetSubreddit("/r/example");
 subreddit.Subscribe();
 foreach (var post in subreddit.New.Take(25))

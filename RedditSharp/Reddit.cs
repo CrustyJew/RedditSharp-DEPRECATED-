@@ -115,7 +115,12 @@ namespace RedditSharp
             DefaultWebAgent.RateLimit = limitMode;
             DefaultWebAgent.RootDomain = "www.reddit.com";
         }
-
+        /// <summary>
+        /// DEPRECATED: Avoid use as Reddit will be removing this option eventually
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="useSsl"></param>
         public Reddit(string username, string password, bool useSsl = true)
             : this(useSsl)
         {
@@ -161,7 +166,7 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Logs in the current Reddit instance.
+        /// Logs in the current Reddit instance. DEPRECATED
         /// </summary>
         /// <param name="username">The username of the user to log on to.</param>
         /// <param name="password">The password of the user to log on to.</param>

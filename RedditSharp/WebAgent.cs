@@ -62,7 +62,7 @@ namespace RedditSharp
         public static string RootDomain { get; set; }
 
         /// <summary>
-        /// Used to make calls against Reddit's API using OAuth23
+        /// Used to make calls against Reddit's API using OAuth2
         /// </summary>
         public string AccessToken { get; set; }
 
@@ -239,7 +239,7 @@ namespace RedditSharp
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
             request.Method = method;
-            request.UserAgent = UserAgent + " - with RedditSharp by /u/sircmpwn";
+            request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
             return request;
         }
 
@@ -258,7 +258,7 @@ namespace RedditSharp
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
             request.Method = method;
-            request.UserAgent = UserAgent + " - with RedditSharp by /u/sircmpwn";
+            request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
             return request;
         }
 

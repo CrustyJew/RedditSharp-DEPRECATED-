@@ -9,7 +9,7 @@ namespace RedditSharp
 {
     public class AuthProvider
     {
-        private const string AccessUrl = "https://ssl.reddit.com/api/v1/access_token";
+        public const string AccessUrl = "https://ssl.reddit.com/api/v1/access_token";
         private const string OauthGetMeUrl = "https://oauth.reddit.com/api/v1/me";
         private const string RevokeUrl = "https://www.reddit.com/api/v1/revoke_token";
 

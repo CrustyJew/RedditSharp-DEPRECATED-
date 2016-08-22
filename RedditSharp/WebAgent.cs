@@ -75,25 +75,32 @@ namespace RedditSharp
         /// <summary>
         /// UTC DateTime of last request made to Reddit API
         /// </summary>
-        public DateTime LastRequest 
+        public DateTime LastRequest
         {
             get { return _lastRequest; }
         }
         /// <summary>
         /// UTC DateTime of when the last burst started
         /// </summary>
-        public DateTime BurstStart 
+        public DateTime BurstStart
         {
             get { return _burstStart; }
         }
         /// <summary>
         /// Number of requests made during the current burst 
         /// </summary>
-        public int RequestsThisBurst 
+        public int RequestsThisBurst
         {
             get { return _requestsThisBurst; }
         }
 
+        static WebAgent()
+        {
+            UserAgent = "";
+            RateLimit = RateLimitMode.Pace;
+            Protocol = "https";
+            RootDomain = "www.reddit.com";
+        }
 
         public virtual JToken CreateAndExecuteRequest(string url)
         {
@@ -174,7 +181,7 @@ namespace RedditSharp
             switch (RateLimit)
             {
                 case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0/limitRequestsPerMinute)// Rate limiting
+                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
                         Thread.Sleep(250);
                     _lastRequest = DateTime.UtcNow;
                     break;

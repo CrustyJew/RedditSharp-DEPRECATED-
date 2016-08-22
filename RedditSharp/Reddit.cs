@@ -41,17 +41,6 @@ namespace RedditSharp
 
         #endregion
 
-        #region Static Variables
-
-        static Reddit()
-        {
-            DefaultWebAgent.UserAgent = "";
-            DefaultWebAgent.RateLimit = DefaultWebAgent.RateLimitMode.Pace;
-            DefaultWebAgent.Protocol = "https";
-            DefaultWebAgent.RootDomain = "www.reddit.com";
-        }
-
-        #endregion
         
         internal IWebAgent WebAgent { get; set; }
         /// <summary>

@@ -26,6 +26,6 @@
    </dependencies>
  </metadata>
  <files>
-   <file src="\RedditSharp\bin\Release\RedditSharp.dll" target="lib" />
+   <file src="bin\Release\RedditSharp.dll" target="lib\Net40" />
  </files>
 </package>

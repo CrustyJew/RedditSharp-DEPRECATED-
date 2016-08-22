@@ -1,3 +1,5 @@
+[![redditsharp MyGet Build Status](https://www.myget.org/BuildSource/Badge/redditsharp?identifier=038d3763-6401-4c84-b579-f5134e1c8efd)](https://www.myget.org/) [![NuGet version](https://badge.fury.io/nu/redditsharp.svg)](https://badge.fury.io/nu/redditsharp)
+
 **This is a hard fork and IS maintained**. 
 
 Due to the project being abandoned and the previous owner's refusal to transfer the repository to someone else to maintain it, I've created this fork to continue on support for the project.

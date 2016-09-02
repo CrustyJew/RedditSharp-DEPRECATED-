@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RedditSharp.Extensions;
 
 namespace RedditSharp.Things
 {

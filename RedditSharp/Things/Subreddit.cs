@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RedditSharp.Utils;
+using RedditSharp.Extensions.DateTimeExtensions;
 
 namespace RedditSharp.Things
 {

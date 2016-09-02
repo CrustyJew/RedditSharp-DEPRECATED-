@@ -55,7 +55,7 @@
     <Compile Include="Moderator Actions\ModActionType.cs" />
     <Compile Include="Things\Contributor.cs" />
     <Compile Include="Things\ModAction.cs" />
-    <Compile Include="DateTime\DateTimeExtensions.cs" />
+    <Compile Include="Extensions\DateTimeExtensions\DateTimeExtensions.cs" />
     <Compile Include="SpamFilterSettings.cs" />
     <Compile Include="Things\AuthenticatedUser.cs" />
     <Compile Include="AuthProvider.cs" />
@@ -67,7 +67,7 @@
     <Compile Include="Interfaces\ICaptchaSolver.cs" />
     <Compile Include="Things\Comment.cs" />
     <Compile Include="Things\CreatedThing.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="Flairs\FlairTemplate.cs" />
     <Compile Include="Interfaces\IWebAgent.cs" />
     <Compile Include="Data\LinkData.cs" />
@@ -90,8 +90,8 @@
     <Compile Include="Subreddit Information\SubredditStyle.cs" />
     <Compile Include="Data\TextData.cs" />
     <Compile Include="Things\Thing.cs" />
-    <Compile Include="DateTime\UnixTimeStamp.cs" />
-    <Compile Include="DateTime\UnixTimestampConverter.cs" />
+    <Compile Include="Extensions\DateTimeExtensions\UnixTimeStamp.cs" />
+    <Compile Include="Extensions\DateTimeExtensions\UnixTimestampConverter.cs" />
     <Compile Include="UrlParser.cs" />
     <Compile Include="Things\VotableThing.cs" />
     <Compile Include="Exceptions\RateLimitException.cs" />

@@ -126,6 +126,8 @@ namespace RedditSharp.Things
         public string LinkTitle { get; set; }
         [JsonProperty("num_reports")]
         public int? NumReports { get; set; }
+        [JsonProperty("stickied")]
+        public bool IsStickied { get; set; }
 
         [JsonIgnore]
         public IList<Comment> Comments { get; private set; }

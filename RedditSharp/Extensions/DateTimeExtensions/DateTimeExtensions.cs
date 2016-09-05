@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RedditSharp.Utils
+namespace RedditSharp.Extensions.DateTimeExtensions
 {
     internal static class DateTimeExtensions
     {

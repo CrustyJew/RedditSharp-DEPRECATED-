@@ -31,6 +31,7 @@ namespace RedditSharp.Things
         private const string AcceptModeratorInviteUrl = "/api/accept_moderator_invite";
         private const string LeaveModerationUrl = "/api/unfriend";
         private const string BanUserUrl = "/api/friend";
+        private const string UnBanUserUrl = "/api/unfriend";
         private const string AddModeratorUrl = "/api/friend";
         private const string AddContributorUrl = "/api/friend";
         private const string ModeratorsUrl = "/r/{0}/about/moderators.json";
@@ -42,6 +43,7 @@ namespace RedditSharp.Things
         private const string SearchUrlDate = "/r/{0}/search.json?q=timestamp:{1}..{2}&restrict_sr=on&sort={3}&syntax=cloudsearch";
         private const string ModLogUrl = "/r/{0}/about/log.json";
         private const string ContributorsUrl = "/r/{0}/about/contributors.json";
+        private const string BannedUsersUrl = "/r/{0}/about/banned.json";
 
         [JsonIgnore]
         private Reddit Reddit { get; set; }
@@ -346,6 +348,13 @@ namespace RedditSharp.Things
             }
         }
 
+        public Listing<BannedUser> BannedUsers
+        {
+            get
+            {
+                return new Listing<BannedUser>(Reddit, string.Format(BannedUsersUrl, Name), WebAgent);
+            }
+        }
 
         public async Task<Subreddit> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
@@ -741,6 +750,91 @@ namespace RedditSharp.Things
             var response = await request.GetResponseAsync();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
+        /// <summary>
+        /// Bans a user
+        /// </summary>
+        /// <param name="user">User to ban, by username</param>
+        /// <param name="reason">Reason for ban, shows in ban note as 'reason: note' or just 'note' if blank</param>
+        /// <param name="note">Mod notes about ban, shows in ban note as 'reason: note'</param>
+        /// <param name="duration">Number of days to ban user, 0 for permanent</param>
+        /// <param name="message">Message to include in ban PM</param>
+        public void BanUser(string user, string reason, string note, int duration, string message)
+        {
+            var request = WebAgent.CreatePost(BanUserUrl);
+            WebAgent.WritePostBody(request.GetRequestStream(), new
+            {
+                api_type = "json",
+                uh = Reddit.User.Modhash,
+                r = Name,
+                container = FullName,
+                type = "banned",
+                name = user,
+                ban_reason = reason,
+                note = note,
+                duration = duration <= 0 ? "" : duration.ToString(),
+                ban_message = message
+            });
+            var response = request.GetResponse();
+            var result = WebAgent.GetResponseString(response.GetResponseStream());
+        }
+
+        public async Task BanUserAsync(string user, string reason, string note, int duration, string message)
+        {
+            var request = WebAgent.CreatePost(BanUserUrl);
+            WebAgent.WritePostBody(await request.GetRequestStreamAsync(), new
+            {
+                api_type = "json",
+                uh = Reddit.User.Modhash,
+                r = Name,
+                container = FullName,
+                type = "banned",
+                name = user,
+                ban_reason = reason,
+                note = note,
+                duration = duration <= 0 ? "" : duration.ToString(),
+                ban_message = message
+            });
+            var response = await request.GetResponseAsync();
+            var result = WebAgent.GetResponseString(response.GetResponseStream());
+        }
+
+        /// <summary>
+        /// Unbans a user
+        /// </summary>
+        /// <param name="user">User to unban, by username</param>
+        public void UnBanUser(string user)
+        {
+            var request = WebAgent.CreatePost(UnBanUserUrl);
+            WebAgent.WritePostBody(request.GetRequestStream(), new
+            {
+                uh = Reddit.User.Modhash,
+                r = Name,
+                type = "banned",
+                container = FullName,
+                executed = "removed",
+                name = user,
+            });
+            var response = request.GetResponse();
+            var result = WebAgent.GetResponseString(response.GetResponseStream());
+        }
+
+        public async Task UnBanUserAsync(string user)
+        {
+            var request = WebAgent.CreatePost(UnBanUserUrl);
+            WebAgent.WritePostBody(await request.GetRequestStreamAsync(), new
+            {
+                uh = Reddit.User.Modhash,
+                r = Name,
+                type = "banned",
+                container = FullName,
+                executed = "removed",
+                name = user,
+            });
+            var response = await request.GetResponseAsync();
+            var result = WebAgent.GetResponseString(response.GetResponseStream());
+        }
+
         private Post Submit(SubmitData data)
         {
             if (Reddit.User == null)

@@ -122,6 +122,14 @@ namespace RedditSharp.Things
                 {
                     return await new ModAction().InitAsync(reddit, json, webAgent);
                 }
+                else if (typeof(T) == typeof(Contributor))
+                {
+                    return new Contributor().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(BannedUser))
+                {
+                    return new BannedUser().Init(reddit, json, webAgent);
+                }
             }
             return result;
         }
@@ -137,6 +145,14 @@ namespace RedditSharp.Things
                 else if (typeof(T) == typeof(ModAction))
                 {
                     return new ModAction().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(Contributor))
+                {
+                    return new Contributor().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(BannedUser))
+                {
+                    return new BannedUser().Init(reddit, json, webAgent);
                 }
             }
             return result;

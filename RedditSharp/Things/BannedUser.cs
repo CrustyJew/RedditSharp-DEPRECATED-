@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
@@ -23,6 +24,13 @@ namespace RedditSharp.Things
         {
             CommonInit(json);
             JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            return this;
+        }
+
+        public async Task<BannedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            CommonInit(json);
+            await JsonConvert.PopulateObjectAsync(json.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 

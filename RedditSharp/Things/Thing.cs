@@ -124,11 +124,11 @@ namespace RedditSharp.Things
                 }
                 else if (typeof(T) == typeof(Contributor))
                 {
-                    return new Contributor().Init(reddit, json, webAgent);
+                    return await new Contributor().InitAsync(reddit, json, webAgent);
                 }
                 else if (typeof(T) == typeof(BannedUser))
                 {
-                    return new BannedUser().Init(reddit, json, webAgent);
+                    return await new BannedUser().InitAsync(reddit, json, webAgent);
                 }
             }
             return result;

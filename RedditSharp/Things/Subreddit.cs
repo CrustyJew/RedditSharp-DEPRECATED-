@@ -700,6 +700,7 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
         public async Task RemoveContributorAsync(string id)
         {
             var request = WebAgent.CreatePost(LeaveModerationUrl);
@@ -712,42 +713,6 @@ namespace RedditSharp.Things
                 id
             });
             var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
-        }
-        public void BanUser(string user, string reason)
-        {
-            var request = WebAgent.CreatePost(BanUserUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
-            {
-                api_type = "json",
-                uh = Reddit.User.Modhash,
-                r = Name,
-                type = "banned",
-                id = "#banned",
-                name = user,
-                note = reason,
-                action = "add",
-                container = FullName
-            });
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
-        }
-        public async Task BanUserAsync(string user, string reason)
-        {
-            var request = WebAgent.CreatePost(BanUserUrl);
-            WebAgent.WritePostBody(await request.GetRequestStreamAsync(), new
-            {
-                api_type = "json",
-                uh = Reddit.User.Modhash,
-                r = Name,
-                type = "banned",
-                id = "#banned",
-                name = user,
-                note = reason,
-                action = "add",
-                container = FullName
-            });
-            var response = await request.GetResponseAsync();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
@@ -797,6 +762,16 @@ namespace RedditSharp.Things
             });
             var response = await request.GetResponseAsync();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
+        }
+
+        public void BanUser(string user, string note)
+        {
+            BanUser(user, "", note, 0, "");
+        }
+
+        public async Task BanUserAsync(string user, string note)
+        {
+            await BanUserAsync(user, "", note, 0, "");
         }
 
         /// <summary>

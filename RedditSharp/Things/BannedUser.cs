@@ -15,10 +15,7 @@ namespace RedditSharp.Things
         public string Note { get; set; }
 
         [JsonProperty("name")]
-        public string UserName { get; set; }
-
-        [JsonProperty("id")]
-        public string UserId { get; set; }
+        public string Name { get; set; }
 
         public BannedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {

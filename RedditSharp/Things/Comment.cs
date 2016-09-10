@@ -17,6 +17,7 @@ namespace RedditSharp.Things
         private const string EditUserTextUrl = "/api/editusertext";
         private const string RemoveUrl = "/api/remove";
         private const string DelUrl = "/api/del";
+        private const string ApproveUrl = "/api/approve";
         private const string SetAsReadUrl = "/api/read_message";
 
         [JsonIgnore]
@@ -226,6 +227,11 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             return data;
+        }
+
+        public void Approve()
+        {
+            var data = SimpleAction(ApproveUrl);
         }
 
         public void Del()

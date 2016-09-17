@@ -19,6 +19,8 @@ namespace RedditSharp.Things
         private const string DelUrl = "/api/del";
         private const string ApproveUrl = "/api/approve";
         private const string SetAsReadUrl = "/api/read_message";
+        private const string IgnoreReportsUrl = "/api/ignore_reports";
+        private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
         [JsonIgnore]
         private Reddit Reddit { get; set; }
@@ -237,6 +239,16 @@ namespace RedditSharp.Things
         public void Del()
         {
             var data = SimpleAction(DelUrl);
+        }
+
+        public void IgnoreReports()
+        {
+            var data = SimpleAction(IgnoreReportsUrl);
+        }
+
+        public void UnIgnoreReports()
+        {
+            var data = SimpleAction(UnIgnoreReportsUrl);
         }
 
         public void Remove()

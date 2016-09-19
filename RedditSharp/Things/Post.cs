@@ -25,6 +25,8 @@ namespace RedditSharp.Things
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
+        private const string IgnoreReportsUrl = "/api/ignore_reports";
+        private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
         [JsonIgnore]
         private Reddit Reddit { get; set; }
@@ -265,6 +267,16 @@ namespace RedditSharp.Things
         public void Unhide()
         {
             var data = SimpleAction(UnhideUrl);
+        }
+
+        public void IgnoreReports()
+        {
+            var data = SimpleAction(IgnoreReportsUrl);
+        }
+
+        public void UnIgnoreReports()
+        {
+            var data = SimpleAction(UnIgnoreReportsUrl);
         }
 
         public void MarkNSFW()

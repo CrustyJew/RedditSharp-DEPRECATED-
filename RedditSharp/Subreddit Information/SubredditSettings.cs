@@ -24,6 +24,7 @@ namespace RedditSharp
             WebAgent = webAgent;
             // Default settings, for use when reduced information is given
             AllowAsDefault = true;
+            AllowImages = false;
             Domain = null;
             Sidebar = string.Empty;
             Language = "en";
@@ -46,6 +47,7 @@ namespace RedditSharp
         {
             var data = json["data"];
             AllowAsDefault = data["default_set"].ValueOrDefault<bool>();
+            AllowImages = data["allow_images"].ValueOrDefault<bool>();
             Domain = data["domain"].ValueOrDefault<string>();
             Sidebar = HttpUtility.HtmlDecode(data["description"].ValueOrDefault<string>() ?? string.Empty);
             Language = data["language"].ValueOrDefault<string>();
@@ -131,6 +133,7 @@ namespace RedditSharp
         public int WikiEditAge { get; set; }
         public ContentOptions ContentOptions { get; set; }
         public SpamFilterSettings SpamFilter { get; set; }
+        public bool AllowImages { get; set; }
 
         public void UpdateSettings()
         {
@@ -178,6 +181,7 @@ namespace RedditSharp
             WebAgent.WritePostBody(stream, new
             {
                 allow_top = AllowAsDefault,
+                allow_images = AllowImages,
                 description = Sidebar,
                 domain = Domain,
                 lang = Language,

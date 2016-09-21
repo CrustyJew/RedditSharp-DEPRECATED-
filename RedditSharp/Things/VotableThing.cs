@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Security.Authentication;
@@ -91,6 +93,14 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("likes")]
         public bool? Liked { get; set; }
+
+        [JsonProperty("mod_reports")]
+        [JsonConverter(typeof(ReportCollectionConverter))]
+        public ICollection<Report> ModReports { get; set; }
+
+        [JsonProperty("user_reports")]
+        [JsonConverter(typeof(ReportCollectionConverter))]
+        public ICollection<Report> UserReports { get; set; }
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.
@@ -306,5 +316,94 @@ namespace RedditSharp.Things
                 writer.WriteValue(d.ToString().ToLower());
             }
         }
+
+        internal class ReportCollectionConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType)
+            {
+                return objectType == typeof(ICollection<Report>) || objectType == typeof(object);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                var token = JToken.Load(reader);
+                if (token.Type != JTokenType.Array || token.Children().Count() == 0)
+                    return new Collection<Report>();
+
+                var result = new Collection<Report>();
+                foreach (var child in token.Children())
+                {
+                    // always tuples
+                    // https://github.com/reddit/reddit/blob/master/r2/r2/models/report.py#L165
+                    if (child.Type != JTokenType.Array || child.Children().Count() != 2)
+                        continue;
+
+                    var report = new Report();
+                    report.Reason = child.First.Value<string>();
+
+                    if (child.Last.Type == JTokenType.String)
+                    {
+                        report.ModeratorName = child.Last.Value<string>();
+                        report.Count = 1;
+                    }
+                    else
+                    {
+                        report.ModeratorName = "";
+                        report.Count = child.Last.Value<int>();
+                    }
+                    result.Add(report);
+                }
+                return result;
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var reports = value as ICollection<Report>;
+
+                if (reports == null || reports.Count == 0)
+                {
+                    writer.WriteStartArray();
+                    writer.WriteEndArray();
+                    return;
+                }
+
+                writer.WriteStartArray();
+
+                foreach (var report in reports)
+                {
+                    writer.WriteStartArray();
+
+                    writer.WriteValue(report.Reason);
+
+                    if (String.IsNullOrEmpty(report.ModeratorName))
+                        writer.WriteValue(report.Count);
+                    else
+                        writer.WriteValue(report.ModeratorName);
+
+                    writer.WriteEndArray();
+                }
+
+                writer.WriteEndArray();
+            }
+        }
+    }
+
+    public class Report
+    {
+        /// <summary>
+        /// Report reason
+        /// </summary>
+        public string Reason { get; set; }
+
+        /// <summary>
+        /// Moderator who made the report.  Empty if report was made by
+        /// a regular user.
+        /// </summary>
+        public string ModeratorName { get; set; }
+
+        /// <summary>
+        /// Number of reports matching <see cref="Reason"/>
+        /// </summary>
+        public int Count { get; set; }
     }
 }

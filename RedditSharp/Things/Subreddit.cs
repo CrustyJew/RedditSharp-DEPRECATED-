@@ -980,6 +980,47 @@ namespace RedditSharp.Things
         {
             return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}&mod={2}", Name, ModActionTypeConverter.GetRedditParamName(action), string.Join(",", mods)), WebAgent);
         }
+
+
+        /// <summary>
+        /// Infinitely yields new <see cref="Comment"/> posted to the subreddit.
+        /// </summary>
+        public IEnumerable<Comment> CommentStream
+        {
+            get
+            {
+                if (Name == "/")
+                    return new Listing<Comment>(Reddit, "/comments.json", WebAgent).GetListingStream();
+                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name), WebAgent).GetListingStream();
+            }
+        }
+
+        /// <summary>
+        /// Infinitely yields new <see cref="Post"/> made to the subreddit.
+        /// </summary>
+        public IEnumerable<Post> SubmissionStream
+        {
+            get
+            {
+                if (Name == "/")
+                    return new Listing<Post>(Reddit, "/new.json", WebAgent).GetListingStream();
+                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name), WebAgent).GetListingStream();
+            }
+        }
+
+        /// <summary>
+        /// Infinitely yields new <see cref="ModAction"/> made on the subreddit.
+        /// </summary>
+        public IEnumerable<ModAction> ModerationLogStream
+        {
+            get
+            {
+                if (Name == "/")
+                    return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name), WebAgent).GetListingStream();
+                return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name), WebAgent).GetListingStream();
+            }
+        }
+
         #region Obsolete Getter Methods
 
         [Obsolete("Use Posts property instead")]

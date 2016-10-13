@@ -32,7 +32,7 @@ foreach (var post in subreddit.New.Take(25))
 
 ```csharp
 var all = reddit.RSlashAll;
-foreach (var post in all) // BAD
+foreach (var post in all.New) // BAD
 {
     // ...
 }
@@ -42,7 +42,7 @@ This will cause you to page through everything that has ever been posted on Redd
 
 ```csharp
 var all = reddit.RSlashAll;
-foreach (var post in all.Take(25))
+foreach (var post in all.New.Take(25))
 {
     // ...
 }

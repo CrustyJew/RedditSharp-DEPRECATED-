@@ -18,13 +18,13 @@ namespace RedditSharp.Things
         protected async Task<CreatedThing> InitAsync(Reddit reddit, JToken json)
         {
             CommonInit(reddit, json);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
+            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 
         private void CommonInit(Reddit reddit, JToken json)
         {
-            base.Init(json);
+            Init(json);
             Reddit = reddit;
         }
 

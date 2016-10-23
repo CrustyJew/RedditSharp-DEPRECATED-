@@ -1,10 +1,10 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RedditSharp.Things;
 using System;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
-using RedditSharp.Things;
 using System.Threading.Tasks;
 using DefaultWebAgent = RedditSharp.WebAgent;
 
@@ -41,17 +41,6 @@ namespace RedditSharp
 
         #endregion
 
-        #region Static Variables
-
-        static Reddit()
-        {
-            DefaultWebAgent.UserAgent = "";
-            DefaultWebAgent.RateLimit = DefaultWebAgent.RateLimitMode.Pace;
-            DefaultWebAgent.Protocol = "https";
-            DefaultWebAgent.RootDomain = "www.reddit.com";
-        }
-
-        #endregion
         
         internal IWebAgent WebAgent { get; set; }
         /// <summary>
@@ -115,7 +104,12 @@ namespace RedditSharp
             DefaultWebAgent.RateLimit = limitMode;
             DefaultWebAgent.RootDomain = "www.reddit.com";
         }
-
+        /// <summary>
+        /// DEPRECATED: Avoid use as Reddit will be removing this option eventually
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="useSsl"></param>
         public Reddit(string username, string password, bool useSsl = true)
             : this(useSsl)
         {
@@ -161,7 +155,7 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Logs in the current Reddit instance.
+        /// Logs in the current Reddit instance. DEPRECATED
         /// </summary>
         /// <param name="username">The username of the user to log on to.</param>
         /// <param name="password">The password of the user to log on to.</param>
@@ -244,11 +238,7 @@ namespace RedditSharp
 
         public Subreddit GetSubreddit(string name)
         {
-            if (name.StartsWith("r/"))
-                name = name.Substring(2);
-            if (name.StartsWith("/r/"))
-                name = name.Substring(3);
-            name = name.TrimEnd('/');
+            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
             return GetThing<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
@@ -259,11 +249,7 @@ namespace RedditSharp
         /// <returns>The Subreddit by given name</returns>
         public async Task<Subreddit> GetSubredditAsync(string name)
         {
-            if (name.StartsWith("r/"))
-                name = name.Substring(2);
-            if (name.StartsWith("/r/"))
-                name = name.Substring(3);
-            name = name.TrimEnd('/');
+            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
             return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
@@ -311,14 +297,14 @@ namespace RedditSharp
             if (User == null)
                 throw new Exception("User can not be null.");
 
-            if (!String.IsNullOrWhiteSpace(fromSubReddit))
+            if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
                 var subReddit = this.GetSubreddit(fromSubReddit);
                 var modNameList = subReddit.Moderators.Select(b => b.Name).ToList();
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(
-                        String.Format(
+                        string.Format(
                             @"User {0} is not a moderator of subreddit {1}.",
                             User.Name,
                             subReddit.Name));
@@ -348,7 +334,7 @@ namespace RedditSharp
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(captchaId));
 
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel
-                    ComposePrivateMessage(subject, body, to, captchaId, captchaResponse.Answer);
+                    ComposePrivateMessage(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer);
             }
         }
 
@@ -496,22 +482,21 @@ namespace RedditSharp
         protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
             var request = WebAgent.CreateGet(url);
-            var response = request.GetResponse();
+            var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
             var ret = await Thing.ParseAsync(this, json, WebAgent);
             return (T)ret;
         }
-
         protected internal T GetThing<T>(string url) where T : Thing
         {
             var request = WebAgent.CreateGet(url);
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
-            return (T)Thing.Parse(this, json, WebAgent);
+            var ret = Thing.Parse(this, json, WebAgent);
+            return (T)ret;
         }
-
         #endregion
     }
 }

@@ -1,5 +1,5 @@
+using Newtonsoft.Json.Linq;
 using System;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Web;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp
 {
@@ -63,7 +62,7 @@ namespace RedditSharp
         public static string RootDomain { get; set; }
 
         /// <summary>
-        /// Used to make calls against Reddit's API using OAuth23
+        /// Used to make calls against Reddit's API using OAuth2
         /// </summary>
         public string AccessToken { get; set; }
 
@@ -76,32 +75,39 @@ namespace RedditSharp
         /// <summary>
         /// UTC DateTime of last request made to Reddit API
         /// </summary>
-        public DateTime LastRequest 
+        public DateTime LastRequest
         {
             get { return _lastRequest; }
         }
         /// <summary>
         /// UTC DateTime of when the last burst started
         /// </summary>
-        public DateTime BurstStart 
+        public DateTime BurstStart
         {
             get { return _burstStart; }
         }
         /// <summary>
         /// Number of requests made during the current burst 
         /// </summary>
-        public int RequestsThisBurst 
+        public int RequestsThisBurst
         {
             get { return _requestsThisBurst; }
         }
 
+        static WebAgent()
+        {
+            UserAgent = "";
+            RateLimit = RateLimitMode.Pace;
+            Protocol = "https";
+            RootDomain = "www.reddit.com";
+        }
 
         public virtual JToken CreateAndExecuteRequest(string url)
         {
             Uri uri;
             if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
             {
-                if (!Uri.TryCreate(String.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
+                if (!Uri.TryCreate(string.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
                     throw new Exception("Could not parse Uri");
             }
             var request = CreateGet(uri);
@@ -175,7 +181,7 @@ namespace RedditSharp
             switch (RateLimit)
             {
                 case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0/limitRequestsPerMinute)// Rate limiting
+                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
                         Thread.Sleep(250);
                     _lastRequest = DateTime.UtcNow;
                     break;
@@ -218,7 +224,7 @@ namespace RedditSharp
         {
             EnforceRateLimit();
             bool prependDomain;
-            // IsWellFormedUriString returns true on Mono for some reason when using a string like "/api/me"
+            // IsWellFormedUristring returns true on Mono for some reason when using a string like "/api/me"
             if (Type.GetType("Mono.Runtime") != null)
                 prependDomain = !url.StartsWith("http://") && !url.StartsWith("https://");
             else
@@ -226,7 +232,7 @@ namespace RedditSharp
 
             HttpWebRequest request;
             if (prependDomain)
-                request = (HttpWebRequest)WebRequest.Create(String.Format("{0}://{1}{2}", Protocol, RootDomain, url));
+                request = (HttpWebRequest)WebRequest.Create(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
             else
                 request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = Cookies;
@@ -240,7 +246,7 @@ namespace RedditSharp
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
             request.Method = method;
-            request.UserAgent = UserAgent + " - with RedditSharp by /u/sircmpwn";
+            request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
             return request;
         }
 
@@ -259,7 +265,7 @@ namespace RedditSharp
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
             request.Method = method;
-            request.UserAgent = UserAgent + " - with RedditSharp by /u/sircmpwn";
+            request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
             return request;
         }
 

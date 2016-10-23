@@ -27,7 +27,7 @@ namespace RedditSharp
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var data = String.Join(",", JArray.Load(reader).Select(t => t.ToString()));
+            var data = string.Join(",", JArray.Load(reader).Select(t => t.ToString()));
 
             ModeratorPermission result;
 

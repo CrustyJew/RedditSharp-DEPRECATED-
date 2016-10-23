@@ -64,7 +64,60 @@ namespace TestRedditSharp
                 var sub = reddit.GetSubreddit(subname);
                 foreach (var post in sub.GetTop(FromTime.Week).Take(10))
                     Console.WriteLine("\"{0}\" by {1}", post.Title, post.Author);
-            }*/
+            }
+			Console.Write("Check inbox for unread private messages? (y/n) [n]: ");
+	        var choicePM = Console.ReadLine();
+	        if (!string.IsNullOrEmpty(choicePM) && choicePM.ToLower()[0] == 'y')
+	        {
+		        if (reddit.User.HasMail)
+		        {
+			        int i = 1;
+			        foreach (PrivateMessage message in reddit.User.UnreadMessages.OfType<PrivateMessage>())
+			        {
+				        Console.WriteLine("({0}) Sender: {1}", i, message.Author);
+				        Console.WriteLine("Subject: {0}", message.Subject);
+				        Console.WriteLine("Message:");
+				        Console.WriteLine("{0}", message.Body);
+				        Console.WriteLine("---- ---- ---- ---- ---- ---- ---- ----");
+				        i++;
+			        }
+					Console.WriteLine("End of unread private messages");
+					Console.WriteLine("");
+
+				}
+		        else
+		        {
+			        Console.WriteLine("No unread private messages found");
+			        Console.WriteLine("");
+		        }
+	        }
+
+			Console.Write("Check for replies to comments? (y/n) [n]: ");
+	        var choiceCR = Console.ReadLine();
+	        if (!string.IsNullOrEmpty(choiceCR) && choiceCR.ToLower()[0] == 'y')
+	        {
+		        if (reddit.User.HasMail)
+		        {
+			        int i = 1;
+			        foreach (Comment commentReply in reddit.User.UnreadMessages.OfType<Comment>())
+			        {
+				        Console.WriteLine("({0}) Sender: {1}", i, commentReply.Author);
+						Console.WriteLine("Thread Title: {0}", commentReply.LinkTitle);
+						Console.WriteLine("Message:");
+						Console.WriteLine("{0}", commentReply.Body);
+						Console.WriteLine("---- ---- ---- ---- ---- ---- ---- ----");
+						i++;
+					}
+					Console.WriteLine("End of unread replies to comments");
+					Console.WriteLine("");
+		        }
+		        else
+		        {
+					Console.WriteLine("No unread replies to comments found");
+					Console.WriteLine("");
+				}
+	        }
+			*/
             Comment comment = (Comment)reddit.GetThingByFullname("t1_ciif2g7");
             Post post = (Post)reddit.GetThingByFullname("t3_298g7j");
             PrivateMessage pm = (PrivateMessage)reddit.GetThingByFullname("t4_20oi3a"); // Use your own PM here, as you don't have permission to view this one

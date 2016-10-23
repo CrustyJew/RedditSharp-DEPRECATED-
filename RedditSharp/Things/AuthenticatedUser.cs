@@ -16,6 +16,13 @@ namespace RedditSharp.Things
         private const string InboxUrl = "/message/inbox.json";
         private const string SentUrl = "/message/sent.json";
 
+        public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            await CommonInitAsync(reddit, json, webAgent);
+            await JsonConvert.PopulateObjectAsync(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+                reddit.JsonSerializerSettings);
+            return this;
+        }
         public new AuthenticatedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
@@ -23,19 +30,14 @@ namespace RedditSharp.Things
                 reddit.JsonSerializerSettings);
             return this;
         }
-        public async new Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings));
-            return this;
-        }
-
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(reddit, json, webAgent);
         }
-
+        private async Task CommonInitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        {
+            await base.InitAsync(reddit, json, webAgent).ConfigureAwait(false);
+        }
         public Listing<Subreddit> ModeratorSubreddits
         {
             get

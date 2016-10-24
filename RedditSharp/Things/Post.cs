@@ -439,7 +439,6 @@ namespace RedditSharp.Things
 					if (things.Current is More)
 					{
 						More more = (More)things.Current;
-						if(more.ParentId == currentThing.Id) break;
 						things = more.Things().GetEnumerator();
 						things.MoveNext();
 					}

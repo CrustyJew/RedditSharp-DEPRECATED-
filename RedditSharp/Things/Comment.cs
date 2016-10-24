@@ -48,8 +48,8 @@ namespace RedditSharp.Things
 			Thing first = things.Current;
 			Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>();
 			comments[this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>());
-			things.MoveNext();
-			while (first is Comment || first is More)
+			
+			while (things.MoveNext() && (first is Comment || first is More) )
 			{
 				first = things.Current;
 				if (first is Comment)
@@ -80,9 +80,10 @@ namespace RedditSharp.Things
 						break;
 					}
 				}
-				things.MoveNext();
+				//things.MoveNext();
 
 			}
+			
 			foreach (KeyValuePair<string, Tuple<Comment, List<Comment>>> kvp in comments)
 			{
 				kvp.Value.Item1.Comments = kvp.Value.Item2.ToArray();

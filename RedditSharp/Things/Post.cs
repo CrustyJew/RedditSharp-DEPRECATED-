@@ -411,7 +411,6 @@ namespace RedditSharp.Things
 			More moreComments = null;
 			foreach (var comment in postJson)
 			{
-				//TODO Thing.Parse()
 				Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
 				if (newComment.Kind == "more")
 				{
@@ -440,14 +439,12 @@ namespace RedditSharp.Things
 					if (things.Current is More)
 					{
 						More more = (More)things.Current;
+						if(more.ParentId == currentThing.Id) break;
 						things = more.Things().GetEnumerator();
 						things.MoveNext();
 					}
 				}
 			}
-
-
-
 		}
 	}
 }

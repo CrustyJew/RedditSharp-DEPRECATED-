@@ -12,3 +12,6 @@ TestResults/
 
 # StyleCop files
 StyleCop.Cache
+.vs/config/applicationhost.config
+/.vs
+/packages

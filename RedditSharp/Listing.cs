@@ -201,18 +201,20 @@ namespace RedditSharp
                 if (LimitPerRequest != -1)
                 {
                     int limit = LimitPerRequest;
-
-                    if (limit > MaximumLimit)
+                    if(MaximumLimit != -1)
                     {
-                        // If the limit is more than the maximum number of listings, adjust
-                        limit = MaximumLimit;
+                        if (limit > MaximumLimit)
+                        {
+                            // If the limit is more than the maximum number of listings, adjust
+                            limit = MaximumLimit;
+                        }
+                        else if (Count + limit > MaximumLimit)
+                        {
+                            // If a smaller subset of listings are needed, adjust the limit
+                            limit = MaximumLimit - Count;
+                        }
                     }
-                    else if (Count + limit > MaximumLimit)
-                    {
-                        // If a smaller subset of listings are needed, adjust the limit
-                        limit = MaximumLimit - Count;
-                    }
-
+                    
                     if (limit > 0)
                     {
                         // Add the limit, the maximum number of items to be returned per page

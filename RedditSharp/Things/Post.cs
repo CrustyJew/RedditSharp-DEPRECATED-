@@ -164,12 +164,12 @@ namespace RedditSharp.Things
             var request = WebAgent.CreatePost(CommentUrl);
             var stream = request.GetRequestStream();
             WebAgent.WritePostBody(stream, new
-                {
-                    text = message,
-                    thing_id = FullName,
-                    uh = Reddit.User.Modhash,
-                    api_type = "json"
-                });
+            {
+                text = message,
+                thing_id = FullName,
+                uh = Reddit.User.Modhash,
+                api_type = "json"
+            });
             stream.Close();
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
@@ -206,7 +206,7 @@ namespace RedditSharp.Things
             if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
                 throw new AuthenticationException(
                     string.Format(
-                        @"User {0} is not a moderator of subreddit {1}.", 
+                        @"User {0} is not a moderator of subreddit {1}.",
                         Reddit.User.Name,
                         this.Subreddit.Name));
 
@@ -351,7 +351,7 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
 
-            var request = WebAgent.CreatePost(string.Format(SetFlairUrl,SubredditName));
+            var request = WebAgent.CreatePost(string.Format(SetFlairUrl, SubredditName));
             WebAgent.WritePostBody(request.GetRequestStream(), new
             {
                 api_type = "json",
@@ -385,66 +385,66 @@ namespace RedditSharp.Things
             var postJson = json.Last()["data"]["children"];
 
             var comments = new List<Comment>();
-			foreach (var comment in postJson)
-			{
-				Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
-				if (newComment.Kind == "more")
-				{
-				}
-				else
-				{
-					comments.Add(newComment);
-				}
-			}
+            foreach (var comment in postJson)
+            {
+                Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
+                if (newComment.Kind == "more")
+                {
+                }
+                else
+                {
+                    comments.Add(newComment);
+                }
+            }
 
-			return comments;
+            return comments;
         }
 
-		public IEnumerable<Comment> EnumerateComments()
-		{
-			var url = string.Format(GetCommentsUrl, Id);
-			var request = WebAgent.CreateGet(url);
-			var response = request.GetResponse();
-			var data = WebAgent.GetResponseString(response.GetResponseStream());
-			var json = JArray.Parse(data);
-			var postJson = json.Last()["data"]["children"];
-			More moreComments = null;
-			foreach (var comment in postJson)
-			{
-				Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
-				if (newComment.Kind == "more")
-				{
-					moreComments = new More().Init(Reddit, comment, WebAgent);
-				}
-				else
-				{
-					yield return newComment;
-				}
-			}
+        public IEnumerable<Comment> EnumerateComments()
+        {
+            var url = string.Format(GetCommentsUrl, Id);
+            var request = WebAgent.CreateGet(url);
+            var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var json = JArray.Parse(data);
+            var postJson = json.Last()["data"]["children"];
+            More moreComments = null;
+            foreach (var comment in postJson)
+            {
+                Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
+                if (newComment.Kind == "more")
+                {
+                    moreComments = new More().Init(Reddit, comment, WebAgent);
+                }
+                else
+                {
+                    yield return newComment;
+                }
+            }
 
 
-			if (moreComments != null)
-			{
-				IEnumerator<Thing> things = moreComments.Things().GetEnumerator();
-				things.MoveNext();
-				Thing currentThing = null;
-				while (currentThing != things.Current)
-				{
-					currentThing = things.Current;
-					if (things.Current is Comment)
-					{
-						Comment next = ((Comment)things.Current).PopulateComments(things);
-						yield return next;
-					}
-					if (things.Current is More)
-					{
-						More more = (More)things.Current;
-						if(more.ParentId != FullName) break;
-						things = more.Things().GetEnumerator();
-						things.MoveNext();
-					}
-				}
-			}
-		}
-	}
+            if (moreComments != null)
+            {
+                IEnumerator<Thing> things = moreComments.Things().GetEnumerator();
+                things.MoveNext();
+                Thing currentThing = null;
+                while (currentThing != things.Current)
+                {
+                    currentThing = things.Current;
+                    if (things.Current is Comment)
+                    {
+                        Comment next = ((Comment)things.Current).PopulateComments(things);
+                        yield return next;
+                    }
+                    if (things.Current is More)
+                    {
+                        More more = (More)things.Current;
+                        if (more.ParentId != FullName) break;
+                        things = more.Things().GetEnumerator();
+                        things.MoveNext();
+                    }
+                }
+            }
+        }
+    }
 }

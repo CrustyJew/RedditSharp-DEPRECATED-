@@ -138,6 +138,9 @@ namespace RedditSharp.Things
         [JsonProperty("subreddit")]
         public string SubredditName { get; set; }
 
+        [JsonProperty("archived")]
+        public bool IsArchived { get; set; }
+
         [JsonProperty("stickied")]
         public bool IsStickied { get; set; }
 

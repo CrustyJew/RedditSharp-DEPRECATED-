@@ -69,6 +69,8 @@ namespace RedditSharp.Things
                     return await new Subreddit().InitAsync(reddit, json, webAgent);
                 case "modaction":
                     return await new ModAction().InitAsync(reddit, json, webAgent);
+                case "more":
+                    return await new More().InitAsync(reddit, json, webAgent);
                 default:
                     return null;
             }
@@ -97,6 +99,8 @@ namespace RedditSharp.Things
                     return new Subreddit().Init(reddit, json, webAgent);
                 case "modaction":
                     return new ModAction().Init(reddit, json, webAgent);
+                case "more":
+                    return new More().Init(reddit, json, webAgent);
                 default:
                     return null;
             }
@@ -130,6 +134,10 @@ namespace RedditSharp.Things
                 {
                     return await new BannedUser().InitAsync(reddit, json, webAgent);
                 }
+                else if (typeof(T) == typeof(More))
+                {
+                    return await new More().InitAsync(reddit, json, webAgent);
+                }
             }
             return result;
         }
@@ -153,6 +161,10 @@ namespace RedditSharp.Things
                 else if (typeof(T) == typeof(BannedUser))
                 {
                     return new BannedUser().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(More))
+                {
+                    return new More().Init(reddit, json, webAgent);
                 }
             }
             return result;

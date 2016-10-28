@@ -43,6 +43,55 @@ namespace RedditSharp.Things
             return this;
         }
 
+        public Comment PopulateComments(IEnumerator<Thing> things)
+        {
+            Thing first = things.Current;
+            Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>();
+            comments[this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>());
+
+            while (things.MoveNext() && (first is Comment || first is More))
+            {
+                first = things.Current;
+                if (first is Comment)
+                {
+                    Comment comment = (Comment)first;
+                    comments[comment.FullName] = Tuple.Create<Comment, List<Comment>>(comment, new List<Comment>());
+                    if (comments.ContainsKey(comment.ParentId))
+                    {
+                        comments[comment.ParentId].Item2.Add(comment);
+                    }
+                    else if (comment.ParentId == this.ParentId)
+                    {
+                        //only want sub comments.
+                        break;
+                    }
+                }
+                else if (first is More)
+                {
+                    More more = (More)first;
+                    if (comments.ContainsKey(more.ParentId))
+                    {
+                        comments[more.ParentId].Item1.More = more;
+                    }
+                    else if (more.ParentId == this.ParentId)
+                    {
+                        // This is more for parent.
+                        // Need to process the comments dictionary.
+                        break;
+                    }
+                }
+                //things.MoveNext();
+
+            }
+
+            foreach (KeyValuePair<string, Tuple<Comment, List<Comment>>> kvp in comments)
+            {
+                kvp.Value.Item1.Comments = kvp.Value.Item2.ToArray();
+            }
+
+            return this;
+        }
+
         private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             Init(reddit, webAgent, json);
@@ -57,7 +106,7 @@ namespace RedditSharp.Things
                 var context = data["context"].Value<string>();
                 LinkId = context.Split('/')[4];
             }
-         
+
             return data;
         }
         private async Task<JToken> CommonInitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
@@ -86,7 +135,7 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add( new Comment().Init(reddit, comment, webAgent, sender));
+                    subComments.Add(new Comment().Init(reddit, comment, webAgent, sender));
             }
             Comments = subComments.ToArray();
         }
@@ -132,6 +181,9 @@ namespace RedditSharp.Things
         public int? NumReports { get; set; }
         [JsonProperty("stickied")]
         public bool IsStickied { get; set; }
+
+        [JsonIgnore]
+        public More More { get; set; }
 
         [JsonIgnore]
         public IList<Comment> Comments { get; private set; }
@@ -280,11 +332,11 @@ namespace RedditSharp.Things
         {
             var request = WebAgent.CreatePost(SetAsReadUrl);
             WebAgent.WritePostBody(request.GetRequestStream(), new
-                                 {
-                                     id = FullName,
-                                     uh = Reddit.User.Modhash,
-                                     api_type = "json"
-                                 });
+            {
+                id = FullName,
+                uh = Reddit.User.Modhash,
+                api_type = "json"
+            });
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }

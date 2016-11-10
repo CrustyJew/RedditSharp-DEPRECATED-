@@ -35,9 +35,6 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\HtmlAgilityPack.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -52,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotWebAgent.cs" />
+    <Compile Include="Flairs\FlairTemplate.cs" />
     <Compile Include="Moderator Actions\ModActionType.cs" />
     <Compile Include="Things\BannedUser.cs" />
     <Compile Include="Things\Contributor.cs" />
@@ -70,7 +68,6 @@
     <Compile Include="Things\Comment.cs" />
     <Compile Include="Things\CreatedThing.cs" />
     <Compile Include="Extensions\Extensions.cs" />
-    <Compile Include="Flairs\FlairTemplate.cs" />
     <Compile Include="Interfaces\IWebAgent.cs" />
     <Compile Include="Data\LinkData.cs" />
     <Compile Include="Listing.cs" />

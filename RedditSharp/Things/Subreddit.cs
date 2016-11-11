@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions.DateTimeExtensions;
@@ -262,9 +261,9 @@ namespace RedditSharp.Things
             }
         }
         /// <summary>
-        /// Hacky way to obtain flair templates
+        /// Get a list of the available user flair templates for the subreddit
         /// </summary>
-        public UserFlairTemplate[] UserFlairTemplates // Hacky, there isn't a proper endpoint for this
+        public UserFlairTemplate[] UserFlairTemplates
         {
             get
             {
@@ -279,19 +278,13 @@ namespace RedditSharp.Things
                 stream.Close();
                 var response = request.GetResponse();
                 var data = WebAgent.GetResponseString(response.GetResponseStream());
-                var document = new HtmlDocument();
-                document.LoadHtml(data);
-                if (document.DocumentNode.Descendants("div").First().Attributes["error"] != null)
-                    throw new InvalidOperationException("This subreddit does not allow users to select flair.");
-                var templateNodes = document.DocumentNode.Descendants("li");
+                var json = JObject.Parse(data);
+                var choices = json["choices"];
                 var list = new List<UserFlairTemplate>();
-                foreach (var node in templateNodes)
+                foreach (var choice in choices)
                 {
-                    list.Add(new UserFlairTemplate
-                    {
-                        CssClass = node.Descendants("span").First().Attributes["class"].Value.Split(' ')[1],
-                        Text = node.Descendants("span").First().InnerText
-                    });
+                    UserFlairTemplate template = JsonConvert.DeserializeObject<UserFlairTemplate>(choice.ToString());
+                    list.Add(template);
                 }
                 return list.ToArray();
             }

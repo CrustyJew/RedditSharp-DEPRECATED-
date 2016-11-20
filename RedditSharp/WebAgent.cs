@@ -104,8 +104,7 @@ namespace RedditSharp
 
         public virtual JToken CreateAndExecuteRequest(string url)
         {
-            Uri uri;
-            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
             {
                 if (!Uri.TryCreate(string.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
                     throw new Exception("Could not parse Uri");

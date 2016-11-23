@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="BotWebAgent.cs" />
     <Compile Include="Flairs\FlairTemplate.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Moderator Actions\ModActionType.cs" />
     <Compile Include="Things\BannedUser.cs" />
     <Compile Include="Things\Contributor.cs" />

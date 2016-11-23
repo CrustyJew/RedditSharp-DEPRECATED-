@@ -28,7 +28,8 @@ namespace RedditSharp
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var data = string.Join(",", JArray.Load(reader).Select(t => t.ToString()));
-            var valid = Enum.TryParse(data, true, out ModeratorPermission result);
+            ModeratorPermission result;
+            var valid = Enum.TryParse(data, true, out result);
 
             if (!valid)
                 result = ModeratorPermission.None;

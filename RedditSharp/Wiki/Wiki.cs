@@ -5,13 +5,14 @@ using System.Collections.Generic;
 namespace RedditSharp
 {
     using System;
+    using System.Threading.Tasks;
 
     public class Wiki
     {
         private Reddit Reddit { get; set; }
         private Subreddit Subreddit { get; set; }
         private IWebAgent WebAgent { get; set; }
-
+        #region constants
         private const string GetWikiPageUrl = "/r/{0}/wiki/{1}.json?v={2}";
         private const string GetWikiPagesUrl = "/r/{0}/wiki/pages.json";
         private const string WikiPageEditUrl = "/r/{0}/api/wiki/edit";
@@ -23,7 +24,7 @@ namespace RedditSharp
         private const string WikiRevisionsUrl = "/r/{0}/wiki/revisions.json";
         private const string WikiPageRevisionsUrl = "/r/{0}/wiki/revisions/{1}.json";
         private const string WikiPageDiscussionsUrl = "/r/{0}/wiki/discussions/{1}.json";
-
+        #endregion
         public IEnumerable<string> PageNames
         {
             get
@@ -81,6 +82,18 @@ namespace RedditSharp
             });
             var response = request.GetResponse();
         }
+        public async Task SetPageSettingsAsync(string name, WikiPageSettings settings)
+        {
+            var request = WebAgent.CreatePost(string.Format(WikiPageSettingsUrl, Subreddit.Name, name));
+            await WebAgent.WritePostBodyAsync(await request.GetRequestStreamAsync(), new
+            {
+                page = name,
+                permlevel = settings.PermLevel,
+                listed = settings.Listed,
+                uh = Reddit.User.Modhash
+            });
+            var response = request.GetResponseAsync();
+        }
         #endregion
 
         #region Revisions
@@ -121,7 +134,29 @@ namespace RedditSharp
             WebAgent.WritePostBody(request.GetRequestStream(), param,addParams.ToArray());
             var response = request.GetResponse();
         }
-
+        public async Task EditPageAsync(string page, string content, string previous = null, string reason = null)
+        {
+            var request = WebAgent.CreatePost(string.Format(WikiPageEditUrl, Subreddit.Name));
+            dynamic param = new
+            {
+                content = content,
+                page = page,
+                uh = Reddit.User.Modhash
+            };
+            List<string> addParams = new List<string>();
+            if (previous != null)
+            {
+                addParams.Add("previous");
+                addParams.Add(previous);
+            }
+            if (reason != null)
+            {
+                addParams.Add("reason");
+                addParams.Add(reason);
+            }
+            await WebAgent.WritePostBodyAsync(await request.GetRequestStreamAsync(), param, addParams.ToArray());
+            var response = await request.GetResponseAsync();
+        }
         public void HidePage(string page, string revision)
         {
             var request = WebAgent.CreatePost(string.Format(HideWikiPageUrl, Subreddit.Name));
@@ -133,7 +168,17 @@ namespace RedditSharp
             });
             var response = request.GetResponse();
         }
-
+        public async Task HidePageAsync(string page, string revision)
+        {
+            var request = WebAgent.CreatePost(string.Format(HideWikiPageUrl, Subreddit.Name));
+            await WebAgent.WritePostBodyAsync(await request.GetRequestStreamAsync(), new
+            {
+                page = page,
+                revision = revision,
+                uh = Reddit.User.Modhash
+            });
+            var response = request.GetResponseAsync();
+        }
         public void RevertPage(string page, string revision)
         {
             var request = WebAgent.CreatePost(string.Format(RevertWikiPageUrl, Subreddit.Name));
@@ -145,7 +190,17 @@ namespace RedditSharp
             });
             var response = request.GetResponse();
         }
-
+        public async Task RevertPageAsync(string page, string revision)
+        {
+            var request = WebAgent.CreatePost(string.Format(RevertWikiPageUrl, Subreddit.Name));
+            await WebAgent.WritePostBodyAsync(await request.GetRequestStreamAsync(), new
+            {
+                page = page,
+                revision = revision,
+                uh = Reddit.User.Modhash
+            });
+            var response = await request.GetResponseAsync();
+        }
         public void SetPageEditor(string page, string username, bool allow)
         {
             var request = WebAgent.CreatePost(string.Format(allow ? WikiPageAllowEditorAddUrl : WikiPageAllowEditorDelUrl, Subreddit.Name));
@@ -157,7 +212,17 @@ namespace RedditSharp
             });
             var response = request.GetResponse();
         }
-
+        public async Task SetPageEditorAsync(string page, string username, bool allow)
+        {
+            var request = WebAgent.CreatePost(string.Format(allow ? WikiPageAllowEditorAddUrl : WikiPageAllowEditorDelUrl, Subreddit.Name));
+            await WebAgent.WritePostBodyAsync(await request.GetRequestStreamAsync(), new
+            {
+                page = page,
+                username = username,
+                uh = Reddit.User.Modhash
+            });
+            var response = await request.GetResponseAsync();
+        }
         #region Obsolete Getter Methods
 
         [Obsolete("Use PageNames property instead")]

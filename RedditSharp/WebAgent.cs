@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace RedditSharp
@@ -124,7 +125,28 @@ namespace RedditSharp
                 return retval;
             }
         }
-
+        public virtual async Task<JToken> CreateAndExecuteRequestAsync(string url)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+            {
+                if (!Uri.TryCreate(string.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
+                    throw new Exception("Could not parse Uri");
+            }
+            var request = CreateGet(uri);
+            try { return await ExecuteRequestAsync(request); }
+            catch (Exception)
+            {
+                var tempProtocol = Protocol;
+                var tempRootDomain = RootDomain;
+                Protocol = "http";
+                RootDomain = "www.reddit.com";
+                var retval = await CreateAndExecuteRequestAsync(url);
+                Protocol = tempProtocol;
+                RootDomain = tempRootDomain;
+                return retval;
+            }
+        }
         /// <summary>
         /// Executes the web request and handles errors in the response
         /// </summary>
@@ -173,7 +195,54 @@ namespace RedditSharp
             return json;
 
         }
+        /// <summary>
+        /// Executes the web request and handles errors in the response
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public virtual async Task<JToken> ExecuteRequestAsync(HttpWebRequest request)
+        {
+            EnforceRateLimit();
+            HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+            var result = GetResponseString(response.GetResponseStream());
 
+            JToken json;
+            if (!string.IsNullOrEmpty(result))
+            {
+                json = JToken.Parse(result);
+                try
+                {
+                    if (json["json"] != null)
+                    {
+                        json = json["json"]; //get json object if there is a root node
+                    }
+                    if (json["error"] != null)
+                    {
+                        switch (json["error"].ToString())
+                        {
+                            case "404":
+                                throw new Exception("File Not Found");
+                            case "403":
+                                throw new Exception("Restricted");
+                            case "invalid_grant":
+                                //Refresh authtoken
+                                //AccessToken = authProvider.GetRefreshToken();
+                                //ExecuteRequest(request);
+                                break;
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+            else
+            {
+                json = JToken.Parse("{'method':'" + response.Method + "','uri':'" + response.ResponseUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
+            }
+            return json;
+
+        }
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected virtual void EnforceRateLimit()
         {
@@ -249,7 +318,6 @@ namespace RedditSharp
             request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
             return request;
         }
-
         protected virtual HttpWebRequest CreateRequest(Uri uri, string method)
         {
             EnforceRateLimit();
@@ -315,7 +383,28 @@ namespace RedditSharp
             stream.Write(raw, 0, raw.Length);
             stream.Close();
         }
-
+        public virtual async Task WritePostBodyAsync(Stream stream, object data, params string[] additionalFields)
+        {
+            var type = data.GetType();
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            string value = "";
+            foreach (var property in properties)
+            {
+                var attr = property.GetCustomAttributes(typeof(RedditAPINameAttribute), false).FirstOrDefault() as RedditAPINameAttribute;
+                string name = attr == null ? property.Name : attr.Name;
+                var entry = Convert.ToString(property.GetValue(data, null));
+                value += name + "=" + HttpUtility.UrlEncode(entry).Replace(";", "%3B").Replace("&", "%26") + "&";
+            }
+            for (int i = 0; i < additionalFields.Length; i += 2)
+            {
+                var entry = Convert.ToString(additionalFields[i + 1]) ?? string.Empty;
+                value += additionalFields[i] + "=" + HttpUtility.UrlEncode(entry).Replace(";", "%3B").Replace("&", "%26") + "&";
+            }
+            value = value.Remove(value.Length - 1); // Remove trailing &
+            var raw = Encoding.UTF8.GetBytes(value);
+            await stream.WriteAsync(raw, 0, raw.Length);
+            stream.Close();
+        }
         private static bool IsOAuth()
         {
             return RootDomain == "oauth.reddit.com";

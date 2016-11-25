@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {
@@ -16,5 +17,8 @@ namespace RedditSharp
         void WritePostBody(Stream stream, object data, params string[] additionalFields);
         JToken CreateAndExecuteRequest(string url);
         JToken ExecuteRequest(HttpWebRequest request);
+        Task<JToken> ExecuteRequestAsync(HttpWebRequest request);
+        Task<JToken> CreateAndExecuteRequestAsync(string url);
+        Task WritePostBodyAsync(Stream stream, object data, params string[] additionalFields);
     }
 }

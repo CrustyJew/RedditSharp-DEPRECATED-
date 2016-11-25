@@ -280,7 +280,10 @@ namespace RedditSharp
         {
             return new Post().Init(this, GetToken(uri), WebAgent);
         }
-
+        public async Task<Post> GetPostAsync(Uri uri)
+        {
+            return await new Post().InitAsync(this, GetToken(uri), WebAgent);
+        }
         /// <summary>
         /// 
         /// </summary>

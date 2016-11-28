@@ -11,7 +11,7 @@
     <RootNamespace>RedditSharp</RootNamespace>
     <AssemblyName>RedditSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="BotWebAgent.cs" />
     <Compile Include="Flairs\FlairTemplate.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Moderator Actions\ModActionType.cs" />
     <Compile Include="Things\BannedUser.cs" />
     <Compile Include="Things\Contributor.cs" />

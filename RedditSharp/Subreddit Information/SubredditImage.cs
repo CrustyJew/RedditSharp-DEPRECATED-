@@ -27,8 +27,7 @@ namespace RedditSharp
             Url = new Uri(url);
             // Handle legacy image urls
             // http://thumbs.reddit.com/FULLNAME_NUMBER.png
-            int discarded;
-            if (int.TryParse(url, out discarded))
+            if (int.TryParse(url, out int discarded))
                 Url = new Uri(string.Format("http://thumbs.reddit.com/{0}_{1}.png", subreddit.Subreddit.FullName, url), UriKind.Absolute);
         }
 

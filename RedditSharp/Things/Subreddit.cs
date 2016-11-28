@@ -843,7 +843,7 @@ namespace RedditSharp.Things
                 throw new RedditException("No user logged in.");
             var request = WebAgent.CreatePost(SubmitLinkUrl);
 
-            WebAgent.WritePostBody(await request.GetRequestStreamAsync(), data);
+            await WebAgent.WritePostBodyAsync(await request.GetRequestStreamAsync(), data);
 
             var response = await request.GetResponseAsync();
             var result = WebAgent.GetResponseString(response.GetResponseStream());

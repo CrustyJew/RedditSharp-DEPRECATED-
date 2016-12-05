@@ -255,12 +255,12 @@ namespace RedditSharp
                 {
                     int limit = LimitPerRequest;
 
-                    if (limit > MaximumLimit)
+                    if (limit > MaximumLimit && MaximumLimit != -1)
                     {
                         // If the limit is more than the maximum number of listings, adjust
                         limit = MaximumLimit;
                     }
-                    else if (Count + limit > MaximumLimit)
+                    else if (Count + limit > MaximumLimit && MaximumLimit != -1)
                     {
                         // If a smaller subset of listings are needed, adjust the limit
                         limit = MaximumLimit - Count;
@@ -289,7 +289,6 @@ namespace RedditSharp
                 Parse(json);
             }
 
-
             private void Parse(JToken json)
             {
                 var children = json["data"]["children"] as JArray;
@@ -301,8 +300,24 @@ namespace RedditSharp
                         things.Add(Thing.Parse<T>(Listing.Reddit, children[i], Listing.WebAgent));
                     else
                     {
-                        // we only want to see new items.
+                        var kind = children[i]["kind"].ValueOrDefault<string>();
                         var id = children[i]["data"]["id"].ValueOrDefault<string>();
+
+                        // check for new replies to pm / modmail
+                        if (kind == "t4" && children[i]["data"]["replies"].HasValues)
+                        {
+                            var replies = children[i]["data"]["replies"]["data"]["children"] as JArray;
+                            foreach (var reply in replies)
+                            {
+                                var replyId = reply["data"]["id"].ValueOrDefault<string>();
+                                if (done.Contains(replyId))
+                                    continue;
+
+                                things.Add(Thing.Parse<T>(Listing.Reddit, reply, Listing.WebAgent));
+                                done.Add(replyId);
+                            }
+                        }
+
                         if (String.IsNullOrEmpty(id) || done.Contains(id))
                             continue;
 
@@ -311,6 +326,7 @@ namespace RedditSharp
                     }
                 }
 
+                // this doesn't really work when we're processing messages with replies.
                 if (stream)
                     things.Reverse();
 
@@ -390,8 +406,6 @@ namespace RedditSharp
                         catch (Exception ex)
                         {
                             // sleep for a while to see if we can recover
-                            // Sleep() will rethrow after waiting a bit
-                            // todo: make this smarter
                             Sleep(tries,ex);
                         }
                         

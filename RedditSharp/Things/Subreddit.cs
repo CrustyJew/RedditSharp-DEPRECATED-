@@ -43,6 +43,7 @@ namespace RedditSharp.Things
         private const string ModLogUrl = "/r/{0}/about/log.json";
         private const string ContributorsUrl = "/r/{0}/about/contributors.json";
         private const string BannedUsersUrl = "/r/{0}/about/banned.json";
+        private const string ModmailUrl = "/r/{0}/message/moderator/inbox.json";
 
         [JsonIgnore]
         private Reddit Reddit { get; set; }
@@ -346,6 +347,21 @@ namespace RedditSharp.Things
             get
             {
                 return new Listing<BannedUser>(Reddit, string.Format(BannedUsersUrl, Name), WebAgent);
+            }
+        }
+
+        /// <summary>
+        /// Subreddit modmail.
+        /// <para/>
+        ///  When calling <see cref="System.Linq.Enumerable.Take{T}"/> make sure to take replies into account!
+        /// </summary>
+        public Listing<PrivateMessage> Modmail
+        {
+            get
+            {
+                if (Reddit.User == null)
+                    throw new AuthenticationException("No user logged in.");
+                return new Listing<PrivateMessage>(Reddit, string.Format(ModmailUrl, Name), WebAgent);
             }
         }
 

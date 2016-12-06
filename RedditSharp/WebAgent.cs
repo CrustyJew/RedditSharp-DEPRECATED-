@@ -223,24 +223,13 @@ namespace RedditSharp
         public virtual HttpWebRequest CreateRequest(string url, string method)
         {
             EnforceRateLimit();
-            bool prependDomain;
-            // IsWellFormedUristring returns true on Mono for some reason when using a string like "/api/me"
-            if (Type.GetType("Mono.Runtime") != null)
-                prependDomain = !url.StartsWith("http://") && !url.StartsWith("https://");
-            else
-                prependDomain = !Uri.IsWellFormedUriString(url, UriKind.Absolute);
-
+            bool prependDomain = !Uri.IsWellFormedUriString(url, UriKind.Absolute);
             HttpWebRequest request;
             if (prependDomain)
                 request = (HttpWebRequest)WebRequest.Create(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
             else
                 request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = Cookies;
-            if (Type.GetType("Mono.Runtime") != null)
-            {
-                var cookieHeader = Cookies.GetCookieHeader(new Uri("http://reddit.com"));
-                request.Headers.Set("Cookie", cookieHeader);
-            }
             if (IsOAuth())// use OAuth
             {
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls

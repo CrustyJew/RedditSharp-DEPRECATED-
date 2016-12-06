@@ -24,11 +24,19 @@ namespace RedditSharp
             string cssLink, string name, string url, IWebAgent webAgent)
             : this(reddit, subreddit, cssLink, name, webAgent)
         {
-            Url = new Uri(url);
+
+            int discarded;
+            if (int.TryParse(url, out discarded))
+            {
+                Url = new Uri(string.Format("http://thumbs.reddit.com/{0}_{1}.png", subreddit.Subreddit.FullName, url), UriKind.Absolute);
+            }
+            else
+            {
+                Url = new Uri(url);
+            }
             // Handle legacy image urls
             // http://thumbs.reddit.com/FULLNAME_NUMBER.png
-            if (int.TryParse(url, out int discarded))
-                Url = new Uri(string.Format("http://thumbs.reddit.com/{0}_{1}.png", subreddit.Subreddit.FullName, url), UriKind.Absolute);
+            
         }
 
         public string CssLink { get; set; }

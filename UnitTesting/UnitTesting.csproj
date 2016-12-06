@@ -65,6 +65,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="MoreUnitTest.cs" />
+    <Compile Include="Subreddit Information\SubredditImageTests.cs" />
     <Compile Include="TestData\JsonGetComments.cs" />
     <Compile Include="TestData\More-3-4-5.cs" />
     <Compile Include="UnitTest1.cs" />

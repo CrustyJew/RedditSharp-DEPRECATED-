@@ -23,7 +23,7 @@ namespace RedditSharp.Multi
         /// Internal Model Data of the Multi Class
         /// </summary>
         [JsonIgnore]
-        public mData Data { get; set; }
+        public MData Data { get; set; }
 
         /// <summary>
         /// Creates an implementation of MultiData
@@ -34,7 +34,7 @@ namespace RedditSharp.Multi
         /// <param name="subs">Whether there are subs</param>
         protected internal MultiData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs = true)
         {
-            Data = new mData(reddit, json["data"], webAgent, subs);
+            Data = new MData(reddit, json["data"], webAgent, subs);
             JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
         }
     }
@@ -42,7 +42,7 @@ namespace RedditSharp.Multi
     /// <summary>
     /// Contains the innner information of the Multi
     /// </summary>
-    public class mData
+    public class MData
     {
         /// <summary>
         /// Can the Multi be edited
@@ -72,7 +72,8 @@ namespace RedditSharp.Multi
         /// When the multi was created
         /// </summary>
         [JsonProperty("created")]
-        public double Created { get; set; }
+        [JsonConverter(typeof(UnixTimestampConverter))]
+        public DateTime? Created { get; set; }
 
         /// <summary>
         /// Where the multi was copied from if it was copied
@@ -96,7 +97,8 @@ namespace RedditSharp.Multi
         /// When the multi was created in UTC
         /// </summary>
         [JsonProperty("created_utc")]
-        public double CreatedUTC { get; set; }
+        [JsonConverter(typeof(UnixTimestampConverter))]
+        public DateTime? CreatedUTC { get; set; }
 
         /// <summary>
         /// Hex Code of the color for the multi
@@ -141,7 +143,7 @@ namespace RedditSharp.Multi
         /// <param name="json">Token to use with parameters for the different members</param>
         /// <param name="webAgent">Web Agent to use</param>
         /// <param name="subs">Whether or not subs exist</param>
-        protected internal mData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs)
+        protected internal MData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs)
         {
             Subreddits = new List<MultiSubs>();
             if (subs)

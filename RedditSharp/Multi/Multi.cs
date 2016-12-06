@@ -26,10 +26,10 @@ namespace RedditSharp.Multi
         #endregion
 
 
-        public Multi(Reddit Reddit2, IWebAgent WebAgent2)
+        public Multi(Reddit reddit, IWebAgent webAgent)
         {
-            Reddit = Reddit2;
-            WebAgent = WebAgent2;
+            Reddit = reddit;
+            WebAgent = webAgent;
         }
 
         /// <summary>
@@ -120,7 +120,9 @@ namespace RedditSharp.Multi
         public string RenameMulti(string displayName, string pathFrom, string pathTo)
         {
             if (Reddit.User == null)
+            {
                 throw new AuthenticationException("No user logged in.");
+            }
             var request = WebAgent.CreatePost(PostMultiRenameUrl);
             var stream = request.GetRequestStream();
             WebAgent.WritePostBody(stream, new
@@ -145,7 +147,9 @@ namespace RedditSharp.Multi
         public string PutSubMulti(string path, string subName)
         {
             if (Reddit.User == null)
+            { 
                 throw new AuthenticationException("No user logged in.");
+             }
             var request = WebAgent.CreateRequest(string.Format(PutSubMultiUrl,path,subName),"PUT");
             request.ContentType = "application/x-www-form-urlencoded";
             var stream = request.GetRequestStream();
@@ -174,7 +178,9 @@ namespace RedditSharp.Multi
         public string PutMultiDescription(string path, string description)
         {
             if (Reddit.User == null)
+            {
                 throw new AuthenticationException("No user logged in.");
+            }
             var request = WebAgent.CreateRequest(string.Format(GetMultiDescriptionPathUrl, path), "PUT");
             request.ContentType = "application/x-www-form-urlencoded";
             var stream = request.GetRequestStream();
@@ -202,7 +208,9 @@ namespace RedditSharp.Multi
         public string CopyMulti(string displayName, string pathFrom, string pathTo)
         {
             if (Reddit.User == null)
+            {
                 throw new AuthenticationException("No user logged in.");
+            }
             var request = WebAgent.CreatePost(CopyMultiUrl);
             var stream = request.GetRequestStream();
             WebAgent.WritePostBody(stream, new
@@ -229,7 +237,9 @@ namespace RedditSharp.Multi
         public string DeleteSub(string path, string subname)
         {
             if (Reddit.User == null)
+            {
                 throw new AuthenticationException("No user logged in.");
+            }
             var request = WebAgent.CreateRequest(string.Format(GetMultiSubUrl, path, subname),"DELETE");
             request.ContentType = "application/x-www-form-urlencoded";
             var stream = request.GetRequestStream();
@@ -253,7 +263,9 @@ namespace RedditSharp.Multi
         public string DeleteMulti(string path)
         {
             if (Reddit.User == null)
+            {
                 throw new AuthenticationException("No user logged in.");
+            }
             var request = WebAgent.CreateRequest(string.Format(GetMultiPathUrl, path), "DELETE");
             request.ContentType = "application/x-www-form-urlencoded";
             var stream = request.GetRequestStream();
@@ -283,7 +295,9 @@ namespace RedditSharp.Multi
         public string PostMulti(string description, string displayname, string iconname, string keycolor, string[] subreddits, string visibility, string weightingscheme, string path)
         {
             if(Reddit.User == null)
+            { 
                 throw new AuthenticationException("No user logged in");
+            }
             var request = WebAgent.CreatePost(string.Format(GetMultiPathUrl,path));
             var stream = request.GetRequestStream();
             JObject modelData = new JObject();
@@ -328,7 +342,9 @@ namespace RedditSharp.Multi
         public string PutMulti(string description, string displayname, string iconname, string keycolor, string[] subreddits, string visibility, string weightingscheme, string path)
         {
             if (Reddit.User == null)
+            {
                 throw new AuthenticationException("No user logged in");
+            }
             var request = WebAgent.CreateRequest(string.Format(GetMultiPathUrl, path),"PUT");
             request.ContentType = "application/x-www-form-urlencoded";
             var stream = request.GetRequestStream();

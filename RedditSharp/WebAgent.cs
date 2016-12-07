@@ -275,6 +275,20 @@ namespace RedditSharp
             return request;
         }
 
+        public virtual HttpWebRequest CreatePut(string url)
+        {
+            var request = CreateRequest(url, "PUT");
+            request.ContentType = "application/x-www-form-urlencoded";
+            return request;
+        }
+
+        public virtual HttpWebRequest CreateDelete(string url)
+        {
+            var request = CreateRequest(url, "DELETE");
+            request.ContentType = "application/x-www-form-urlencoded";
+            return request;
+        }
+
         public virtual string GetResponseString(Stream stream)
         {
             var data = new StreamReader(stream).ReadToEnd();

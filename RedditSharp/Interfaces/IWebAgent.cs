@@ -12,6 +12,8 @@ namespace RedditSharp
         HttpWebRequest CreateRequest(string url, string method);
         HttpWebRequest CreateGet(string url);
         HttpWebRequest CreatePost(string url);
+        HttpWebRequest CreatePut(string url);
+        HttpWebRequest CreateDelete(string url);
         string GetResponseString(Stream stream);
         void WritePostBody(Stream stream, object data, params string[] additionalFields);
         JToken CreateAndExecuteRequest(string url);

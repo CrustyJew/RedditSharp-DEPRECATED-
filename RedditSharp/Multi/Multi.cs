@@ -42,9 +42,9 @@ namespace RedditSharp.Multi
             var response = request.GetResponse();
             var json = JToken.Parse(WebAgent.GetResponseString(response.GetResponseStream()));
             List<MultiData> results = new List<MultiData>();
-            for (int i = 0; i < json.Count();i++)
+            foreach (var r in json)
             {
-                results.Add(new MultiData(Reddit,json[i],WebAgent));
+                results.Add(new MultiData(Reddit,r,WebAgent));
             }
             return results;
         }
@@ -60,9 +60,9 @@ namespace RedditSharp.Multi
             var response = request.GetResponse();
             var json = JToken.Parse(WebAgent.GetResponseString(response.GetResponseStream()));
             List<MultiData> results = new List<MultiData>();
-            for (int i = 0; i < json.Count();i++)
+            foreach (var r in json)
             {
-                results.Add(new MultiData(Reddit, json[i], WebAgent));
+                results.Add(new MultiData(Reddit, r, WebAgent));
             }
             return results;
         }
@@ -150,8 +150,7 @@ namespace RedditSharp.Multi
             { 
                 throw new AuthenticationException("No user logged in.");
              }
-            var request = WebAgent.CreateRequest(string.Format(PutSubMultiUrl,path,subName),"PUT");
-            request.ContentType = "application/x-www-form-urlencoded";
+            var request = WebAgent.CreatePut(string.Format(PutSubMultiUrl,path,subName));
             var stream = request.GetRequestStream();
             JObject modelData = new JObject();
             modelData.Add("name", subName);
@@ -181,8 +180,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiDescriptionPathUrl, path), "PUT");
-            request.ContentType = "application/x-www-form-urlencoded";
+            var request = WebAgent.CreatePut(string.Format(GetMultiDescriptionPathUrl, path));
             var stream = request.GetRequestStream();
             JObject modelData = new JObject();
             modelData.Add("body_md", description);
@@ -240,8 +238,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiSubUrl, path, subname),"DELETE");
-            request.ContentType = "application/x-www-form-urlencoded";
+            var request = WebAgent.CreateDelete(string.Format(GetMultiSubUrl, path, subname));
             var stream = request.GetRequestStream();
             WebAgent.WritePostBody(stream, new
                 {
@@ -266,8 +263,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiPathUrl, path), "DELETE");
-            request.ContentType = "application/x-www-form-urlencoded";
+            var request = WebAgent.CreateDelete(string.Format(GetMultiPathUrl, path));
             var stream = request.GetRequestStream();
             WebAgent.WritePostBody(stream, new
             {
@@ -292,7 +288,7 @@ namespace RedditSharp.Multi
         /// <param name="weightingscheme">Weighting Scheme for the Multi</param>
         /// <param name="path">Desired URL path for the Multi</param>
         /// <returns>A string containing the information for the newly created Multi or a status of (409) if the Multi already exists</returns>
-        public string PostMulti(string description, string displayname, string iconname, string keycolor, string[] subreddits, string visibility, string weightingscheme, string path)
+        public string PostMulti(MData m, string path)
         {
             if(Reddit.User == null)
             { 
@@ -301,20 +297,20 @@ namespace RedditSharp.Multi
             var request = WebAgent.CreatePost(string.Format(GetMultiPathUrl,path));
             var stream = request.GetRequestStream();
             JObject modelData = new JObject();
-            modelData.Add("description_md",description);
-            modelData.Add("display_name",displayname);
-            modelData.Add("icon_name",iconname);
-            modelData.Add("key_color",keycolor);
+            modelData.Add("description_md",m.DescriptionMD);
+            modelData.Add("display_name",m.DisplayName);
+            modelData.Add("icon_name",m.IconName);
+            modelData.Add("key_color",m.KeyColor);
             JArray subData = new JArray();
-            for(int i = 0; i < subreddits.Count();i++)
+            foreach(var s in m.Subreddits)
             {
                 JObject sub = new JObject();
-                sub.Add("name",subreddits[i]);
+                sub.Add("name",s.Name);
                 subData.Add(sub);
             }
             modelData.Add("subreddits",subData);
-            modelData.Add("visibility",visibility);
-            modelData.Add("weighting_scheme",weightingscheme);
+            modelData.Add("visibility",m.Visibility);
+            modelData.Add("weighting_scheme",m.WeightingScheme);
             WebAgent.WritePostBody(stream, new
                 {
                     model = modelData,
@@ -325,6 +321,7 @@ namespace RedditSharp.Multi
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             return data;
+            
         }
 
         /// <summary>
@@ -339,30 +336,29 @@ namespace RedditSharp.Multi
         /// <param name="weightingscheme">Weighting Scheme for the Multi</param>
         /// <param name="path">Desired URL path for the Multi</param>
         /// <returns>A string containing the information for the newly created or updated Multi or a status of (409) if the Multi already exists</returns>
-        public string PutMulti(string description, string displayname, string iconname, string keycolor, string[] subreddits, string visibility, string weightingscheme, string path)
+        public string PutMulti(MData m, string path)
         {
             if (Reddit.User == null)
             {
                 throw new AuthenticationException("No user logged in");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiPathUrl, path),"PUT");
-            request.ContentType = "application/x-www-form-urlencoded";
+            var request = WebAgent.CreatePut(string.Format(GetMultiPathUrl, path));
             var stream = request.GetRequestStream();
             JObject modelData = new JObject();
-            modelData.Add("description_md", description);
-            modelData.Add("display_name", displayname);
-            modelData.Add("icon_name", iconname);
-            modelData.Add("key_color", keycolor);
+            modelData.Add("description_md", m.DescriptionMD);
+            modelData.Add("display_name", m.DisplayName);
+            modelData.Add("icon_name", m.IconName);
+            modelData.Add("key_color", m.KeyColor);
             JArray subData = new JArray();
-            for (int i = 0; i < subreddits.Count(); i++)
+            foreach (var s in m.Subreddits)
             {
                 JObject sub = new JObject();
-                sub.Add("name", subreddits[i]);
+                sub.Add("name", s.Name);
                 subData.Add(sub);
             }
             modelData.Add("subreddits", subData);
-            modelData.Add("visibility", visibility);
-            modelData.Add("weighting_scheme", weightingscheme);
+            modelData.Add("visibility", m.Visibility);
+            modelData.Add("weighting_scheme", m.WeightingScheme);
             WebAgent.WritePostBody(stream, new
             {
                 model = modelData,

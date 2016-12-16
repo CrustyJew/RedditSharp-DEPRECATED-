@@ -433,10 +433,14 @@ namespace RedditSharp
                 int seconds = 180;
 
                 if (tries > 36)
+                {
                     if (ex != null)
                         throw ex;
+                }
                 else
-                    seconds = tries * 5;
+                {
+                    seconds = tries*5;
+                }
 
                 System.Threading.Thread.Sleep(seconds*1000);
             }

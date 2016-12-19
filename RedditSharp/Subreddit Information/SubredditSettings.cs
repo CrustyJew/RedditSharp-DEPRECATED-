@@ -1,8 +1,9 @@
-﻿using System.Web;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions;
 using RedditSharp.Things;
+using System.Threading.Tasks;
+using System.Net;
 
 namespace RedditSharp
 {
@@ -49,7 +50,7 @@ namespace RedditSharp
             AllowAsDefault = data["default_set"].ValueOrDefault<bool>();
             AllowImages = data["allow_images"].ValueOrDefault<bool>();
             Domain = data["domain"].ValueOrDefault<string>();
-            Sidebar = HttpUtility.HtmlDecode(data["description"].ValueOrDefault<string>() ?? string.Empty);
+            Sidebar = WebUtility.HtmlDecode(data["description"].ValueOrDefault<string>() ?? string.Empty);
             Language = data["language"].ValueOrDefault<string>();
             Title = data["title"].ValueOrDefault<string>();
             WikiEditKarma = data["wiki_edit_karma"].ValueOrDefault<int>();
@@ -57,7 +58,7 @@ namespace RedditSharp
             UseDomainSidebar = data["domain_sidebar"].ValueOrDefault<bool>();
             HeaderHoverText = data["header_hover_text"].ValueOrDefault<string>();
             NSFW = data["over_18"].ValueOrDefault<bool>();
-            PublicDescription = HttpUtility.HtmlDecode(data["public_description"].ValueOrDefault<string>() ?? string.Empty);
+            PublicDescription = WebUtility.HtmlDecode(data["public_description"].ValueOrDefault<string>() ?? string.Empty);
             SpamFilter = new SpamFilterSettings
             {
                 LinkPostStrength = GetSpamFilterStrength(data["spam_links"].ValueOrDefault<string>()),
@@ -135,10 +136,9 @@ namespace RedditSharp
         public SpamFilterSettings SpamFilter { get; set; }
         public bool AllowImages { get; set; }
 
-        public void UpdateSettings()
+        public async Task UpdateSettings()
         {
             var request = WebAgent.CreatePost(SiteAdminUrl);
-            var stream = request.GetRequestStream();
             string link_type;
             string type;
             string wikimode;
@@ -178,7 +178,7 @@ namespace RedditSharp
                     wikimode = "disabled";
                     break;
             }
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 allow_top = AllowAsDefault,
                 allow_images = AllowImages,
@@ -201,26 +201,23 @@ namespace RedditSharp
                 spam_comments = SpamFilter == null ? null : SpamFilter.CommentStrength.ToString().ToLowerInvariant(),
                 api_type = "json"
             }, "header-title", HeaderHoverText);
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
         /// Resets the subreddit's header image to the Reddit logo
         /// </summary>
-        public void ResetHeaderImage()
+        public async Task ResetHeaderImage()
         {
             var request = WebAgent.CreatePost(DeleteHeaderImageUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 uh = Reddit.User.Modhash,
                 r = Subreddit.Name
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
 
         private SpamFilterStrength GetSpamFilterStrength(string rawValue)

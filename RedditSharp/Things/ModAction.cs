@@ -39,7 +39,8 @@ namespace RedditSharp.Things
         {
             get
             {
-                return Reddit.GetUser(TargetAuthorName);
+                //TODO discuss
+                return Task.Run(async () => { return await Reddit.GetUserAsync(TargetAuthorName); }).Result;
             }
         }
 
@@ -48,7 +49,8 @@ namespace RedditSharp.Things
         {
             get
             {
-                return Reddit.GetThingByFullname(TargetThingFullname);
+                //TODO discuss
+                return Task.Run(async () => { return await Reddit.GetThingByFullnameAsync(TargetThingFullname); }).Result ;
             }
         }
 
@@ -61,7 +63,7 @@ namespace RedditSharp.Things
         public async Task<ModAction> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             CommonInit(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
         public ModAction Init(Reddit reddit, JToken post, IWebAgent webAgent)

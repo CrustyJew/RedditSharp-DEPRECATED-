@@ -1,24 +1,28 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Reflection;
 
 namespace RedditSharp
 {
     public class MultipartFormBuilder
     {
-        public HttpWebRequest Request { get; set; }
+        public HttpRequestMessage Request { get; set; }
 
         private string Boundary { get; set; }
         private MemoryStream Buffer { get; set; }
         private TextWriter TextBuffer { get; set; }
 
-        public MultipartFormBuilder(HttpWebRequest request)
+        private MultipartFormDataContent Content { get; set; }
+
+        public MultipartFormBuilder(HttpRequestMessage request)
         {
             // TODO: See about regenerating the boundary when needed
             Request = request;
             var random = new Random();
             Boundary = "----------" + CreateRandomBoundary();
-            request.ContentType = "multipart/form-data; boundary=" + Boundary;
+            Content = new MultipartFormDataContent(Boundary);
             Buffer = new MemoryStream();
             TextBuffer = new StreamWriter(Buffer);
         }
@@ -67,10 +71,9 @@ namespace RedditSharp
         {
             TextBuffer.Write("--" + Boundary + "--");
             TextBuffer.Flush();
-            var stream = Request.GetRequestStream();
             Buffer.Seek(0, SeekOrigin.Begin);
-            Buffer.WriteTo(stream);
-            stream.Close();
+            var stream = new StreamContent(Buffer);
+            Content.Add(stream);
         }
     }
 }

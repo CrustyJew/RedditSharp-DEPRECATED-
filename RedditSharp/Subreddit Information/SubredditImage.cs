@@ -44,34 +44,30 @@ namespace RedditSharp
         public Uri Url { get; set; }
         public SubredditStyle SubredditStyle { get; set; }
 
-        public void Delete()
+        public async Task Delete()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 img_name = Name,
                 uh = Reddit.User.Modhash,
                 r = SubredditStyle.Subreddit.Name
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             SubredditStyle.Images.Remove(this);
         }
         public async Task DeleteAsync()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);
-            var stream = await request.GetRequestStreamAsync();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 img_name = Name,
                 uh = Reddit.User.Modhash,
                 r = SubredditStyle.Subreddit.Name
             });
-            stream.Close();
-            var response = await request.GetResponseAsync();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             SubredditStyle.Images.Remove(this);
         }
     }

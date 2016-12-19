@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using RedditSharp.Extensions;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {
     public static class ToolBoxUserNotes
     {
         private const string ToolBoxUserNotesWiki = "/r/{0}/wiki/usernotes";
-        public static IEnumerable<TBUserNote> GetUserNotes(IWebAgent webAgent, string subName)
+        public static async Task<IEnumerable<TBUserNote>> GetUserNotesAsync(IWebAgent webAgent, string subName)
         {
             var request = webAgent.CreateGet(string.Format(ToolBoxUserNotesWiki, subName));
-            var reqResponse = webAgent.ExecuteRequest(request);
+            var reqResponse = await webAgent.ExecuteRequestAsync(request);
+
             var response = JObject.Parse(reqResponse["data"]["content_md"].Value<string>());
 
             int version = response["ver"].Value<int>();

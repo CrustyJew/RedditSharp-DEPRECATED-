@@ -104,24 +104,13 @@ namespace RedditSharp
             DefaultWebAgent.RateLimit = limitMode;
             DefaultWebAgent.RootDomain = "www.reddit.com";
         }
-        /// <summary>
-        /// DEPRECATED: Avoid use as Reddit will be removing this option eventually
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <param name="useSsl"></param>
-        public Reddit(string username, string password, bool useSsl = true)
-            : this(useSsl)
-        {
-            LogIn(username, password, useSsl);
-        }
 
         public Reddit(string accessToken)
             : this(true)
         {
             DefaultWebAgent.RootDomain = OAuthDomainUrl;
             WebAgent.AccessToken = accessToken;
-            InitOrUpdateUser();
+            Task.Run(InitOrUpdateUserAsync);
         }
         /// <summary>
         /// Creates a Reddit instance with the given WebAgent implementation
@@ -151,63 +140,14 @@ namespace RedditSharp
                 DefaultValueHandling = DefaultValueHandling.Ignore
             };
             CaptchaSolver = new ConsoleCaptchaSolver();
-            if(initUser) InitOrUpdateUser();
+            if(initUser) Task.Run(InitOrUpdateUserAsync);
         }
 
-        /// <summary>
-        /// Logs in the current Reddit instance. DEPRECATED
-        /// </summary>
-        /// <param name="username">The username of the user to log on to.</param>
-        /// <param name="password">The password of the user to log on to.</param>
-        /// <param name="useSsl">Whether to use SSL or not. (default: true)</param>
-        /// <returns></returns>
-        public AuthenticatedUser LogIn(string username, string password, bool useSsl = true)
-        {
-            if (Type.GetType("Mono.Runtime") != null)
-                ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
-            WebAgent.Cookies = new CookieContainer();
-            HttpWebRequest request;
-            if (useSsl)
-                request = WebAgent.CreatePost(SslLoginUrl);
-            else
-                request = WebAgent.CreatePost(LoginUrl);
-            var stream = request.GetRequestStream();
-            if (useSsl)
-            {
-                WebAgent.WritePostBody(stream, new
-                {
-                    user = username,
-                    passwd = password,
-                    api_type = "json"
-                });
-            }
-            else
-            {
-                WebAgent.WritePostBody(stream, new
-                {
-                    user = username,
-                    passwd = password,
-                    api_type = "json",
-                    op = "login"
-                });
-            }
-            stream.Close();
-            var response = (HttpWebResponse)request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
-            var json = JObject.Parse(result)["json"];
-            if (json["errors"].Count() != 0)
-                throw new AuthenticationException("Incorrect login.");
-
-            InitOrUpdateUser();
-
-            return User;
-        }
-
-        public RedditUser GetUser(string name)
+        public async Task<RedditUser> GetUserAsync(string name)
         {
             var request = WebAgent.CreateGet(string.Format(UserInfoUrl, name));
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
             return new RedditUser().Init(this, json, WebAgent);
         }
@@ -217,29 +157,13 @@ namespace RedditSharp
         /// otherwise replaces the existing user object
         /// with a new one fetched from reddit servers.
         /// </summary>
-        public void InitOrUpdateUser()
+        public async Task InitOrUpdateUserAsync()
         {
             var request = WebAgent.CreateGet(string.IsNullOrEmpty(WebAgent.AccessToken) ? MeUrl : OAuthMeUrl);
-            var response = (HttpWebResponse)request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
             User = new AuthenticatedUser().Init(this, json, WebAgent);
-        }
-
-        #region Obsolete Getter Methods
-
-        [Obsolete("Use User property instead")]
-        public AuthenticatedUser GetMe()
-        {
-            return User;
-        }
-
-        #endregion Obsolete Getter Methods
-
-        public Subreddit GetSubreddit(string name)
-        {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
-            return GetThing<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
         /// <summary>
@@ -261,7 +185,7 @@ namespace RedditSharp
             return new Domain(this, uri, WebAgent);
         }
 
-        public JToken GetToken(Uri uri)
+        public async Task<JToken> GetTokenAsync(Uri uri)
         {
             var url = uri.AbsoluteUri;
 
@@ -269,20 +193,16 @@ namespace RedditSharp
                 url = url.Remove(url.Length - 1);
 
             var request = WebAgent.CreateGet(string.Format(GetPostUrl, url));
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
 
             return json[0]["data"]["children"].First;
         }
 
-        public Post GetPost(Uri uri)
-        {
-            return new Post().Init(this, GetToken(uri), WebAgent);
-        }
         public async Task<Post> GetPostAsync(Uri uri)
         {
-            return await new Post().InitAsync(this, GetToken(uri), WebAgent);
+            return await new Post().InitAsync(this, await GetTokenAsync(uri), WebAgent);
         }
         /// <summary>
         /// 
@@ -295,15 +215,15 @@ namespace RedditSharp
         /// <param name="captchaAnswer"></param>
         /// <remarks>If <paramref name="fromSubReddit"/> is passed in then the message is sent from the subreddit. the sender must be a mod of the specified subreddit.</remarks>
         /// <exception cref="AuthenticationException">Thrown when a subreddit is passed in and the user is not a mod of that sub.</exception>
-        public void ComposePrivateMessage(string subject, string body, string to, string fromSubReddit = "", string captchaId = "", string captchaAnswer = "")
+        public async Task ComposePrivateMessageAsync(string subject, string body, string to, string fromSubReddit = "", string captchaId = "", string captchaAnswer = "")
         {
             if (User == null)
                 throw new Exception("User can not be null.");
 
             if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
-                var subReddit = this.GetSubreddit(fromSubReddit);
-                var modNameList = subReddit.Moderators.Select(b => b.Name).ToList();
+                var subReddit =await GetSubredditAsync(fromSubReddit);
+                var modNameList = (await subReddit.GetModeratorsAsync()).Select(b => b.Name).ToList();
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(
@@ -314,7 +234,7 @@ namespace RedditSharp
             }
 
             var request = WebAgent.CreatePost(ComposeMessageUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 subject,
@@ -325,8 +245,8 @@ namespace RedditSharp
                 iden = captchaId,
                 captcha = captchaAnswer
             });
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
 
             ICaptchaSolver solver = CaptchaSolver; // Prevent race condition
@@ -337,7 +257,7 @@ namespace RedditSharp
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(captchaId));
 
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel
-                    ComposePrivateMessage(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer);
+                    await ComposePrivateMessageAsync(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer);
             }
         }
 
@@ -348,10 +268,10 @@ namespace RedditSharp
         /// <param name="passwd">The password for the new account.</param>
         /// <param name="email">The optional recovery email for the new account.</param>
         /// <returns>The newly created user account</returns>
-        public AuthenticatedUser RegisterAccount(string userName, string passwd, string email = "")
+        public async Task<AuthenticatedUser> RegisterAccountAsync(string userName, string passwd, string email = "")
         {
             var request = WebAgent.CreatePost(RegisterAccountUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 email = email,
@@ -359,46 +279,41 @@ namespace RedditSharp
                 passwd2 = passwd,
                 user = userName
             });
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
             return new AuthenticatedUser().Init(this, json, WebAgent);
             // TODO: Error
         }
 
-        public Thing GetThingByFullname(string fullname)
+        public async Task<Thing> GetThingByFullnameAsync(string fullname)
         {
             var request = WebAgent.CreateGet(string.Format(GetThingUrl, fullname));
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            var json = JToken.Parse(data);
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
+            var json = JToken.Parse(result);
             return Thing.Parse(this, json["data"]["children"][0], WebAgent);
         }
 
-        public Comment GetComment(string subreddit, string name, string linkName)
+        public Task<Comment> GetCommentAsync(string subreddit, string name, string linkName)
         {
-            try
-            {
+            
                 if (linkName.StartsWith("t3_"))
                     linkName = linkName.Substring(3);
                 if (name.StartsWith("t1_"))
                     name = name.Substring(3);
 
                 var url = string.Format(GetCommentUrl, subreddit, linkName, name);
-                return GetComment(new Uri(url));
-            }
-            catch (WebException)
-            {
-                return null;
-            }
+                return GetCommentAsync(new Uri(url));
+            
         }
 
-        public Comment GetComment(Uri uri)
+        public async Task<Comment> GetCommentAsync(Uri uri)
         {
             var url = string.Format(GetPostUrl, uri.AbsoluteUri);
             var request = WebAgent.CreateGet(url);
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
 
             var sender = new Post().Init(this, json[0]["data"]["children"][0], WebAgent);
@@ -485,19 +400,10 @@ namespace RedditSharp
         protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
             var request = WebAgent.CreateGet(url);
-            var response = await request.GetResponseAsync();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
             var ret = await Thing.ParseAsync(this, json, WebAgent);
-            return (T)ret;
-        }
-        protected internal T GetThing<T>(string url) where T : Thing
-        {
-            var request = WebAgent.CreateGet(url);
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            var json = JToken.Parse(data);
-            var ret = Thing.Parse(this, json, WebAgent);
             return (T)ret;
         }
         #endregion

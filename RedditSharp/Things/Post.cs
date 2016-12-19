@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions;
+using System.Net;
+using System.Reactive.Linq;
 
 namespace RedditSharp.Things
 {
@@ -43,7 +44,7 @@ namespace RedditSharp.Things
         public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             await CommonInitAsync(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
         public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
@@ -73,15 +74,15 @@ namespace RedditSharp.Things
         {
             get
             {
-                return Reddit.GetUser(AuthorName);
+                return Task.Run(async ()=> { return await Reddit.GetUserAsync(AuthorName); }).Result;
             }
         }
-
-        public Comment[] Comments
+        //TODO Discuss
+        public IObservable<Comment> Comments
         {
             get
             {
-                return ListComments().ToArray();
+                return GetComments();
             }
         }
 
@@ -149,7 +150,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return Reddit.GetSubreddit("/r/" + SubredditName);
+                return Task.Run(async () => { return await Reddit.GetSubredditAsync("/r/" + SubredditName); }).Result;
             }
         }
 
@@ -160,51 +161,48 @@ namespace RedditSharp.Things
         [JsonProperty("num_reports")]
         public int? Reports { get; set; }
 
-        public Comment Comment(string message)
+        public async Task<Comment> CommentAsync(string message)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreatePost(CommentUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 text = message,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(data);
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
             return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
         }
 
-        private string SimpleAction(string endpoint)
+        private async Task<string> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreatePost(endpoint);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+           
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             return data;
         }
 
-        private string SimpleActionToggle(string endpoint, bool value, bool requiresModAction = false)
+        private async Task<string> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var modNameList = this.Subreddit.Moderators.Select(b => b.Name).ToList();
+            var modNameList = (await this.Subreddit.GetModeratorsAsync()).Select(b => b.Name).ToList();
 
             if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
                 throw new AuthenticationException(
@@ -214,109 +212,95 @@ namespace RedditSharp.Things
                         this.Subreddit.Name));
 
             var request = WebAgent.CreatePost(endpoint);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 state = value,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             return data;
         }
 
-        public void Approve()
+        public Task Approve()
         {
-            var data = SimpleAction(ApproveUrl);
+            return SimpleActionAsync(ApproveUrl);
         }
 
-        public void Remove()
+        public Task Remove()
         {
-            RemoveImpl(false);
+            return RemoveImplAsync(false);
         }
 
-        public void RemoveSpam()
+        public Task RemoveSpamAsync()
         {
-            RemoveImpl(true);
+            return RemoveImplAsync(true);
         }
 
-        private void RemoveImpl(bool spam)
+        private async Task RemoveImplAsync(bool spam)
         {
             var request = WebAgent.CreatePost(RemoveUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 spam = spam,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
 
-        public void Del()
+        public Task DelAsync()
         {
-            var data = SimpleAction(DelUrl);
+            return SimpleActionAsync(DelUrl);
         }
 
-        public void Hide()
+        public Task HideAsync()
         {
-            var data = SimpleAction(HideUrl);
+            return SimpleActionAsync(HideUrl);
         }
 
-        public void Unhide()
+        public Task UnhideAsync()
         {
-            var data = SimpleAction(UnhideUrl);
+            return SimpleActionAsync(UnhideUrl);
         }
 
-        public void IgnoreReports()
+        public Task IgnoreReportsAsync()
         {
-            var data = SimpleAction(IgnoreReportsUrl);
+            return SimpleActionAsync(IgnoreReportsUrl);
         }
 
-        public void UnIgnoreReports()
+        public Task UnIgnoreReportsAsync()
         {
-            var data = SimpleAction(UnIgnoreReportsUrl);
+            return SimpleActionAsync(UnIgnoreReportsUrl);
         }
 
-        public void MarkNSFW()
+        public Task MarkNSFWAsync()
         {
-            var data = SimpleAction(MarkNSFWUrl);
+            return SimpleActionAsync(MarkNSFWUrl);
         }
 
-        public void UnmarkNSFW()
+        public Task UnmarkNSFWAsync()
         {
-            var data = SimpleAction(UnmarkNSFWUrl);
+            return SimpleActionAsync(UnmarkNSFWUrl);
         }
 
-        public void ContestMode(bool state)
+        public Task ContestModeAsync(bool state)
         {
-            var data = SimpleActionToggle(ContestModeUrl, state);
+            return SimpleActionToggleAsync(ContestModeUrl, state);
         }
 
-        public void StickyMode(bool state)
+        public Task StickyModeAsync(bool state)
         {
-            var data = SimpleActionToggle(StickyModeUrl, state, true);
+            return SimpleActionToggleAsync(StickyModeUrl, state, true);
         }
-
-        #region Obsolete Getter Methods
-
-        [Obsolete("Use Comments property instead")]
-        public Comment[] GetComments()
-        {
-            return Comments;
-        }
-
-        #endregion Obsolete Getter Methods
 
         /// <summary>
         /// Replaces the text in this post with the input text.
         /// </summary>
         /// <param name="newText">The text to replace the post's contents</param>
-        public void EditText(string newText)
+        public async Task EditTextAsync(string newText)
         {
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
@@ -324,24 +308,24 @@ namespace RedditSharp.Things
                 throw new Exception("Submission to edit is not a self-post.");
 
             var request = WebAgent.CreatePost(EditUserTextUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 text = newText,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             JToken json = JToken.Parse(result);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
             else
                 throw new Exception("Error editing text.");
         }
-        public void Update()
+        public async Task UpdateAsync()
         {
-            JToken post = Reddit.GetToken(this.Url);
+            JToken post = await Reddit.GetTokenAsync(this.Url);
             JsonConvert.PopulateObject(post["data"].ToString(), this, Reddit.JsonSerializerSettings);
         }
         /// <summary>
@@ -349,13 +333,13 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="flairText">Text to set your flair</param>
         /// <param name="flairClass">class of the flair</param>
-        public void SetFlair(string flairText, string flairClass)
+        public async Task SetFlairAsync(string flairText, string flairClass)
         {
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
 
             var request = WebAgent.CreatePost(string.Format(SetFlairUrl, SubredditName));
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 css_class = flairClass,
@@ -364,26 +348,26 @@ namespace RedditSharp.Things
                 text = flairText,
                 uh = Reddit.User.Modhash
             });
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(result);
             LinkFlairText = flairText;
         }
 
-        public List<Comment> ListComments(int? limit = null)
+        public async Task<List<Comment>> ListCommentsAsync(int? limit = null)
         {
             var url = string.Format(GetCommentsUrl, Id);
+            var request = WebAgent.CreateGet(url);
 
             if (limit.HasValue)
             {
-                var query = HttpUtility.ParseQueryString(string.Empty);
-                query.Add("limit", limit.Value.ToString());
+                var query = WebUtility.UrlEncode("limit="+limit.Value.ToString());
                 url = string.Format("{0}?{1}", url, query);
             }
 
-            var request = WebAgent.CreateGet(url);
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JArray.Parse(data);
             var postJson = json.Last()["data"]["children"];
 
@@ -403,51 +387,63 @@ namespace RedditSharp.Things
             return comments;
         }
 
-        public IEnumerable<Comment> EnumerateComments()
+        //TODO discuss this
+        public IEnumerable<Comment> EnumerateCommentsAsync() {
+            return GetComments().ToEnumerable();
+        }
+
+        public IObservable<Comment> GetComments()
         {
-            var url = string.Format(GetCommentsUrl, Id);
-            var request = WebAgent.CreateGet(url);
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            var json = JArray.Parse(data);
-            var postJson = json.Last()["data"]["children"];
-            More moreComments = null;
-            foreach (var comment in postJson)
+            return Observable.Create<Comment>(async obs =>
             {
-                Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
-                if (newComment.Kind == "more")
-                {
-                    moreComments = new More().Init(Reddit, comment, WebAgent);
-                }
-                else
-                {
-                    yield return newComment;
-                }
-            }
 
 
-            if (moreComments != null)
-            {
-                IEnumerator<Thing> things = moreComments.Things().GetEnumerator();
-                things.MoveNext();
-                Thing currentThing = null;
-                while (currentThing != things.Current)
+                var url = string.Format(GetCommentsUrl, Id);
+                var request = WebAgent.CreateGet(url);
+                var response = await WebAgent.GetResponseAsync(request);
+                var data = await response.Content.ReadAsStringAsync();
+                var json = JArray.Parse(data);
+                var postJson = json.Last()["data"]["children"];
+                More moreComments = null;
+                foreach (var comment in postJson)
                 {
-                    currentThing = things.Current;
-                    if (things.Current is Comment)
+                    Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
+                    if (newComment.Kind == "more")
                     {
-                        Comment next = ((Comment)things.Current).PopulateComments(things);
-                        yield return next;
+                        moreComments = new More().Init(Reddit, comment, WebAgent);
                     }
-                    if (things.Current is More)
+                    else
                     {
-                        More more = (More)things.Current;
-                        if (more.ParentId != FullName) break;
-                        things = more.Things().GetEnumerator();
-                        things.MoveNext();
+                        obs.OnNext(newComment);
                     }
                 }
-            }
+
+
+                if (moreComments != null)
+                {
+                    IEnumerator<Thing> things = (await moreComments.GetThingsAsync()).GetEnumerator();
+                    things.MoveNext();
+                    Thing currentThing = null;
+                    while (currentThing != things.Current)
+                    {
+                        currentThing = things.Current;
+                        if (things.Current is Comment)
+                        {
+                            Comment next = ((Comment)things.Current).PopulateComments(things);
+                            obs.OnNext(next);
+                        }
+                        if (things.Current is More)
+                        {
+                            More more = (More)things.Current;
+                            if (more.ParentId != FullName) break;
+                            things = (await more.GetThingsAsync()).GetEnumerator();
+                            things.MoveNext();
+                        }
+                    }
+                }
+
+                obs.OnCompleted();
+            });
         }
     }
 }

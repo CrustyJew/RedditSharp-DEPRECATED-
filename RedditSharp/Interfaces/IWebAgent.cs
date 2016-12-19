@@ -2,23 +2,19 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace RedditSharp
 {
     public interface IWebAgent
     {
-        CookieContainer Cookies { get; set; }
-        string AuthCookie { get; set; }
         string AccessToken { get; set; }
-        HttpWebRequest CreateRequest(string url, string method);
-        HttpWebRequest CreateGet(string url);
-        HttpWebRequest CreatePost(string url);
-        string GetResponseString(Stream stream);
-        void WritePostBody(Stream stream, object data, params string[] additionalFields);
-        JToken CreateAndExecuteRequest(string url);
-        JToken ExecuteRequest(HttpWebRequest request);
-        Task<JToken> ExecuteRequestAsync(HttpWebRequest request);
+        HttpRequestMessage CreateRequest(string url, string method);
+        HttpRequestMessage CreateGet(string url);
+        HttpRequestMessage CreatePost(string url);
+        Task<JToken> ExecuteRequestAsync(HttpRequestMessage request);
         Task<JToken> CreateAndExecuteRequestAsync(string url);
-        Task WritePostBodyAsync(Stream stream, object data, params string[] additionalFields);
+        Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request);
+        void WritePostBody(HttpRequestMessage request, object data, params string[] additionalFields);
     }
 }

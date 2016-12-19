@@ -27,7 +27,7 @@ namespace RedditSharp.Things
         public async Task<BannedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(json);
-            await JsonConvert.PopulateObjectAsync(json.ToString(), this, reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
 

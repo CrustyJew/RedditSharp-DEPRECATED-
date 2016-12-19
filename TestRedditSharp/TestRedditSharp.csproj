@@ -54,8 +54,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RedditSharp\RedditSharp.csproj">
-      <Project>{A368CB75-75F0-4489-904D-B5CEBB0FE624}</Project>
+    <ProjectReference Include="..\RedditSharp\RedditSharp.xproj">
+      <Project>{eea13827-0899-47d3-b74c-f7937cf9b992}</Project>
       <Name>RedditSharp</Name>
     </ProjectReference>
   </ItemGroup>

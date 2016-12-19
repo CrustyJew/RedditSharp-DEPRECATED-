@@ -3,6 +3,7 @@ using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
 using RedditSharp.Extensions;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {
@@ -178,18 +179,18 @@ namespace RedditSharp
                 }
             }
 
-            private void FetchNextPage()
+            private Task FetchNextPageAsync()
             {
                 if (stream)
-                    PageForward();
+                    return PageForwardAsync();
                 else
-                    PageBack();
+                    return PageBackAsync();
             }
 
             /// <summary>
             /// Standard behavior.  Page from newest to oldest - "backward" in time.
             /// </summary>
-            private void PageBack()
+            private async Task PageBackAsync()
             {
                 var url = Listing.Url;
 
@@ -230,8 +231,8 @@ namespace RedditSharp
                 }
 
                 var request = Listing.WebAgent.CreateGet(url);
-                var response = request.GetResponse();
-                var data = Listing.WebAgent.GetResponseString(response.GetResponseStream());
+                var response = await Listing.WebAgent.GetResponseAsync(request);
+                var data = await response.Content.ReadAsStringAsync();
                 var json = JToken.Parse(data);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listing.");
@@ -242,7 +243,7 @@ namespace RedditSharp
             /// <summary>
             /// Page from oldest to newest - "forward" in time.
             /// </summary>
-            private void PageForward()
+            private async Task PageForwardAsync()
             {
                 var url = Listing.Url;
 
@@ -281,8 +282,8 @@ namespace RedditSharp
                 }
 
                 var request = Listing.WebAgent.CreateGet(url);
-                var response = request.GetResponse();
-                var data = Listing.WebAgent.GetResponseString(response.GetResponseStream());
+                var response = await Listing.WebAgent.GetResponseAsync(request);
+                var data = await response.Content.ReadAsStringAsync();
                 var json = JToken.Parse(data);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
@@ -335,12 +336,17 @@ namespace RedditSharp
             public bool MoveNext()
             {
                 if (stream)
-                    return MoveNextForward();
-                else
-                    return MoveNextBack();
+                {
+                    var result = Task.Run(MoveNextForwardAsync).Result;
+                    return result;
+                }
+                else {
+                    var result = Task.Run(MoveNextBackAsync).Result;
+                    return result;
+                }
             }
 
-            private bool MoveNextBack()
+            private async Task<bool> MoveNextBackAsync()
             {
                 CurrentPageIndex++;
                 if (CurrentPageIndex == CurrentPage.Length)
@@ -358,7 +364,7 @@ namespace RedditSharp
                     }
 
                     // Get the next page
-                    FetchNextPage();
+                    await FetchNextPageAsync();
                     CurrentPageIndex = 0;
 
                     if (CurrentPage.Length == 0)
@@ -370,7 +376,7 @@ namespace RedditSharp
                 return true;
             }
 
-            private bool MoveNextForward()
+            private async Task<bool> MoveNextForwardAsync()
             {
                 CurrentPageIndex++;
                 if (CurrentPageIndex == CurrentPage.Length)
@@ -385,7 +391,7 @@ namespace RedditSharp
                         // Get the next page
                         try
                         {
-                            FetchNextPage();
+                            await FetchNextPageAsync();
                         }
                         catch (Exception ex)
                         {

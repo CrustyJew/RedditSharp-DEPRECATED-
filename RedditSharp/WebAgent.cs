@@ -8,12 +8,15 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
+using System.Net.Http;
+using System.Collections.Generic;
 
 namespace RedditSharp
 {
     public class WebAgent : IWebAgent
     {
+        private static HttpClient _httpClient;
+        private object rateLimitLock = new object();
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
         /// </summary>
@@ -67,9 +70,6 @@ namespace RedditSharp
         /// </summary>
         public string AccessToken { get; set; }
 
-        public CookieContainer Cookies { get; set; }
-        public string AuthCookie { get; set; }
-
         private static DateTime _lastRequest;
         private static DateTime _burstStart;
         private static int _requestsThisBurst;
@@ -97,34 +97,14 @@ namespace RedditSharp
 
         static WebAgent()
         {
+            //Static constructors are dumb, no likey -Meepster23
             UserAgent = "";
             RateLimit = RateLimitMode.Pace;
             Protocol = "https";
             RootDomain = "www.reddit.com";
+            _httpClient = new HttpClient();
         }
 
-        public virtual JToken CreateAndExecuteRequest(string url)
-        {
-            Uri uri;
-            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-            {
-                if (!Uri.TryCreate(string.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
-                    throw new Exception("Could not parse Uri");
-            }
-            var request = CreateGet(uri);
-            try { return ExecuteRequest(request); }
-            catch (Exception)
-            {
-                var tempProtocol = Protocol;
-                var tempRootDomain = RootDomain;
-                Protocol = "http";
-                RootDomain = "www.reddit.com";
-                var retval = CreateAndExecuteRequest(url);
-                Protocol = tempProtocol;
-                RootDomain = tempRootDomain;
-                return retval;
-            }
-        }
         public virtual async Task<JToken> CreateAndExecuteRequestAsync(string url)
         {
             Uri uri;
@@ -135,6 +115,7 @@ namespace RedditSharp
             }
             var request = CreateGet(uri);
             try { return await ExecuteRequestAsync(request); }
+            //What the hell is going on here?! Why is this a thing? -Meepster23
             catch (Exception)
             {
                 var tempProtocol = Protocol;
@@ -147,16 +128,17 @@ namespace RedditSharp
                 return retval;
             }
         }
+        
         /// <summary>
         /// Executes the web request and handles errors in the response
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public virtual JToken ExecuteRequest(HttpWebRequest request)
+        public virtual async Task<JToken> ExecuteRequestAsync(HttpRequestMessage request)
         {
             EnforceRateLimit();
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            var result = GetResponseString(response.GetResponseStream());
+            var response = await _httpClient.SendAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
 
             JToken json;
             if (!string.IsNullOrEmpty(result))
@@ -190,106 +172,61 @@ namespace RedditSharp
             }
             else
             {
-                json = JToken.Parse("{'method':'" + response.Method + "','uri':'" + response.ResponseUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
+                json = JToken.Parse("{'method':'" + response.RequestMessage.Method + "','uri':'" + response.RequestMessage.RequestUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
             }
             return json;
 
         }
-        /// <summary>
-        /// Executes the web request and handles errors in the response
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public virtual async Task<JToken> ExecuteRequestAsync(HttpWebRequest request)
-        {
-            EnforceRateLimit();
-            HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
-            var result = GetResponseString(response.GetResponseStream());
 
-            JToken json;
-            if (!string.IsNullOrEmpty(result))
-            {
-                json = JToken.Parse(result);
-                try
-                {
-                    if (json["json"] != null)
-                    {
-                        json = json["json"]; //get json object if there is a root node
-                    }
-                    if (json["error"] != null)
-                    {
-                        switch (json["error"].ToString())
-                        {
-                            case "404":
-                                throw new Exception("File Not Found");
-                            case "403":
-                                throw new Exception("Restricted");
-                            case "invalid_grant":
-                                //Refresh authtoken
-                                //AccessToken = authProvider.GetRefreshToken();
-                                //ExecuteRequest(request);
-                                break;
-                        }
-                    }
-                }
-                catch
-                {
-                }
-            }
-            else
-            {
-                json = JToken.Parse("{'method':'" + response.Method + "','uri':'" + response.ResponseUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
-            }
-            return json;
-
-        }
-        [MethodImpl(MethodImplOptions.Synchronized)]
         protected virtual void EnforceRateLimit()
         {
-            var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
-            switch (RateLimit)
+            lock (rateLimitLock)
             {
-                case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
-                        Thread.Sleep(250);
-                    _lastRequest = DateTime.UtcNow;
-                    break;
-                case RateLimitMode.SmallBurst:
-                    if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
-                    {
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
-                    {
-                        while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
+                var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
+                switch (RateLimit)
+                {
+                    case RateLimitMode.Pace:
+                        while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
                             Thread.Sleep(250);
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    _lastRequest = DateTime.UtcNow;
-                    _requestsThisBurst++;
-                    break;
-                case RateLimitMode.Burst:
-                    if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
-                    {
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
-                    {
-                        while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
-                            Thread.Sleep(250);
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    _lastRequest = DateTime.UtcNow;
-                    _requestsThisBurst++;
-                    break;
+                        _lastRequest = DateTime.UtcNow;
+                        break;
+                    case RateLimitMode.SmallBurst:
+                        if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
+                        {
+                            _burstStart = DateTime.UtcNow;
+                            _requestsThisBurst = 0;
+                        }
+                        if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
+                        {
+                            while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
+                                Thread.Sleep(250);
+                            _burstStart = DateTime.UtcNow;
+                            _requestsThisBurst = 0;
+                        }
+                        _lastRequest = DateTime.UtcNow;
+                        _requestsThisBurst++;
+                        break;
+                    case RateLimitMode.Burst:
+                        if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
+                        {
+                            _burstStart = DateTime.UtcNow;
+                            _requestsThisBurst = 0;
+                        }
+                        if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
+                        {
+                            while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
+                                Thread.Sleep(250);
+                            _burstStart = DateTime.UtcNow;
+                            _requestsThisBurst = 0;
+                        }
+                        _lastRequest = DateTime.UtcNow;
+                        _requestsThisBurst++;
+                        break;
+                }
             }
         }
 
-        public virtual HttpWebRequest CreateRequest(string url, string method)
+        public virtual HttpRequestMessage CreateRequest(string url, string method)
         {
             EnforceRateLimit();
             bool prependDomain;
@@ -299,112 +236,80 @@ namespace RedditSharp
             else
                 prependDomain = !Uri.IsWellFormedUriString(url, UriKind.Absolute);
 
-            HttpWebRequest request;
+            HttpRequestMessage request = new HttpRequestMessage();
             if (prependDomain)
-                request = (HttpWebRequest)WebRequest.Create(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
-            else
-                request = (HttpWebRequest)WebRequest.Create(url);
-            request.CookieContainer = Cookies;
-            if (Type.GetType("Mono.Runtime") != null)
             {
-                var cookieHeader = Cookies.GetCookieHeader(new Uri("http://reddit.com"));
-                request.Headers.Set("Cookie", cookieHeader);
+                request.RequestUri = new Uri(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
             }
+            else
+            {
+                request.RequestUri = new Uri(url);
+            }
+
             if (IsOAuth())// use OAuth
             {
-                request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer ", AccessToken);//Must be included in OAuth calls
             }
-            request.Method = method;
-            request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
+            request.Method = new HttpMethod(method);
+            request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by meepster23");
             return request;
         }
-        protected virtual HttpWebRequest CreateRequest(Uri uri, string method)
+        protected virtual HttpRequestMessage CreateRequest(Uri uri, string method)
         {
             EnforceRateLimit();
-            var request = (HttpWebRequest)WebRequest.Create(uri);
-            request.CookieContainer = Cookies;
-            if (Type.GetType("Mono.Runtime") != null)
-            {
-                var cookieHeader = Cookies.GetCookieHeader(new Uri("http://reddit.com"));
-                request.Headers.Set("Cookie", cookieHeader);
-            }
+            var request = new HttpRequestMessage();
+            request.RequestUri = uri;
             if (IsOAuth())// use OAuth
             {
-                request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer " + AccessToken);//Must be included in OAuth calls
             }
-            request.Method = method;
-            request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
+            request.Method = new HttpMethod(method);
+            request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by /u/meepster23");
             return request;
         }
 
-        public virtual HttpWebRequest CreateGet(string url)
+        public virtual HttpRequestMessage CreateGet(string url)
         {
             return CreateRequest(url, "GET");
         }
 
-        private HttpWebRequest CreateGet(Uri url)
+        private HttpRequestMessage CreateGet(Uri url)
         {
             return CreateRequest(url, "GET");
         }
 
-        public virtual HttpWebRequest CreatePost(string url)
+        public virtual HttpRequestMessage CreatePost(string url)
         {
             var request = CreateRequest(url, "POST");
-            request.ContentType = "application/x-www-form-urlencoded";
             return request;
         }
 
-        public virtual string GetResponseString(Stream stream)
+        public virtual void WritePostBody(HttpRequestMessage request, object data, params string[] additionalFields)
         {
-            var data = new StreamReader(stream).ReadToEnd();
-            stream.Close();
-            return data;
+            var type = data.GetType();
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            var content = new List<KeyValuePair<string, string>>();
+            foreach (var property in properties)
+            {
+                var attr = property.GetCustomAttributes(typeof(RedditAPINameAttribute), false).FirstOrDefault() as RedditAPINameAttribute;
+                string name = attr == null ? property.Name : attr.Name;
+                var entry = Convert.ToString(property.GetValue(data, null));
+                content.Add(new KeyValuePair<string,string>(name, entry));
+            }
+            for (int i = 0; i < additionalFields.Length; i += 2)
+            {
+                var entry = Convert.ToString(additionalFields[i + 1]) ?? string.Empty;
+                content.Add(new KeyValuePair<string, string>(additionalFields[i], entry));
+            }
+
+            request.Content = new FormUrlEncodedContent(content);
         }
 
-        public virtual void WritePostBody(Stream stream, object data, params string[] additionalFields)
+        public virtual Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
         {
-            var type = data.GetType();
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            string value = "";
-            foreach (var property in properties)
-            {
-                var attr = property.GetCustomAttributes(typeof(RedditAPINameAttribute), false).FirstOrDefault() as RedditAPINameAttribute;
-                string name = attr == null ? property.Name : attr.Name;
-                var entry = Convert.ToString(property.GetValue(data, null));
-                value += name + "=" + HttpUtility.UrlEncode(entry).Replace(";", "%3B").Replace("&", "%26") + "&";
-            }
-            for (int i = 0; i < additionalFields.Length; i += 2)
-            {
-                var entry = Convert.ToString(additionalFields[i + 1]) ?? string.Empty;
-                value += additionalFields[i] + "=" + HttpUtility.UrlEncode(entry).Replace(";", "%3B").Replace("&", "%26") + "&";
-            }
-            value = value.Remove(value.Length - 1); // Remove trailing &
-            var raw = Encoding.UTF8.GetBytes(value);
-            stream.Write(raw, 0, raw.Length);
-            stream.Close();
+            return _httpClient.SendAsync(request);
         }
-        public virtual async Task WritePostBodyAsync(Stream stream, object data, params string[] additionalFields)
-        {
-            var type = data.GetType();
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            string value = "";
-            foreach (var property in properties)
-            {
-                var attr = property.GetCustomAttributes(typeof(RedditAPINameAttribute), false).FirstOrDefault() as RedditAPINameAttribute;
-                string name = attr == null ? property.Name : attr.Name;
-                var entry = Convert.ToString(property.GetValue(data, null));
-                value += name + "=" + HttpUtility.UrlEncode(entry).Replace(";", "%3B").Replace("&", "%26") + "&";
-            }
-            for (int i = 0; i < additionalFields.Length; i += 2)
-            {
-                var entry = Convert.ToString(additionalFields[i + 1]) ?? string.Empty;
-                value += additionalFields[i] + "=" + HttpUtility.UrlEncode(entry).Replace(";", "%3B").Replace("&", "%26") + "&";
-            }
-            value = value.Remove(value.Length - 1); // Remove trailing &
-            var raw = Encoding.UTF8.GetBytes(value);
-            await stream.WriteAsync(raw, 0, raw.Length);
-            stream.Close();
-        }
+
         private static bool IsOAuth()
         {
             return RootDomain == "oauth.reddit.com";

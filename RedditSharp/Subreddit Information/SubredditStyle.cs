@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
-using System.Web;
 using RedditSharp.Things;
+using System.Threading.Tasks;
+using System.Net;
 
 namespace RedditSharp
 {
@@ -24,7 +25,7 @@ namespace RedditSharp
         {
             Images = new List<SubredditImage>();
             var data = json["data"];
-            CSS = HttpUtility.HtmlDecode(data["stylesheet"].Value<string>());
+            CSS = WebUtility.HtmlDecode(data["stylesheet"].Value<string>());
             foreach (var image in data["images"])
             {
                 Images.Add(new SubredditImage(
@@ -37,11 +38,10 @@ namespace RedditSharp
         public List<SubredditImage> Images { get; set; }
         public Subreddit Subreddit { get; set; }
 
-        public void UpdateCss()
+        public async Task UpdateCssAsync()
         {
             var request = WebAgent.CreatePost(UpdateCssUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 op = "save",
                 stylesheet_contents = CSS,
@@ -49,13 +49,12 @@ namespace RedditSharp
                 api_type = "json",
                 r = Subreddit.Name
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
         }
 
-        public void UploadImage(string name, ImageType imageType, byte[] file)
+        public async Task UploadImageAsync(string name, ImageType imageType, byte[] file)
         {
             var request = WebAgent.CreatePost(UploadImageUrl);
             var formData = new MultipartFormBuilder(request);
@@ -70,8 +69,8 @@ namespace RedditSharp
                 });
             formData.AddFile("file", "foo.png", file, imageType == ImageType.PNG ? "image/png" : "image/jpeg");
             formData.Finish();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             // TODO: Detect errors
         }
     }

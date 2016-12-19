@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {
@@ -91,20 +92,20 @@ namespace RedditSharp
         /// <param name="code">Sent by reddit as a parameter in the return uri.</param>
         /// <param name="isRefresh">Set to true for refresh requests.</param>
         /// <returns></returns>
-        public string GetOAuthToken(string code, bool isRefresh = false)
+        public async Task<string> GetOAuthTokenAsync(string code, bool isRefresh = false)
         {
-            if (Type.GetType("Mono.Runtime") != null)
-                ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
-            _webAgent.Cookies = new CookieContainer();
-
+            //TODO test mono and make sure this works without security issues. Shouldn't be handled by library, should require install of cert or at least explicit calls to ingore certs
+            //if (Type.GetType("Mono.Runtime") != null)
+            //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
+            
             var request = _webAgent.CreatePost(AccessUrl);
 
-            request.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.Default.GetBytes(_clientId + ":" + _clientSecret));
-            var stream = request.GetRequestStream();
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
+            
 
             if (isRefresh)
             {
-                _webAgent.WritePostBody(stream, new
+                _webAgent.WritePostBody(request, new
                 {
                     grant_type = "refresh_token",
                     refresh_token = code
@@ -112,16 +113,15 @@ namespace RedditSharp
             }
             else
             {
-                _webAgent.WritePostBody(stream, new
+                _webAgent.WritePostBody(request, new
                 {
                     grant_type = "authorization_code",
                     code,
                     redirect_uri = _redirectUri
                 });
             }
-
-            stream.Close();
-            var json = _webAgent.ExecuteRequest(request);
+            
+            var json = await _webAgent.ExecuteRequestAsync(request);
             if (json["access_token"] != null)
             {
                 if (json["refresh_token"] != null)
@@ -138,27 +138,26 @@ namespace RedditSharp
         /// <param name="username">The username.</param>
         /// <param name="password">The user's password.</param>
         /// <returns>The access token</returns>
-        public string GetOAuthToken(string username, string password)
+        public async Task<string> GetOAuthTokenAsync(string username, string password)
         {
-            if (Type.GetType("Mono.Runtime") != null)
-                ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
-            _webAgent.Cookies = new CookieContainer();
+            //TODO same as above
+            //if (Type.GetType("Mono.Runtime") != null)
+            //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
+            //_webAgent.Cookies = new CookieContainer();
 
             var request = _webAgent.CreatePost(AccessUrl);
 
-            request.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.Default.GetBytes(_clientId + ":" + _clientSecret));
-            var stream = request.GetRequestStream();
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
 
-            _webAgent.WritePostBody(stream, new
+            _webAgent.WritePostBody(request, new
             {
                 grant_type = "password",
                 username,
                 password,
                 redirect_uri = _redirectUri
             });
-
-            stream.Close();
-            var json = _webAgent.ExecuteRequest(request);
+            
+            var json = await _webAgent.ExecuteRequestAsync(request);
             if (json["access_token"] != null)
             {
                 if (json["refresh_token"] != null)
@@ -169,24 +168,21 @@ namespace RedditSharp
             throw new AuthenticationException("Could not log in.");
         }
 		
-        public void RevokeToken(string token, bool isRefresh)
+        public async Task RevokeTokenAsync(string token, bool isRefresh)
         {
             string tokenType = isRefresh ? "refresh_token" : "access_token";
             var request = _webAgent.CreatePost(RevokeUrl);
 
-            request.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.Default.GetBytes(_clientId + ":" + _clientSecret));
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
 
-            var stream = request.GetRequestStream();
-
-            _webAgent.WritePostBody(stream, new
+            _webAgent.WritePostBody(request, new
             {
                 token = token,
                 token_type = tokenType
             });
+            
 
-            stream.Close();
-
-            _webAgent.ExecuteRequest(request);
+            var data = await _webAgent.ExecuteRequestAsync(request);
 
         }
         /// <summary>
@@ -195,12 +191,12 @@ namespace RedditSharp
         /// <param name="accessToken">Obtained using GetOAuthToken</param>
         /// <returns></returns>
         [Obsolete("Reddit.InitOrUpdateUser is preferred")]
-        public AuthenticatedUser GetUser(string accessToken)
+        public async Task<AuthenticatedUser> GetUserAsync(string accessToken)
         {
             var request = _webAgent.CreateGet(OauthGetMeUrl);
-            request.Headers["Authorization"] = string.Format("bearer {0}", accessToken);
-            var response = (HttpWebResponse)request.GetResponse();
-            var result = _webAgent.GetResponseString(response.GetResponseStream());
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", accessToken);
+            var response = await _webAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             var thingjson = "{\"kind\": \"t2\", \"data\": " + result + "}";
             var json = JObject.Parse(thingjson);
             return new AuthenticatedUser().Init(new Reddit(), json, _webAgent);

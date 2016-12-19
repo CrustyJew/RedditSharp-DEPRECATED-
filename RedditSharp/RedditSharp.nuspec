@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
    <id>RedditSharp</id>
-   <version>1.1.0</version>
+   <version>2.0.0</version>
    <authors>Meepster23</authors>
    <owners>RobIII, Meepster23</owners>
    <licenseUrl>https://github.com/CrustyJew/RedditSharp/blob/master/LICENSE</licenseUrl>
@@ -21,10 +21,11 @@
    </summary>
    <language>en-US</language>
    <dependencies>
-     <dependency id="Newtonsoft.Json" version="8.0.3" />
+     <dependency id="Newtonsoft.Json" version="9.0.1" />
    </dependencies>
  </metadata>
  <files>
-   <file src="bin\Release\RedditSharp.dll" target="lib\net462" />
+   <file src="bin\Release\net462\RedditSharp*.*" target="lib\net462" />
+   <file src="bin\Release\netstandard1.6\*.*" target="lib\netstandard1.6" />
  </files>
 </package>

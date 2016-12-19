@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -38,12 +37,14 @@ namespace RedditSharp.Things
 			WebAgent = webAgent;
 		}
 
-		public IEnumerable<Thing> Things()
+		public async Task<List<Thing>> GetThingsAsync()
 		{
 			var url = string.Format(MoreUrl, ParentId, string.Join(",", Children));
 			var request = WebAgent.CreateGet(url);
-			var response = request.GetResponse();
-			var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await request.Content.ReadAsStringAsync();
+            List<Thing> toReturn = new List<Things.Thing>();
+
 			var json = JObject.Parse(data)["json"];
 			if (json["errors"].Count() != 0)
 				throw new AuthenticationException("Incorrect login.");
@@ -53,15 +54,15 @@ namespace RedditSharp.Things
 			{
 				Thing parsed = Thing.Parse(Reddit, token, WebAgent);
 
-				yield return parsed;
+                toReturn.Add(parsed);
 			}
-
+            return toReturn;
 		}
 
 		internal async Task<Thing> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
 		{
 			CommonInit(reddit, json, webAgent);
-			await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
 			return this;	
 		}
 	}

@@ -8,6 +8,7 @@ using System.Net;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using RedditSharp.Extensions;
+using System.Net.Http;
 
 namespace RedditSharp.Things
 {
@@ -31,7 +32,7 @@ namespace RedditSharp.Things
         {
             var data = await CommonInitAsync(reddit, json, webAgent, sender);
             await ParseCommentsAsync(reddit, json, webAgent, sender);
-            await JsonConvert.PopulateObjectAsync(data.ToString(), this, reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
 
@@ -209,13 +210,12 @@ namespace RedditSharp.Things
             }
         }
 
-        public Comment Reply(string message)
+        public async Task<Comment> ReplyAsync(string message)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreatePost(CommentUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 text = message,
                 thing_id = FullName,
@@ -223,42 +223,42 @@ namespace RedditSharp.Things
                 api_type = "json"
                 //r = Subreddit
             });
-            stream.Close();
-            try
-            {
-                var response = request.GetResponse();
-                var data = WebAgent.GetResponseString(response.GetResponseStream());
+            // TODO actual error handling. This just hides the error and returns null
+            //try
+            //{
+                var response = await WebAgent.GetResponseAsync(request);
+                var data = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(data);
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
                 return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
-            }
-            catch (WebException ex)
-            {
-                var error = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
-                return null;
-            }
+            //}
+            //catch (HttpRequestException ex)
+            //{
+            //    var error = new StreamReader(ex..GetResponseStream()).ReadToEnd();
+            //    return null;
+            //}
         }
 
         /// <summary>
         /// Replaces the text in this comment with the input text.
         /// </summary>
         /// <param name="newText">The text to replace the comment's contents</param>        
-        public void EditText(string newText)
+        public async Task EditTextAsync(string newText)
         {
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
 
             var request = WebAgent.CreatePost(EditUserTextUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 text = newText,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = request.GetResponse();
-            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             JToken json = JToken.Parse(result);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
@@ -266,79 +266,75 @@ namespace RedditSharp.Things
                 throw new Exception("Error editing text.");
         }
 
-        private string SimpleAction(string endpoint)
+        private async Task<string> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreatePost(endpoint);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             return data;
         }
 
-        public void Approve()
+        public void ApproveAsync()
         {
-            var data = SimpleAction(ApproveUrl);
+            var data = SimpleActionAsync(ApproveUrl);
         }
 
-        public void Del()
+        public Task DelAsync()
         {
-            var data = SimpleAction(DelUrl);
+            return SimpleActionAsync(DelUrl);
         }
 
-        public void IgnoreReports()
+        public Task IgnoreReportsAsync()
         {
-            var data = SimpleAction(IgnoreReportsUrl);
+            return SimpleActionAsync(IgnoreReportsUrl);
         }
 
-        public void UnIgnoreReports()
+        public void UnIgnoreReportsAsync()
         {
-            var data = SimpleAction(UnIgnoreReportsUrl);
+            var data = SimpleActionAsync(UnIgnoreReportsUrl);
         }
 
-        public void Remove()
+        public Task RemoveAsync()
         {
-            RemoveImpl(false);
+            return RemoveImplAsync(false);
         }
 
-        public void RemoveSpam()
+        public Task RemoveSpamAsync()
         {
-            RemoveImpl(true);
+            return RemoveImplAsync(true);
         }
 
-        private void RemoveImpl(bool spam)
+        private async Task RemoveImplAsync(bool spam)
         {
             var request = WebAgent.CreatePost(RemoveUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 spam = spam,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
 
-        public void SetAsRead()
+        public async Task SetAsReadAsync()
         {
             var request = WebAgent.CreatePost(SetAsReadUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
             });
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
     }
 }

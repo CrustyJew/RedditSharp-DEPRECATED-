@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,32 +25,32 @@ namespace RedditSharp
             RateLimit = RateLimitMode.Burst;
             RootDomain = "oauth.reddit.com";
             TokenProvider = new AuthProvider(clientID, clientSecret, redirectURI, this);
-            GetNewToken();
+            Task.Run(GetNewTokenAsync).Wait();
         }
 
-        public override HttpWebRequest CreateRequest(string url, string method)
+        public override HttpRequestMessage CreateRequest(string url, string method)
         {
             //add 5 minutes for clock skew to ensure requests succeed 
             if (url != AuthProvider.AccessUrl && DateTime.UtcNow.AddMinutes(5) > TokenValidTo)
             {
-                GetNewToken();
+                Task.Run(GetNewTokenAsync).Wait();
             }
             return base.CreateRequest(url, method);
         }
 
-        protected override HttpWebRequest CreateRequest(Uri uri, string method)
+        protected override HttpRequestMessage CreateRequest(Uri uri, string method)
         {
             //add 5 minutes for clock skew to ensure requests succeed
             if (uri.ToString() != AuthProvider.AccessUrl && DateTime.UtcNow.AddMinutes(5) > TokenValidTo)
             {
-                GetNewToken();
+                Task.Run(GetNewTokenAsync).Wait();
             }
             return base.CreateRequest(uri, method);
         }
 
-        private void GetNewToken()
+        private async Task GetNewTokenAsync()
         {
-            AccessToken = TokenProvider.GetOAuthToken(Username, Password);
+            AccessToken = await TokenProvider.GetOAuthTokenAsync(Username, Password);
             TokenValidTo = DateTime.UtcNow.AddHours(1);
         }
     }

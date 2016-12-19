@@ -99,7 +99,7 @@ namespace RedditSharp.Things
         public async Task<PrivateMessage> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
         public PrivateMessage Init(Reddit reddit, JToken json, IWebAgent webAgent)
@@ -129,79 +129,38 @@ namespace RedditSharp.Things
             }
         }
 
-        #region Obsolete Getter Methods
-
-        [Obsolete("Use Thread property instead")]
-        public Listing<PrivateMessage> GetThread()
-        {
-            return Thread;
-        }
-
-        #endregion Obsolete Gettter Methods
         /// <summary>
         /// Mark the message read
         /// </summary>
-        public void SetAsRead()
-        {
-            var request = WebAgent.CreatePost(SetAsReadUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
-            {
-                id = FullName,
-                uh = Reddit.User.Modhash,
-                api_type = "json"
-            });
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-        }
         public async Task SetAsReadAsync()
         {
             var request = WebAgent.CreatePost(SetAsReadUrl);
-            WebAgent.WritePostBody(await request.GetRequestStreamAsync(), new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
             });
-            var response = await request.GetResponseAsync();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
         /// <summary>
         /// Reply to the message
         /// </summary>
         /// <param name="message">Text to reply with</param>
-        public void Reply(string message)
-        {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(CommentUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
-            {
-                text = message,
-                thing_id = FullName,
-                uh = Reddit.User.Modhash
-            });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            var json = JObject.Parse(data);
-        }
         public async Task ReplyAsync(string message)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreatePost(CommentUrl);
-            var stream = await request.GetRequestStreamAsync();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 text = message,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = await request.GetResponseAsync();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            var json = JObject.Parse(data);
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
     }
 }

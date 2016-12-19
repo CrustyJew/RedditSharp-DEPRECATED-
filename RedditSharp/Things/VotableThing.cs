@@ -51,7 +51,7 @@ namespace RedditSharp.Things
         protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await CommonInitAsync(reddit, webAgent, json);
-            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
+            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings));
             return this;
         }
         protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
@@ -118,41 +118,43 @@ namespace RedditSharp.Things
                     default: return VoteType.None;
                 }
             }
-            set { this.SetVote(value); }
+            set
+            {
+                Task.Run(async () => { await SetVoteAsync(value); });
+            }
         }
         /// <summary>
         /// Upvotes something
         /// </summary>
-        public void Upvote()
+        public Task UpvoteAsync()
         {
-            this.SetVote(VoteType.Upvote);
+            return this.SetVoteAsync(VoteType.Upvote);
         }
 
-        public void Downvote()
+        public Task DownvoteAsync()
         {
-            this.SetVote(VoteType.Downvote);
+            return this.SetVoteAsync(VoteType.Downvote);
         }
 
-        public void SetVote(VoteType type)
+        public async Task SetVoteAsync(VoteType type)
         {
             if (this.Vote == type) return;
 
             var request = WebAgent.CreatePost(VoteUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 dir = (int)type,
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
 
             if (Liked == true) Upvotes--;
             if (Liked == false) Downvotes--;
 
-            switch(type)
+            switch (type)
             {
                 case VoteType.Upvote: Liked = true; Upvotes++; return;
                 case VoteType.None: Liked = null; return;
@@ -160,59 +162,53 @@ namespace RedditSharp.Things
             }
         }
 
-        public void Save()
+        public async Task SaveAsync()
         {
             var request = WebAgent.CreatePost(SaveUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             Saved = true;
         }
 
-        public void Unsave()
+        public async Task UnsaveAsync()
         {
             var request = WebAgent.CreatePost(UnsaveUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             Saved = false;
         }
-
-        public void ClearVote()
+        //TODO clean this up, unnecessary calls
+        public async Task ClearVote()
         {
             var request = WebAgent.CreatePost(VoteUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 dir = 0,
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
         /// <summary>
         /// Reports someone
         /// </summary>
         /// <param name="reportType">What you're reporting them for <see cref="ReportType"/></param>
         /// <param name="otherReason">If your reason is "Other", say why you're reporting them</param>
-        public void Report(ReportType reportType, string otherReason = null)
+        public async Task ReportAsync(ReportType reportType, string otherReason = null)
         {
             var request = WebAgent.CreatePost(ReportUrl);
-            var stream = request.GetRequestStream();
 
             string reportReason;
             switch (reportType)
@@ -231,7 +227,7 @@ namespace RedditSharp.Things
                     reportReason = "other"; break;
             }
 
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 reason = reportReason,
@@ -239,20 +235,19 @@ namespace RedditSharp.Things
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
         }
         /// <summary>
         /// Distingiush a comment
         /// </summary>
         /// <param name="distinguishType">Type you want to distinguish <see cref="DistinguishType"/></param>
-        public void Distinguish(DistinguishType distinguishType)
+        public async Task DistinguishAsync(DistinguishType distinguishType)
         {
             if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
+                throw new Exception("No user logged in.");
             var request = WebAgent.CreatePost(DistinguishUrl);
-            var stream = request.GetRequestStream();
+
             string how;
             switch (distinguishType)
             {
@@ -269,18 +264,17 @@ namespace RedditSharp.Things
                     how = "special";
                     break;
             }
-            WebAgent.WritePostBody(stream, new
+            WebAgent.WritePostBody(request, new
             {
                 how,
                 id = Id,
                 uh = Reddit.User.Modhash
             });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(data);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
-                throw new AuthenticationException("You are not permitted to distinguish this comment.");
+                throw new Exception("You are not permitted to distinguish this comment.");
         }
 
         internal class DistinguishConverter : JsonConverter

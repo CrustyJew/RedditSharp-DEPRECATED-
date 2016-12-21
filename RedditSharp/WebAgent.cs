@@ -230,7 +230,7 @@ namespace RedditSharp
             else
                 request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = Cookies;
-            if (IsOAuth())// use OAuth
+            if (IsOAuth() && request.Host.ToLower() == "oauth.reddit.com")// use OAuth
             {
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }
@@ -249,7 +249,7 @@ namespace RedditSharp
                 var cookieHeader = Cookies.GetCookieHeader(new Uri("http://reddit.com"));
                 request.Headers.Set("Cookie", cookieHeader);
             }
-            if (IsOAuth())// use OAuth
+            if (IsOAuth() && uri.Host.ToLower() == "oauth.reddit.com")// use OAuth
             {
                 request.Headers.Set("Authorization", "bearer " + AccessToken);//Must be included in OAuth calls
             }

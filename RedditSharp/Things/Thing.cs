@@ -71,6 +71,10 @@ namespace RedditSharp.Things
                     return await new ModAction().InitAsync(reddit, json, webAgent);
                 case "more":
                     return await new More().InitAsync(reddit, json, webAgent);
+                case "LiveUpdate":
+                    return await new LiveUpdate().InitAsync(reddit, json, webAgent);
+                case "LiveUpdateEvent":
+                    return await new LiveUpdateEvent().InitAsync(reddit, json, webAgent);
                 default:
                     return null;
             }
@@ -101,6 +105,10 @@ namespace RedditSharp.Things
                     return new ModAction().Init(reddit, json, webAgent);
                 case "more":
                     return new More().Init(reddit, json, webAgent);
+                case "LiveUpdate":
+                    return new LiveUpdate().Init(reddit, json, webAgent);
+                case "LiveUpdateEvent":
+                    return new LiveUpdateEvent().Init(reddit, json, webAgent);
                 default:
                     return null;
             }
@@ -138,6 +146,14 @@ namespace RedditSharp.Things
                 {
                     return await new More().InitAsync(reddit, json, webAgent);
                 }
+                else if (typeof(T) == typeof(LiveUpdate))
+                {
+                    return await new LiveUpdate().InitAsync(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(LiveUpdateEvent))
+                {
+                    return await new LiveUpdateEvent().InitAsync(reddit, json, webAgent);
+                }
             }
             return result;
         }
@@ -165,6 +181,14 @@ namespace RedditSharp.Things
                 else if (typeof(T) == typeof(More))
                 {
                     return new More().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(LiveUpdate))
+                {
+                    return new LiveUpdate().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(LiveUpdateEvent))
+                {
+                    return new LiveUpdateEvent().Init(reddit, json, webAgent);
                 }
             }
             return result;

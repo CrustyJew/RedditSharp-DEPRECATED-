@@ -50,6 +50,8 @@
   <ItemGroup>
     <Compile Include="BotWebAgent.cs" />
     <Compile Include="Flairs\FlairTemplate.cs" />
+    <Compile Include="Things\LiveUpdateEvent.cs" />
+    <Compile Include="Things\LiveUpdate.cs" />
     <Compile Include="Moderator Actions\ModActionType.cs" />
     <Compile Include="Multi\MData.cs" />
     <Compile Include="Multi\Multi.cs" />

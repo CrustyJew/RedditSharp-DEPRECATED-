@@ -80,6 +80,7 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
         #endregion
 
@@ -120,6 +121,7 @@ namespace RedditSharp
             }
             WebAgent.WritePostBody(request.GetRequestStream(), param,addParams.ToArray());
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
         public void HidePage(string page, string revision)
@@ -132,6 +134,7 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
         public void RevertPage(string page, string revision)
@@ -144,6 +147,7 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
         public void SetPageEditor(string page, string username, bool allow)
@@ -156,6 +160,7 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
         #region Obsolete Getter Methods

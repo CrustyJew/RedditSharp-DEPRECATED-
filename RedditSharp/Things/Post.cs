@@ -46,18 +46,28 @@ namespace RedditSharp.Things
             await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
+
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="post"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             CommonInit(reddit, post, webAgent);
             JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
+
         private void CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             base.Init(reddit, webAgent, post);
             Reddit = reddit;
             WebAgent = webAgent;
         }
+
         private async Task CommonInitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             await base.InitAsync(reddit, webAgent, post);
@@ -65,9 +75,15 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
+        /// <summary>
+        /// Name of the author of this post.
+        /// </summary>
         [JsonProperty("author")]
         public string AuthorName { get; set; }
 
+        /// <summary>
+        /// Author of this post.
+        /// </summary>
         [JsonIgnore]
         public RedditUser Author
         {
@@ -77,6 +93,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// An array of comments on this post.
+        /// </summary>
         public Comment[] Comments
         {
             get
@@ -85,65 +104,125 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// The moderator who approved this post.  This will be null or empty if the post has not been approved.
+        /// </summary>
         [JsonProperty("approved_by")]
         public string ApprovedBy { get; set; }
 
+        /// <summary>
+        /// Css flair class of the posts author.
+        /// </summary>
         [JsonProperty("author_flair_css_class")]
         public string AuthorFlairCssClass { get; set; }
 
+        /// <summary>
+        /// Flair text of the posts author.
+        /// </summary>
         [JsonProperty("author_flair_text")]
         public string AuthorFlairText { get; set; }
 
+        /// <summary>
+        /// The moderator who removed this post.  This will be null or empty if the post has not been removed.
+        /// </summary>
         [JsonProperty("banned_by")]
         public string BannedBy { get; set; }
 
+        /// <summary>
+        /// Domain of this post.
+        /// </summary>
         [JsonProperty("domain")]
         public string Domain { get; set; }
 
+        /// <summary>
+        /// Returns true if this post has been edited by the author.
+        /// </summary>
         [JsonProperty("edited")]
         public bool Edited { get; set; }
 
+        /// <summary>
+        /// Returns true if this is a self post.
+        /// </summary>
         [JsonProperty("is_self")]
         public bool IsSelfPost { get; set; }
 
+        /// <summary>
+        /// Css class of the link flair.
+        /// </summary>
         [JsonProperty("link_flair_css_class")]
         public string LinkFlairCssClass { get; set; }
 
+        /// <summary>
+        /// Text of the link flair.
+        /// </summary>
         [JsonProperty("link_flair_text")]
         public string LinkFlairText { get; set; }
 
+        /// <summary>
+        /// Number of comments on this post.
+        /// </summary>
         [JsonProperty("num_comments")]
         public int CommentCount { get; set; }
-
+        
+        /// <summary>
+        /// Returns true if this post is marked not safe for work.
+        /// </summary>
         [JsonProperty("over_18")]
         public bool NSFW { get; set; }
 
+        /// <summary>
+        /// Post permalink.
+        /// </summary>
         [JsonProperty("permalink")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Permalink { get; set; }
 
+        /// <summary>
+        /// Post self text markdown.
+        /// </summary>
         [JsonProperty("selftext")]
         public string SelfText { get; set; }
 
+        /// <summary>
+        /// Post self text html.
+        /// </summary>
         [JsonProperty("selftext_html")]
         public string SelfTextHtml { get; set; }
 
+        /// <summary>
+        /// Uri to the thumbnail image of this post.
+        /// </summary>
         [JsonProperty("thumbnail")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Thumbnail { get; set; }
 
+        /// <summary>
+        /// Post title.
+        /// </summary>
         [JsonProperty("title")]
         public string Title { get; set; }
 
+        /// <summary>
+        /// Parent subreddit name.
+        /// </summary>
         [JsonProperty("subreddit")]
         public string SubredditName { get; set; }
 
+        /// <summary>
+        /// Returns true if this post is archived.
+        /// </summary>
         [JsonProperty("archived")]
         public bool IsArchived { get; set; }
 
+        /// <summary>
+        /// Returns true if the post is sticked.
+        /// </summary>
         [JsonProperty("stickied")]
         public bool IsStickied { get; set; }
 
+        /// <summary>
+        /// Parent subreddit.
+        /// </summary>
         [JsonIgnore]
         public Subreddit Subreddit
         {
@@ -153,13 +232,24 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Post uri.
+        /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; set; }
 
+        /// <summary>
+        /// Number of reports on this post.
+        /// </summary>
         [JsonProperty("num_reports")]
         public int? Reports { get; set; }
 
+        /// <summary>
+        /// Comment on this post.
+        /// </summary>
+        /// <param name="message">Markdown text.</param>
+        /// <returns></returns>
         public Comment Comment(string message)
         {
             if (Reddit.User == null)
@@ -227,16 +317,25 @@ namespace RedditSharp.Things
             return data;
         }
 
+        /// <summary>
+        /// Approve this post.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void Approve()
         {
             var data = SimpleAction(ApproveUrl);
         }
 
+        /// <summary>
+        /// Remove this post.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void Remove()
         {
             RemoveImpl(false);
         }
 
+        /// <summary>
+        /// Remove this post, flagging it as spam.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void RemoveSpam()
         {
             RemoveImpl(true);
@@ -257,46 +356,75 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Delete this post.  Logged in user must be post author.
+        /// </summary>
         public void Del()
         {
             var data = SimpleAction(DelUrl);
         }
 
+        /// <summary>
+        /// Hide this post.
+        /// </summary>
         public void Hide()
         {
             var data = SimpleAction(HideUrl);
         }
 
+        /// <summary>
+        /// Unhide this post.
+        /// </summary>
         public void Unhide()
         {
             var data = SimpleAction(UnhideUrl);
         }
 
+        /// <summary>
+        /// Ignore reports on this post.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void IgnoreReports()
         {
             var data = SimpleAction(IgnoreReportsUrl);
         }
 
+        /// <summary>
+        /// Unignore reports on this post.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void UnIgnoreReports()
         {
             var data = SimpleAction(UnIgnoreReportsUrl);
         }
 
+        /// <summary>
+        /// Mark this post not safe for work.
+        /// </summary>
         public void MarkNSFW()
         {
             var data = SimpleAction(MarkNSFWUrl);
         }
 
+        /// <summary>
+        /// Unmark this post not safe for work.
+        /// </summary>
         public void UnmarkNSFW()
         {
             var data = SimpleAction(UnmarkNSFWUrl);
         }
 
+        /// <summary>
+        /// Set contest mode state.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        /// <param name="state"></param>
         public void ContestMode(bool state)
         {
             var data = SimpleActionToggle(ContestModeUrl, state);
         }
 
+        /// <summary>
+        /// Set sticky state.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        /// <param name="state"></param>
         public void StickyMode(bool state)
         {
             var data = SimpleActionToggle(StickyModeUrl, state, true);
@@ -339,6 +467,10 @@ namespace RedditSharp.Things
             else
                 throw new Exception("Error editing text.");
         }
+
+        /// <summary>
+        /// Update this post.
+        /// </summary>
         public void Update()
         {
             JToken post = Reddit.GetToken(this.Url);
@@ -370,6 +502,11 @@ namespace RedditSharp.Things
             LinkFlairText = flairText;
         }
 
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of comments.
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns></returns>
         public List<Comment> ListComments(int? limit = null)
         {
             var url = string.Format(GetCommentsUrl, Id);
@@ -403,6 +540,10 @@ namespace RedditSharp.Things
             return comments;
         }
 
+        /// <summary>
+        /// Enumerate more comments.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Comment> EnumerateComments()
         {
             var url = string.Format(GetCommentsUrl, Id);

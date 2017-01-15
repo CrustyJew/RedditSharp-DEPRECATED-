@@ -24,6 +24,9 @@ namespace RedditSharp
         /// </summary>
         public static bool EnableRateLimit { get; set; }
 
+        /// <summary>
+        /// web protocol "http", "https"
+        /// </summary>
         public static string Protocol { get; set; }
 
         /// <summary>
@@ -102,6 +105,11 @@ namespace RedditSharp
             RootDomain = "www.reddit.com";
         }
 
+        /// <summary>
+        /// Execute a request and return a <see cref="JToken"/>
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public virtual JToken CreateAndExecuteRequest(string url)
         {
             Uri uri;
@@ -174,6 +182,9 @@ namespace RedditSharp
 
         }
 
+        /// <summary>
+        /// Enforce the api throttle.
+        /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected virtual void EnforceRateLimit()
         {
@@ -220,6 +231,12 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Create a <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="url">target  uri</param>
+        /// <param name="method">http method</param>
+        /// <returns></returns>
         public virtual HttpWebRequest CreateRequest(string url, string method)
         {
             EnforceRateLimit();
@@ -239,6 +256,12 @@ namespace RedditSharp
             return request;
         }
 
+        /// <summary>
+        /// Create a <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="uri">target  uri</param>
+        /// <param name="method">http method</param>
+        /// <returns></returns>
         protected virtual HttpWebRequest CreateRequest(Uri uri, string method)
         {
             EnforceRateLimit();
@@ -258,16 +281,31 @@ namespace RedditSharp
             return request;
         }
 
+        /// <summary>
+        /// Create a http GET <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="url">target url</param>
+        /// <returns></returns>
         public virtual HttpWebRequest CreateGet(string url)
         {
             return CreateRequest(url, "GET");
         }
 
+        /// <summary>
+        /// Create a http GET <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="url">target uri</param>
+        /// <returns></returns>
         private HttpWebRequest CreateGet(Uri url)
         {
             return CreateRequest(url, "GET");
         }
 
+        /// <summary>
+        /// Create a http POST <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="url">target url</param>
+        /// <returns></returns>
         public virtual HttpWebRequest CreatePost(string url)
         {
             var request = CreateRequest(url, "POST");
@@ -275,6 +313,11 @@ namespace RedditSharp
             return request;
         }
 
+        /// <summary>
+        /// Create a http PUT <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="url">target url</param>
+        /// <returns></returns>
         public virtual HttpWebRequest CreatePut(string url)
         {
             var request = CreateRequest(url, "PUT");
@@ -282,6 +325,11 @@ namespace RedditSharp
             return request;
         }
 
+        /// <summary>
+        /// Create a http DELETE <see cref="HttpWebRequest"/>
+        /// </summary>
+        /// <param name="url">target url</param>
+        /// <returns></returns>
         public virtual HttpWebRequest CreateDelete(string url)
         {
             var request = CreateRequest(url, "DELETE");
@@ -289,6 +337,11 @@ namespace RedditSharp
             return request;
         }
 
+        /// <summary>
+        /// Read a string from a stream.
+        /// </summary>
+        /// <param name="stream">response stream</param>
+        /// <returns></returns>
         public virtual string GetResponseString(Stream stream)
         {
             var data = new StreamReader(stream).ReadToEnd();
@@ -296,6 +349,12 @@ namespace RedditSharp
             return data;
         }
 
+        /// <summary>
+        /// Write an object to a stream.
+        /// </summary>
+        /// <param name="stream">output stream</param>
+        /// <param name="data">input object</param>
+        /// <param name="additionalFields">additional fields to write</param>
         public virtual void WritePostBody(Stream stream, object data, params string[] additionalFields)
         {
             var type = data.GetType();

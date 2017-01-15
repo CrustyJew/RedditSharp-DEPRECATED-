@@ -53,43 +53,82 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
+        /// <summary>
+        /// Subreddit Wiki
+        /// </summary>
         [JsonIgnore]
         public Wiki Wiki { get; private set; }
 
+        /// <summary>
+        /// Date the subreddit was created.
+        /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime? Created { get; set; }
 
+        /// <summary>
+        /// Subreddit description.
+        /// </summary>
         [JsonProperty("description")]
         public string Description { get; set; }
 
+        /// <summary>
+        /// Subreddit description html.
+        /// </summary>
         [JsonProperty("description_html")]
         public string DescriptionHTML { get; set; }
 
+        /// <summary>
+        /// Subreddit display name.
+        /// </summary>
         [JsonProperty("display_name")]
         public string DisplayName { get; set; }
 
+        /// <summary>
+        /// Header image.
+        /// </summary>
         [JsonProperty("header_img")]
         public string HeaderImage { get; set; }
 
+        /// <summary>
+        /// Header title.
+        /// </summary>
         [JsonProperty("header_title")]
         public string HeaderTitle { get; set; }
 
+        /// <summary>
+        /// Returns true of the subreddit is marked for users over 18.
+        /// </summary>
         [JsonProperty("over_18")]
         public bool NSFW { get; set; }
 
+        /// <summary>
+        /// Public description of the subreddit.
+        /// </summary>
         [JsonProperty("public_description")]
         public string PublicDescription { get; set; }
 
+        /// <summary>
+        /// Total subscribers to the subreddit.
+        /// </summary>
         [JsonProperty("subscribers")]
         public int? Subscribers { get; set; }
 
+        /// <summary>
+        /// Current active users .
+        /// </summary>
         [JsonProperty("accounts_active")]
         public int? ActiveUsers { get; set; }
 
+        /// <summary>
+        /// Subreddit title.
+        /// </summary>
         [JsonProperty("title")]
         public string Title { get; set; }
 
+        /// <summary>
+        /// Subreddit url.
+        /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; set; }
@@ -289,7 +328,7 @@ namespace RedditSharp.Things
             }
         }
         /// <summary>
-        /// Get a list of the available user flair templates for the subreddit
+        /// Get an array of the available user flair templates for the subreddit
         /// </summary>
         public UserFlairTemplate[] UserFlairTemplates
         {
@@ -318,6 +357,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Get the subreddit stylesheet.
+        /// </summary>
         public SubredditStyle Stylesheet
         {
             get
@@ -330,6 +372,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Get an <see cref="IEnumerable{T}"/> of the subreddit moderators.
+        /// </summary>
         public IEnumerable<ModeratorUser> Moderators
         {
             get
@@ -353,6 +398,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Get an <see cref="IEnumerable{T}"/> of toolbox user notes.
+        /// </summary>
         public IEnumerable<TBUserNote> UserNotes
         {
             get
@@ -361,6 +409,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of contributors.
+        /// </summary>
         public Listing<Contributor> Contributors
         {
             get
@@ -369,6 +420,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of banned users.
+        /// </summary>
         public Listing<BannedUser> BannedUsers
         {
             get
@@ -392,6 +446,13 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public async Task<Subreddit> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
@@ -400,6 +461,14 @@ namespace RedditSharp.Things
 
             return this;
         }
+
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public Subreddit Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
@@ -425,6 +494,7 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
             Wiki = new Wiki(reddit, this, webAgent);
         }
+
         /// <summary>
         /// http://www.reddit.com/r/all
         /// </summary>
@@ -443,6 +513,7 @@ namespace RedditSharp.Things
             };
             return rSlashAll;
         }
+
         /// <summary>
         /// Gets the frontpage of the user
         /// </summary>
@@ -461,6 +532,7 @@ namespace RedditSharp.Things
             };
             return frontPage;
         }
+
         /// <summary>
         /// Subscribe to a subreddit
         /// </summary>
@@ -481,6 +553,7 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             //Disposes and discards
         }
+
         /// <summary>
         /// Unsubscribes from a subreddit
         /// </summary>
@@ -502,6 +575,10 @@ namespace RedditSharp.Things
             //Dispose and discard
         }
 
+        /// <summary>
+        /// Clear templates of specified <see cref="FlairType"/>
+        /// </summary>
+        /// <param name="flairType"><see cref="FlairType"/></param>
         public void ClearFlairTemplates(FlairType flairType)
         {
             var request = WebAgent.CreatePost(ClearFlairTemplatesUrl);
@@ -517,6 +594,13 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Add a new flair template.
+        /// </summary>
+        /// <param name="cssClass">css class name</param>
+        /// <param name="flairType"><see cref="FlairType"/></param>
+        /// <param name="text">flair text</param>
+        /// <param name="userEditable">set flair user editable</param>
         public void AddFlairTemplate(string cssClass, FlairType flairType, string text, bool userEditable)
         {
             var request = WebAgent.CreatePost(FlairTemplateUrl);
@@ -537,6 +621,11 @@ namespace RedditSharp.Things
             var json = JToken.Parse(data);
         }
 
+        /// <summary>
+        /// Get the text of the specified users flair.
+        /// </summary>
+        /// <param name="user">reddit username</param>
+        /// <returns></returns>
         public string GetFlairText(string user)
         {
             var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
@@ -545,6 +634,12 @@ namespace RedditSharp.Things
             var json = JToken.Parse(data);
             return (string)json["users"][0]["flair_text"];
         }
+
+        /// <summary>
+        /// Get the text of the specified users flair.
+        /// </summary>
+        /// <param name="user">reddit username</param>
+        /// <returns></returns>
         public async Task<string> GetFlairTextAsync(string user)
         {
             var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
@@ -553,6 +648,12 @@ namespace RedditSharp.Things
             var json = JToken.Parse(data);
             return (string)json["users"][0]["flair_text"];
         }
+
+        /// <summary>
+        /// Get the css class of the specified users flair.
+        /// </summary>
+        /// <param name="user">reddit username</param>
+        /// <returns></returns>
         public string GetFlairCssClass(string user)
         {
             var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
@@ -561,6 +662,12 @@ namespace RedditSharp.Things
             var json = JToken.Parse(data);
             return (string)json["users"][0]["flair_css_class"];
         }
+
+        /// <summary>
+        /// Get the css class of the specified users flair.
+        /// </summary>
+        /// <param name="user">reddit username</param>
+        /// <returns></returns>
         public async Task<string> GetFlairCssClassAsync(string user)
         {
             var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
@@ -569,6 +676,13 @@ namespace RedditSharp.Things
             var json = JToken.Parse(data);
             return (string)json["users"][0]["flair_css_class"];
         }
+
+        /// <summary>
+        /// Set a users flair.
+        /// </summary>
+        /// <param name="user">reddit username</param>
+        /// <param name="cssClass">flair css class</param>
+        /// <param name="text">flair text</param>
         public void SetUserFlair(string user, string cssClass, string text)
         {
             var request = WebAgent.CreatePost(SetUserFlairUrl);
@@ -585,6 +699,14 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
+        /// <summary>
+        /// Set a users flair.
+        /// </summary>
+        /// <param name="user">reddit username</param>
+        /// <param name="cssClass">flair css class</param>
+        /// <param name="text">flair text</param>
+        /// <returns></returns>
         public async Task SetUserFlairAsync(string user, string cssClass, string text)
         {
             var request = WebAgent.CreatePost(SetUserFlairUrl);
@@ -601,6 +723,13 @@ namespace RedditSharp.Things
             var response = await request.GetResponseAsync();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
+        /// <summary>
+        /// Upload a header image.
+        /// </summary>
+        /// <param name="name">name of image.</param>
+        /// <param name="imageType"><see cref="ImageType"/> of image</param>
+        /// <param name="file">image buffer</param>
         public void UploadHeaderImage(string name, ImageType imageType, byte[] file)
         {
             var request = WebAgent.CreatePost(UploadImageUrl);
@@ -621,6 +750,13 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             // TODO: Detect errors
         }
+
+        /// <summary>
+        /// Upload a header image.
+        /// </summary>
+        /// <param name="name">name of image.</param>
+        /// <param name="imageType"><see cref="ImageType"/> of image</param>
+        /// <param name="file">image buffer</param>
         public async Task UploadHeaderImageAsync(string name, ImageType imageType, byte[] file)
         {
             var request = WebAgent.CreatePost(UploadImageUrl);
@@ -641,6 +777,7 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             // TODO: Detect errors
         }
+
         /// <summary>
         /// Adds a moderator
         /// </summary>
@@ -659,6 +796,11 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
+        /// <summary>
+        /// Adds a moderator
+        /// </summary>
+        /// <param name="user">User to add</param>
         public void AddModerator(RedditUser user)
         {
             var request = WebAgent.CreatePost(AddModeratorUrl);
@@ -674,6 +816,9 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Accept invitation to moderate this subreddit.
+        /// </summary>
         public void AcceptModeratorInvite()
         {
             var request = WebAgent.CreatePost(AcceptModeratorInviteUrl);
@@ -687,6 +832,10 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Remove a moderator from this subreddit.
+        /// </summary>
+        /// <param name="id">reddit user fullname</param>
         public void RemoveModerator(string id)
         {
             var request = WebAgent.CreatePost(LeaveModerationUrl);
@@ -702,11 +851,16 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return "/r/" + DisplayName;
         }
 
+        /// <summary>
+        /// Add a contributor to this subreddit.
+        /// </summary>
+        /// <param name="user">reddit username.</param>
         public void AddContributor(string user)
         {
             var request = WebAgent.CreatePost(AddContributorUrl);
@@ -722,6 +876,10 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Remove a contributor from this subreddit.
+        /// </summary>
+        /// <param name="id">reddit user full name</param>
         public void RemoveContributor(string id)
         {
             var request = WebAgent.CreatePost(LeaveModerationUrl);
@@ -737,6 +895,10 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Remove a contributor from this subreddit.
+        /// </summary>
+        /// <param name="id">reddit user full name</param>
         public async Task RemoveContributorAsync(string id)
         {
             var request = WebAgent.CreatePost(LeaveModerationUrl);
@@ -780,6 +942,14 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Bans a user
+        /// </summary>
+        /// <param name="user">User to ban, by username</param>
+        /// <param name="reason">Reason for ban, shows in ban note as 'reason: note' or just 'note' if blank</param>
+        /// <param name="note">Mod notes about ban, shows in ban note as 'reason: note'</param>
+        /// <param name="duration">Number of days to ban user, 0 for permanent</param>
+        /// <param name="message">Message to include in ban PM</param>
         public async Task BanUserAsync(string user, string reason, string note, int duration, string message)
         {
             var request = WebAgent.CreatePost(BanUserUrl);
@@ -800,11 +970,22 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Ban a user by name
+        /// </summary>
+        /// <param name="user">user name</param>
+        /// <param name="note">ban note</param>
         public void BanUser(string user, string note)
         {
             BanUser(user, "", note, 0, "");
         }
 
+
+        /// <summary>
+        /// Ban a user by name
+        /// </summary>
+        /// <param name="user">user name</param>
+        /// <param name="note">ban note</param>
         public async Task BanUserAsync(string user, string note)
         {
             await BanUserAsync(user, "", note, 0, "");
@@ -830,6 +1011,10 @@ namespace RedditSharp.Things
             var result = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Unbans a user
+        /// </summary>
+        /// <param name="user">User to unban, by username</param>
         public async Task UnBanUserAsync(string user)
         {
             var request = WebAgent.CreatePost(UnBanUserUrl);
@@ -934,6 +1119,12 @@ namespace RedditSharp.Things
                         Captcha = captchaAnswer
                     });
         }
+
+        /// <summary>
+        /// Submits a link post in the current subreddit using the logged-in user
+        /// </summary>
+        /// <param name="title">The title of the submission</param>
+        /// <param name="url">The url of the submission link</param>
         public async Task<Post> SubmitPostAsync(string title, string url, string captchaId = "", string captchaAnswer = "", bool resubmit = false)
         {
             return await
@@ -969,6 +1160,12 @@ namespace RedditSharp.Things
                         Captcha = captchaAnswer
                     });
         }
+
+        /// <summary>
+        /// Submits a text post in the current subreddit using the logged-in user
+        /// </summary>
+        /// <param name="title">The title of the submission</param>
+        /// <param name="text">The raw markdown text of the submission</param>
         public async Task<Post> SubmitTextPostAsync(string title, string text, string captchaId = "", string captchaAnswer = "")
         {
             return await
@@ -983,6 +1180,7 @@ namespace RedditSharp.Things
                         Captcha = captchaAnswer
                     });
         }
+
         /// <summary>
         /// Gets the moderation log of the current subreddit
         /// </summary>
@@ -990,6 +1188,7 @@ namespace RedditSharp.Things
         {
             return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name), WebAgent);
         }
+
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken
         /// </summary>
@@ -998,6 +1197,7 @@ namespace RedditSharp.Things
         {
             return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}", Name, ModActionTypeConverter.GetRedditParamName(action)), WebAgent);
         }
+
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by moderator(s) who performed the action
         /// </summary>
@@ -1006,6 +1206,7 @@ namespace RedditSharp.Things
         {
             return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?mod={1}", Name, string.Join(",", mods)), WebAgent);
         }
+
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken and moderator(s) who performed the action
         /// </summary>
@@ -1016,7 +1217,6 @@ namespace RedditSharp.Things
         {
             return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}&mod={2}", Name, ModActionTypeConverter.GetRedditParamName(action), string.Join(",", mods)), WebAgent);
         }
-
 
         /// <summary>
         /// Infinitely yields new <see cref="Comment"/> posted to the subreddit.

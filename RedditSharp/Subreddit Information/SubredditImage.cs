@@ -32,11 +32,29 @@ namespace RedditSharp
                 Url = new Uri(string.Format("http://thumbs.reddit.com/{0}_{1}.png", subreddit.Subreddit.FullName, url), UriKind.Absolute);
         }
 
+        /// <summary>
+        /// css link.
+        /// </summary>
         public string CssLink { get; set; }
+
+        /// <summary>
+        /// Name.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Url.
+        /// </summary>
         public Uri Url { get; set; }
+
+        /// <summary>
+        /// Subreddit style.
+        /// </summary>
         public SubredditStyle SubredditStyle { get; set; }
 
+        /// <summary>
+        /// Delete this subreddit image.
+        /// </summary>
         public void Delete()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);
@@ -52,6 +70,11 @@ namespace RedditSharp
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             SubredditStyle.Images.Remove(this);
         }
+
+        /// <summary>
+        /// Delete this subreddit image.
+        /// </summary>
+        /// <returns></returns>
         public async Task DeleteAsync()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);

@@ -27,6 +27,13 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = await CommonInitAsync(reddit, json, webAgent, sender);
@@ -35,6 +42,13 @@ namespace RedditSharp.Things
             return this;
         }
 
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = CommonInit(reddit, json, webAgent, sender);
@@ -43,6 +57,11 @@ namespace RedditSharp.Things
             return this;
         }
 
+        /// <summary>
+        /// Fill the object with comments.
+        /// </summary>
+        /// <param name="things"></param>
+        /// <returns></returns>
         public Comment PopulateComments(IEnumerator<Thing> things)
         {
             Thing first = things.Current;
@@ -153,44 +172,109 @@ namespace RedditSharp.Things
             Comments = subComments.ToArray();
         }
 
+        /// <summary>
+        /// Comment author user name.
+        /// </summary>
         [JsonProperty("author")]
         public string Author { get; set; }
+
+        /// <summary>
+        /// Moderator this comment was removed by.  Will be null or empty if the comment has not been removed.
+        /// </summary>
         [JsonProperty("banned_by")]
         public string BannedBy { get; set; }
+
+        /// <summary>
+        /// Comment body markdown.
+        /// </summary>
         [JsonProperty("body")]
         public string Body { get; set; }
+
+        /// <summary>
+        /// Comment body html.
+        /// </summary>
         [JsonProperty("body_html")]
         public string BodyHtml { get; set; }
+
+        /// <summary>
+        /// Id of the parent <see cref="VotableThing"/>.
+        /// </summary>
         [JsonProperty("parent_id")]
         public string ParentId { get; set; }
+
+        /// <summary>
+        /// Parent subreddit name.
+        /// </summary>
         [JsonProperty("subreddit")]
         public string Subreddit { get; set; }
+
+        /// <summary>
+        /// Moderator this comment was approved by.  Will be null or empty if the comment has not been approved.
+        /// </summary>
         [JsonProperty("approved_by")]
         public string ApprovedBy { get; set; }
+
+        /// <summary>
+        /// Css class of the authors flair.
+        /// </summary>
         [JsonProperty("author_flair_css_class")]
         public string AuthorFlairCssClass { get; set; }
+
+        /// <summary>
+        /// Text of the authors flair.
+        /// </summary>
         [JsonProperty("author_flair_text")]
         public string AuthorFlairText { get; set; }
+
+        /// <summary>
+        /// Number of times this comment has been gilded.
+        /// </summary>
         [JsonProperty("gilded")]
         public int Gilded { get; set; }
+
+        /// <summary>
+        /// Link id.
+        /// </summary>
         [JsonProperty("link_id")]
         public string LinkId { get; set; }
+
+        /// <summary>
+        /// Parent link title.
+        /// </summary>
         [JsonProperty("link_title")]
         public string LinkTitle { get; set; }
+
+        /// <summary>
+        /// Number of reports on this comment.
+        /// </summary>
         [JsonProperty("num_reports")]
         public int? NumReports { get; set; }
+
+        /// <summary>
+        /// Returns true if this comment is stickied.
+        /// </summary>
         [JsonProperty("stickied")]
         public bool IsStickied { get; set; }
 
+        /// <summary>
+        /// More comments.
+        /// </summary>
         [JsonIgnore]
         public More More { get; set; }
 
+        /// <summary>
+        /// Replies to this comment.
+        /// </summary>
         [JsonIgnore]
         public IList<Comment> Comments { get; private set; }
 
+        /// <summary>
+        /// Parent <see cref="VotableThing"/>
+        /// </summary>
         [JsonIgnore]
         public Thing Parent { get; internal set; }
 
+        /// <inheritdoc/>
         public override string Shortlink
         {
             get
@@ -209,6 +293,11 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Reply to this comment.
+        /// </summary>
+        /// <param name="message">markdown text of the reply.</param>
+        /// <returns></returns>
         public Comment Reply(string message)
         {
             if (Reddit.User == null)
@@ -266,51 +355,69 @@ namespace RedditSharp.Things
                 throw new Exception("Error editing text.");
         }
 
-        private string SimpleAction(string endpoint)
-        {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(endpoint);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
-            {
-                id = FullName,
-                uh = Reddit.User.Modhash
-            });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            return data;
-        }
-
+        /// <summary>
+        /// Approve this comment.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void Approve()
         {
             var data = SimpleAction(ApproveUrl);
         }
 
+        /// <summary>
+        /// Delete this comment.    Logged in user must be a moderator of parent subreddit.
+        /// or the Author of this comment.
+        /// </summary>
         public void Del()
         {
             var data = SimpleAction(DelUrl);
         }
 
+        /// <summary>
+        /// Ignore reports on this comment.    Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void IgnoreReports()
         {
             var data = SimpleAction(IgnoreReportsUrl);
         }
 
+        /// <summary>
+        /// Unignore reports on this comment.    Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void UnIgnoreReports()
         {
             var data = SimpleAction(UnIgnoreReportsUrl);
         }
 
+        /// <summary>
+        /// Remove this comment.    Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void Remove()
         {
             RemoveImpl(false);
         }
 
+        /// <summary>
+        /// Remove this comment, flagging it as spam.    Logged in user must be a moderator of parent subreddit.
+        /// </summary>
         public void RemoveSpam()
         {
             RemoveImpl(true);
+        }
+
+        /// <summary>
+        /// Mark this comment as read.
+        /// </summary>
+        public void SetAsRead()
+        {
+            var request = WebAgent.CreatePost(SetAsReadUrl);
+            WebAgent.WritePostBody(request.GetRequestStream(), new
+            {
+                id = FullName,
+                uh = Reddit.User.Modhash,
+                api_type = "json"
+            });
+            var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
         private void RemoveImpl(bool spam)
@@ -328,17 +435,21 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
-        public void SetAsRead()
+        private string SimpleAction(string endpoint)
         {
-            var request = WebAgent.CreatePost(SetAsReadUrl);
-            WebAgent.WritePostBody(request.GetRequestStream(), new
+            if (Reddit.User == null)
+                throw new AuthenticationException("No user logged in.");
+            var request = WebAgent.CreatePost(endpoint);
+            var stream = request.GetRequestStream();
+            WebAgent.WritePostBody(stream, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash,
-                api_type = "json"
+                uh = Reddit.User.Modhash
             });
+            stream.Close();
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
+            return data;
         }
     }
 }

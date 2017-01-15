@@ -121,7 +121,7 @@ namespace RedditSharp
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <param name="useSsl"></param>
-        [Obsolete]
+        [Obsolete("OAuth is recommended.", false)]
         public Reddit(string username, string password, bool useSsl = true)
             : this(useSsl)
         {

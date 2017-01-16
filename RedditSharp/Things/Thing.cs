@@ -17,6 +17,7 @@ namespace RedditSharp.Things
             Kind = json["kind"].ValueOrDefault<string>();
             FetchedAt = DateTime.Now;
         }
+
         /// <summary>
         /// Shortlink to the item
         /// </summary>
@@ -25,8 +26,19 @@ namespace RedditSharp.Things
             get { return "http://redd.it/" + Id; }
         }
 
+        /// <summary>
+        /// Base36 id.
+        /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// reddit full name.  Kind_Base36 id.  Example.  t1_a1b2c3
+        /// </summary>
         public string FullName { get; set; }
+
+        /// <summary>
+        /// Thing kind.  t1, t2, t3 etc
+        /// </summary>
         public string Kind { get; set; }
 
         /// <summary>
@@ -45,6 +57,7 @@ namespace RedditSharp.Things
             }
         }
         // Awaitables don't have to be called asyncronously
+
         /// <summary>
         /// Parses what it is, based on the t(number) attribute
         /// </summary>
@@ -75,6 +88,7 @@ namespace RedditSharp.Things
                     return null;
             }
         }
+
         /// <summary>
         /// Parses what it is, based on the t(number) attribute
         /// </summary>
@@ -105,6 +119,7 @@ namespace RedditSharp.Things
                     return null;
             }
         }
+
         /// <summary>
         /// Tries to find the "Thing" you are looking for
         /// </summary>
@@ -141,6 +156,15 @@ namespace RedditSharp.Things
             }
             return result;
         }
+
+        /// <summary>
+        /// Tries to find the "Thing" you are looking for
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns>The "Thing"</returns>
         public static Thing Parse<T>(Reddit reddit, JToken json, IWebAgent webAgent) where T : Thing
         {
             Thing result = Parse(reddit, json, webAgent);

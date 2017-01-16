@@ -248,7 +248,7 @@ namespace RedditSharp
 
             if (IsOAuth())// use OAuth
             {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer ", AccessToken);//Must be included in OAuth calls
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
             }
             request.Method = new HttpMethod(method);
             request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by meepster23");
@@ -261,7 +261,7 @@ namespace RedditSharp
             request.RequestUri = uri;
             if (IsOAuth())// use OAuth
             {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer " + AccessToken);//Must be included in OAuth calls
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
             }
             request.Method = new HttpMethod(method);
             request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by /u/meepster23");

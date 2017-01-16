@@ -69,14 +69,7 @@ namespace RedditSharp.Things
         [JsonProperty("author")]
         public string AuthorName { get; set; }
 
-        [JsonIgnore]
-        public RedditUser Author
-        {
-            get
-            {
-                return Task.Run(async ()=> { return await Reddit.GetUserAsync(AuthorName); }).Result;
-            }
-        }
+        
         //TODO Discuss
         public IObservable<Comment> Comments
         {
@@ -223,12 +216,12 @@ namespace RedditSharp.Things
             return data;
         }
 
-        public Task Approve()
+        public Task ApproveAsync()
         {
             return SimpleActionAsync(ApproveUrl);
         }
 
-        public Task Remove()
+        public Task RemoveAsync()
         {
             return RemoveImplAsync(false);
         }

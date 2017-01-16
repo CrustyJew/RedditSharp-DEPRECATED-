@@ -140,7 +140,7 @@ namespace RedditSharp
                 DefaultValueHandling = DefaultValueHandling.Ignore
             };
             CaptchaSolver = new ConsoleCaptchaSolver();
-            if(initUser) Task.Run(InitOrUpdateUserAsync);
+            if(initUser) Task.Run(InitOrUpdateUserAsync).Wait();
         }
 
         public async Task<RedditUser> GetUserAsync(string name)

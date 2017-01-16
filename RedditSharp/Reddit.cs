@@ -298,8 +298,9 @@ namespace RedditSharp
         /// Get a <see cref="JToken"/> from a url.
         /// </summary>
         /// <param name="uri">uri to fetch</param>
+        /// <param name="isLive">bool indicating if it's a live thread or not</param>
         /// <returns></returns>
-        public JToken GetToken(Uri uri)
+        public JToken GetToken(Uri uri, bool isLive = false)
         {
             var url = uri.AbsoluteUri;
 

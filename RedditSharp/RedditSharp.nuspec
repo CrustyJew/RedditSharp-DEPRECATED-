@@ -25,6 +25,8 @@
    </dependencies>
  </metadata>
  <files>
-   <file src="bin\Release\RedditSharp.dll" target="lib\Net40" />
+   <file src="bin\Release\RedditSharp.dll" target="lib\Net45" />
+   <file src="bin\Release\RedditSharp.pdb" target="lib\Net45" />
+   <file src="bin\Release\RedditSharp.xml" target="lib\Net45" />
  </files>
 </package>

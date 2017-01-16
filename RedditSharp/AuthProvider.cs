@@ -168,7 +168,13 @@ namespace RedditSharp
             }
             throw new AuthenticationException("Could not log in.");
         }
-		
+
+        /// <summary>
+        /// revokes an oauth token
+        /// </summary>
+        /// <param name="token">The oauth token..</param>
+        /// <param name="isRefresh">Set to true for refresh token.</param>
+        /// <returns>The access token</returns>
         public void RevokeToken(string token, bool isRefresh)
         {
             string tokenType = isRefresh ? "refresh_token" : "access_token";

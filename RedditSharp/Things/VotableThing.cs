@@ -48,24 +48,41 @@ namespace RedditSharp.Things
         [JsonIgnore]
         private Reddit Reddit { get; set; }
 
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="webAgent"></param>
+        /// <param name="json"></param>
+        /// <returns></returns>
         protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await CommonInitAsync(reddit, webAgent, json);
             await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
             return this;
         }
+
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="webAgent"></param>
+        /// <param name="json"></param>
+        /// <returns></returns>
         protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             CommonInit(reddit, webAgent, json);
             JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
             return this;
         }
+
         private void CommonInit(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             Init(reddit, json);
             Reddit = reddit;
             WebAgent = webAgent;
         }
+
         private async Task CommonInitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await InitAsync(reddit, json);
@@ -73,15 +90,33 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
-
+        /// <summary>
+        /// Number of upvotes on this item.
+        /// </summary>
         [JsonProperty("downs")]
         public int Downvotes { get; set; }
+
+        /// <summary>
+        /// Number of upvotes on this item.
+        /// </summary>
         [JsonProperty("ups")]
         public int Upvotes { get; set; }
+
+        /// <summary>
+        /// Current score of this item.
+        /// </summary>
         [JsonProperty("score")]
         public int Score { get; set; }
+
+        /// <summary>
+        /// Returns true if this item is saved.
+        /// </summary>
         [JsonProperty("saved")]
         public bool Saved { get; set; }
+
+        /// <summary>
+        /// Returns the distinguish type.
+        /// </summary>
         [JsonProperty("distinguished")]
         [JsonConverter(typeof(DistinguishConverter))]
         public DistinguishType Distinguished { get; set; }
@@ -94,10 +129,16 @@ namespace RedditSharp.Things
         [JsonProperty("likes")]
         public bool? Liked { get; set; }
 
+        /// <summary>
+        /// Returns a list of reports made by moderators.
+        /// </summary>
         [JsonProperty("mod_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> ModReports { get; set; }
 
+        /// <summary>
+        /// Returns a list of reports made by users.
+        /// </summary>
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> UserReports { get; set; }
@@ -128,11 +169,18 @@ namespace RedditSharp.Things
             this.SetVote(VoteType.Upvote);
         }
 
+        /// <summary>
+        /// Downvote this item.
+        /// </summary>
         public void Downvote()
         {
             this.SetVote(VoteType.Downvote);
         }
 
+        /// <summary>
+        /// Vote on this item.
+        /// </summary>
+        /// <param name="type"></param>
         public void SetVote(VoteType type)
         {
             if (this.Vote == type) return;
@@ -160,6 +208,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Save this item.
+        /// </summary>
         public void Save()
         {
             var request = WebAgent.CreatePost(SaveUrl);
@@ -175,6 +226,9 @@ namespace RedditSharp.Things
             Saved = true;
         }
 
+        /// <summary>
+        /// Unsave this item.
+        /// </summary>
         public void Unsave()
         {
             var request = WebAgent.CreatePost(UnsaveUrl);
@@ -190,6 +244,9 @@ namespace RedditSharp.Things
             Saved = false;
         }
 
+        /// <summary>
+        /// Clear you vote on this item.
+        /// </summary>
         public void ClearVote()
         {
             var request = WebAgent.CreatePost(VoteUrl);
@@ -204,6 +261,7 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
         /// <summary>
         /// Reports someone
         /// </summary>
@@ -243,6 +301,7 @@ namespace RedditSharp.Things
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
+
         /// <summary>
         /// Distingiush a comment
         /// </summary>

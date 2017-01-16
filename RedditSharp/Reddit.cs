@@ -37,7 +37,8 @@ namespace RedditSharp
         private const string GoldSubredditsUrl = "/subreddits/gold.json";
         private const string DefaultSubredditsUrl = "/subreddits/default.json";
         private const string SearchSubredditsUrl = "/subreddits/search.json?q={0}";
-
+        private const string CreateLiveEventUrl = "/api/live/create";
+        private const string GetLiveEventUrl = "https://www.reddit.com/live/{0}/about";
 
         #endregion
 
@@ -292,6 +293,7 @@ namespace RedditSharp
             return new Domain(this, uri, WebAgent);
         }
 
+
         /// <summary>
         /// Get a <see cref="JToken"/> from a url.
         /// </summary>
@@ -309,7 +311,10 @@ namespace RedditSharp
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JToken.Parse(data);
 
-            return json[0]["data"]["children"].First;
+            if (isLive)
+                return json;
+            else
+                return json[0]["data"]["children"].First;
         }
 
         /// <summary>
@@ -323,6 +328,60 @@ namespace RedditSharp
         }
 
         /// <summary>
+        /// Create a Reddit Live thread.
+        /// </summary>
+        /// <param name="title">Required.</param>
+        /// <param name="description">Required</param>
+        /// <param name="resources"></param>
+        /// <param name="nsfw"></param>
+        /// <returns></returns>
+        public LiveUpdateEvent CreateLiveEvent(string title,string description,string resources = "", bool nsfw = false)
+        {
+            if (String.IsNullOrEmpty(title))
+                throw new ArgumentException(nameof(title));
+
+            if (String.IsNullOrEmpty(description))
+                throw new ArgumentException(nameof(description));
+
+            var request = WebAgent.CreatePost(CreateLiveEventUrl);
+            WebAgent.WritePostBody(request.GetRequestStream(), new
+            {
+                api_type = "json",
+                title = title,
+                description = description,
+                resources = resources,
+                nsfw = nsfw
+            });
+            var response = request.GetResponse();
+            var result = WebAgent.GetResponseString(response.GetResponseStream());
+            var json = JObject.Parse(result);
+
+            if (json["json"]["errors"].Any())
+                throw new Exception(json["json"]["errors"][0][0].ToString());
+
+            var id = json["json"]["data"]["id"].ToString();
+
+            return GetLiveEvent(new Uri(String.Format(GetLiveEventUrl, id)));
+        }
+
+        /// <summary>
+        /// Get a reddit live thread.
+        /// </summary>
+        /// <param name="uri">Uri of the live thread.</param>
+        /// <returns></returns>
+        public LiveUpdateEvent GetLiveEvent(Uri uri)
+        {
+            if (!uri.AbsoluteUri.EndsWith("about"))
+                uri = new Uri(uri.AbsoluteUri + "/about");
+
+            var token = GetToken(uri,true);
+            return new LiveUpdateEvent().Init(this, token, WebAgent);
+        }
+
+
+        /// <summary>
+        /// 
+
         /// Compose a private message.
         /// </summary>
         /// <param name="subject">message subject</param>

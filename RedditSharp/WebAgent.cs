@@ -97,6 +97,16 @@ namespace RedditSharp
             get { return _requestsThisBurst; }
         }
 
+        /// <summary>
+        /// Whether or not to use a proxy when executing web requests
+        /// </summary>
+        public bool UseProxy { get; set; }
+
+        /// <summary>
+        /// Proxy for executing web requests, will not be used unless <see cref="UseProxy"/> is true
+        /// </summary>
+        public WebProxy Proxy { get; set; }
+
         static WebAgent()
         {
             UserAgent = "";
@@ -141,6 +151,12 @@ namespace RedditSharp
         public virtual JToken ExecuteRequest(HttpWebRequest request)
         {
             EnforceRateLimit();
+
+            if(UseProxy)
+            {
+                request.Proxy = Proxy;
+            }
+
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             var result = GetResponseString(response.GetResponseStream());
 
@@ -253,6 +269,7 @@ namespace RedditSharp
             }
             request.Method = method;
             request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
+            request = InjectProxy(request);
             return request;
         }
 
@@ -278,6 +295,7 @@ namespace RedditSharp
             }
             request.Method = method;
             request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
+            request = InjectProxy(request);
             return request;
         }
 
@@ -381,6 +399,19 @@ namespace RedditSharp
         private static bool IsOAuth()
         {
             return RootDomain == "oauth.reddit.com";
+        }
+
+        /// <summary>
+        /// Inject the web proxy <see cref="Proxy"/> into the provided request
+        /// </summary>
+        /// <param name="request">The request object to inject the proxy into</param>
+        public virtual HttpWebRequest InjectProxy(HttpWebRequest request)
+        {
+            if (this.UseProxy)
+            {
+                request.Proxy = this.Proxy;
+            }
+            return request;
         }
     }
 }

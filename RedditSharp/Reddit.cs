@@ -325,6 +325,9 @@ namespace RedditSharp
         /// <returns></returns>
         public Post GetPost(Uri uri)
         {
+            if (!String.IsNullOrEmpty(WebAgent.AccessToken) && uri.AbsoluteUri.StartsWith("https://www.reddit.com"))
+                uri = new Uri(uri.AbsoluteUri.Replace("https://www.reddit.com", "https://oauth.reddit.com"));
+
             return new Post().Init(this, GetToken(uri), WebAgent);
         }
 

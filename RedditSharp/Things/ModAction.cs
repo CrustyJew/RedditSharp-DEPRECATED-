@@ -78,12 +78,6 @@ namespace RedditSharp.Things
             }
         }
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
         /// <summary>
         /// Initialize
         /// </summary>

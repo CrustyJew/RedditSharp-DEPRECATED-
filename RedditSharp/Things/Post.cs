@@ -13,10 +13,7 @@ namespace RedditSharp.Things
     public class Post : VotableThing
     {
         private const string CommentUrl = "/api/comment";
-        private const string RemoveUrl = "/api/remove";
-        private const string DelUrl = "/api/del";
         private const string GetCommentsUrl = "/comments/{0}.json";
-        private const string ApproveUrl = "/api/approve";
         private const string EditUserTextUrl = "/api/editusertext";
         private const string HideUrl = "/api/hide";
         private const string UnhideUrl = "/api/unhide";
@@ -25,14 +22,7 @@ namespace RedditSharp.Things
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
-        private const string IgnoreReportsUrl = "/api/ignore_reports";
-        private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
         /// <summary>
         /// Initialize
         /// </summary>
@@ -76,12 +66,6 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Name of the author of this post.
-        /// </summary>
-        [JsonProperty("author")]
-        public string AuthorName { get; set; }
-
-        /// <summary>
         /// Author of this post.
         /// </summary>
         [JsonIgnore]
@@ -105,40 +89,10 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// The moderator who approved this post.  This will be null or empty if the post has not been approved.
-        /// </summary>
-        [JsonProperty("approved_by")]
-        public string ApprovedBy { get; set; }
-
-        /// <summary>
-        /// Css flair class of the posts author.
-        /// </summary>
-        [JsonProperty("author_flair_css_class")]
-        public string AuthorFlairCssClass { get; set; }
-
-        /// <summary>
-        /// Flair text of the posts author.
-        /// </summary>
-        [JsonProperty("author_flair_text")]
-        public string AuthorFlairText { get; set; }
-
-        /// <summary>
-        /// The moderator who removed this post.  This will be null or empty if the post has not been removed.
-        /// </summary>
-        [JsonProperty("banned_by")]
-        public string BannedBy { get; set; }
-
-        /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]
         public string Domain { get; set; }
-
-        /// <summary>
-        /// Returns true if this post has been edited by the author.
-        /// </summary>
-        [JsonProperty("edited")]
-        public bool Edited { get; set; }
 
         /// <summary>
         /// Returns true if this is a self post.
@@ -209,18 +163,6 @@ namespace RedditSharp.Things
         public string SubredditName { get; set; }
 
         /// <summary>
-        /// Returns true if this post is archived.
-        /// </summary>
-        [JsonProperty("archived")]
-        public bool IsArchived { get; set; }
-
-        /// <summary>
-        /// Returns true if the post is sticked.
-        /// </summary>
-        [JsonProperty("stickied")]
-        public bool IsStickied { get; set; }
-
-        /// <summary>
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
@@ -238,12 +180,6 @@ namespace RedditSharp.Things
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; set; }
-
-        /// <summary>
-        /// Number of reports on this post.
-        /// </summary>
-        [JsonProperty("num_reports")]
-        public int? Reports { get; set; }
 
         /// <summary>
         /// Comment on this post.
@@ -270,23 +206,6 @@ namespace RedditSharp.Things
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
             return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
-        }
-
-        private string SimpleAction(string endpoint)
-        {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(endpoint);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
-            {
-                id = FullName,
-                uh = Reddit.User.Modhash
-            });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-            return data;
         }
 
         private string SimpleActionToggle(string endpoint, bool value, bool requiresModAction = false)
@@ -318,53 +237,6 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Approve this post.  Logged in user must be a moderator of parent subreddit.
-        /// </summary>
-        public void Approve()
-        {
-            var data = SimpleAction(ApproveUrl);
-        }
-
-        /// <summary>
-        /// Remove this post.  Logged in user must be a moderator of parent subreddit.
-        /// </summary>
-        public void Remove()
-        {
-            RemoveImpl(false);
-        }
-
-        /// <summary>
-        /// Remove this post, flagging it as spam.  Logged in user must be a moderator of parent subreddit.
-        /// </summary>
-        public void RemoveSpam()
-        {
-            RemoveImpl(true);
-        }
-
-        private void RemoveImpl(bool spam)
-        {
-            var request = WebAgent.CreatePost(RemoveUrl);
-            var stream = request.GetRequestStream();
-            WebAgent.WritePostBody(stream, new
-            {
-                id = FullName,
-                spam = spam,
-                uh = Reddit.User.Modhash
-            });
-            stream.Close();
-            var response = request.GetResponse();
-            var data = WebAgent.GetResponseString(response.GetResponseStream());
-        }
-
-        /// <summary>
-        /// Delete this post.  Logged in user must be post author.
-        /// </summary>
-        public void Del()
-        {
-            var data = SimpleAction(DelUrl);
-        }
-
-        /// <summary>
         /// Hide this post.
         /// </summary>
         public void Hide()
@@ -378,22 +250,6 @@ namespace RedditSharp.Things
         public void Unhide()
         {
             var data = SimpleAction(UnhideUrl);
-        }
-
-        /// <summary>
-        /// Ignore reports on this post.  Logged in user must be a moderator of parent subreddit.
-        /// </summary>
-        public void IgnoreReports()
-        {
-            var data = SimpleAction(IgnoreReportsUrl);
-        }
-
-        /// <summary>
-        /// Unignore reports on this post.  Logged in user must be a moderator of parent subreddit.
-        /// </summary>
-        public void UnIgnoreReports()
-        {
-            var data = SimpleAction(UnIgnoreReportsUrl);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Security.Authentication;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using RedditSharp.Extensions;
@@ -7,6 +8,10 @@ namespace RedditSharp.Things
 {
     public class Thing
     {
+        protected Reddit Reddit { get; set; }
+
+        protected IWebAgent WebAgent { get; set; }
+
         internal void Init(JToken json)
         {
             if (json == null)
@@ -216,6 +221,30 @@ namespace RedditSharp.Things
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Execute a simple POST request against the reddit api.  
+        /// Supports endpoints that require only id and modhash as
+        /// parameters.
+        /// </summary>
+        /// <param name="endpoint"></param>
+        /// <returns></returns>
+        protected virtual string SimpleAction(string endpoint)
+        {
+            if (Reddit.User == null)
+                throw new AuthenticationException("No user logged in.");
+            var request = WebAgent.CreatePost(endpoint);
+            var stream = request.GetRequestStream();
+            WebAgent.WritePostBody(stream, new
+            {
+                id = FullName,
+                uh = Reddit.User.Modhash
+            });
+            stream.Close();
+            var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
+            return data;
         }
     }
 }

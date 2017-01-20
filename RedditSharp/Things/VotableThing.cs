@@ -42,11 +42,11 @@ namespace RedditSharp.Things
         private const string ReportUrl = "/api/report";
         private const string DistinguishUrl = "/api/distinguish";
 
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
+        private const string ApproveUrl = "/api/approve";
+        private const string DelUrl = "/api/del";
+        private const string RemoveUrl = "/api/remove";
+        private const string IgnoreReportsUrl = "/api/ignore_reports";
+        private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
         /// <summary>
         /// Initialize.
@@ -90,11 +90,68 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
+        protected virtual void RemoveImpl(bool spam)
+        {
+            var request = WebAgent.CreatePost(RemoveUrl);
+            var stream = request.GetRequestStream();
+            WebAgent.WritePostBody(stream, new
+            {
+                id = FullName,
+                spam = spam,
+                uh = Reddit.User.Modhash
+            });
+            stream.Close();
+            var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
+        }
+
+        /// <summary>
+        /// The moderator who approved this item.  This will be null or empty if the item has not been approved.
+        /// </summary>
+        [JsonProperty("approved_by")]
+        public string ApprovedBy { get; set; }
+
+        /// <summary>
+        /// Author user name.
+        /// </summary>
+        [JsonProperty("author")]
+        public string AuthorName { get; set; }
+
+        /// <summary>
+        /// Css flair class of the item author.
+        /// </summary>
+        [JsonProperty("author_flair_css_class")]
+        public string AuthorFlairCssClass { get; set; }
+
+        /// <summary>
+        /// Flair text of the item author.
+        /// </summary>
+        [JsonProperty("author_flair_text")]
+        public string AuthorFlairText { get; set; }
+
+        /// <summary>
+        /// The moderator who removed this item.  This will be null or empty if the item has not been removed.
+        /// </summary>
+        [JsonProperty("banned_by")]
+        public string BannedBy { get; set; }
+
         /// <summary>
         /// Number of upvotes on this item.
         /// </summary>
         [JsonProperty("downs")]
         public int Downvotes { get; set; }
+
+        /// <summary>
+        /// Returns true if this item has been edited by the author.
+        /// </summary>
+        [JsonProperty("edited")]
+        public bool Edited { get; set; }
+
+        /// <summary>
+        /// Returns true if this item is archived.
+        /// </summary>
+        [JsonProperty("archived")]
+        public bool IsArchived { get; set; }
 
         /// <summary>
         /// Number of upvotes on this item.
@@ -113,6 +170,25 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("saved")]
         public bool Saved { get; set; }
+
+        /// <summary>
+        /// Returns true if the item is sticked.
+        /// </summary>
+        [JsonProperty("stickied")]
+        public bool IsStickied { get; set; }
+
+        /// <summary>
+        /// Number of reports on this item.
+        /// </summary>
+        [JsonIgnore]
+        [Obsolete("Use ReportCount instead.", false)]
+        public int? NumReports => ReportCount;
+
+        /// <summary>
+        /// Number of reports on this item.
+        /// </summary>
+        [JsonProperty("num_reports")]
+        public int? ReportCount { get; set; }
 
         /// <summary>
         /// Returns the distinguish type.
@@ -142,6 +218,12 @@ namespace RedditSharp.Things
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> UserReports { get; set; }
+
+        /// <summary>
+        /// Number of times this item has been gilded.
+        /// </summary>
+        [JsonProperty("gilded")]
+        public int Gilded { get; set; }
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.
@@ -303,7 +385,7 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Distingiush a comment
+        /// Distinguish an item
         /// </summary>
         /// <param name="distinguishType">Type you want to distinguish <see cref="DistinguishType"/></param>
         public void Distinguish(DistinguishType distinguishType)
@@ -339,7 +421,55 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             var json = JObject.Parse(data);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
-                throw new AuthenticationException("You are not permitted to distinguish this comment.");
+                throw new AuthenticationException("You are not permitted to distinguish this item.");
+        }
+
+        /// <summary>
+        /// Approve this item.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        public void Approve()
+        {
+            var data = SimpleAction(ApproveUrl);
+        }
+
+        /// <summary>
+        /// Remove this item.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        public void Remove()
+        {
+            RemoveImpl(false);
+        }
+
+        /// <summary>
+        /// Remove this item, flagging it as spam.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        public void RemoveSpam()
+        {
+            RemoveImpl(true);
+        }
+
+        /// <summary>
+        /// Delete this item.  Logged in user must be the items author.
+        /// </summary>
+        public void Del()
+        {
+            var data = SimpleAction(DelUrl);
+        }
+
+        /// <summary>
+        /// Ignore reports on this item.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        public void IgnoreReports()
+        {
+            var data = SimpleAction(IgnoreReportsUrl);
+        }
+
+        /// <summary>
+        /// Unignore reports on this item.  Logged in user must be a moderator of parent subreddit.
+        /// </summary>
+        public void UnIgnoreReports()
+        {
+            var data = SimpleAction(UnIgnoreReportsUrl);
         }
 
         internal class DistinguishConverter : JsonConverter

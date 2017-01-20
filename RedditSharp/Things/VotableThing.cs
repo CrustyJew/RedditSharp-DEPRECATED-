@@ -154,6 +154,26 @@ namespace RedditSharp.Things
         public bool IsArchived { get; set; }
 
         /// <summary>
+        /// Returns true if this item has been approved.
+        /// Returns false if the item has not been approved.  A value of false does not indicate
+        /// an item has been removed.
+        /// 
+        /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
+        /// </summary>
+        [JsonProperty("approved")]
+        public bool? IsApproved { get; set; }
+
+        /// <summary>
+        /// Returns true if this item has been removed.
+        /// Returns false if the item has not been removed.  A value of false does not indicate
+        /// an item has been approved.
+        /// 
+        /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
+        /// </summary>
+        [JsonProperty("removed")]
+        public bool? IsRemoved { get; set; }
+
+        /// <summary>
         /// Number of upvotes on this item.
         /// </summary>
         [JsonProperty("ups")]

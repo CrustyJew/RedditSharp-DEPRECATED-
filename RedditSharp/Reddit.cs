@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using RedditSharp.Things;
 using System;
 using System.Linq;
-using System.Net;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using DefaultWebAgent = RedditSharp.WebAgent;
@@ -17,8 +16,6 @@ namespace RedditSharp
     {
         #region Constant Urls
 
-        private const string SslLoginUrl = "https://ssl.reddit.com/api/login";
-        private const string LoginUrl = "/api/login/username";
         private const string UserInfoUrl = "/user/{0}/about.json";
         private const string MeUrl = "/api/me.json";
         private const string OAuthMeUrl = "/api/v1/me.json";
@@ -28,7 +25,6 @@ namespace RedditSharp
         private const string GetThingUrl = "/api/info.json?id={0}";
         private const string GetCommentUrl = "/r/{0}/comments/{1}/foo/{2}";
         private const string GetPostUrl = "{0}.json";
-        private const string DomainUrl = "www.reddit.com";
         private const string OAuthDomainUrl = "oauth.reddit.com";
         private const string SearchUrl = "/search.json?q={0}&restrict_sr=off&sort={1}&t={2}";
         private const string UrlSearchPattern = "url:'{0}'";
@@ -37,7 +33,8 @@ namespace RedditSharp
         private const string GoldSubredditsUrl = "/subreddits/gold.json";
         private const string DefaultSubredditsUrl = "/subreddits/default.json";
         private const string SearchSubredditsUrl = "/subreddits/search.json?q={0}";
-
+        private const string CreateLiveEventUrl = "/api/live/create";
+        private const string GetLiveEventUrl = "https://www.reddit.com/live/{0}/about";
 
         #endregion
 
@@ -80,9 +77,15 @@ namespace RedditSharp
             get { return Subreddit.GetRSlashAll(this); }
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public Reddit()
             : this(true) { }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public Reddit(bool useSsl)
         {
             DefaultWebAgent defaultAgent = new DefaultWebAgent();
@@ -97,6 +100,11 @@ namespace RedditSharp
             CaptchaSolver = new ConsoleCaptchaSolver();
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="limitMode">Rate limit</param>
+        /// <param name="useSsl">use ssl.  Defaults to true.</param>
         public Reddit(DefaultWebAgent.RateLimitMode limitMode, bool useSsl = true)
             : this(useSsl)
         {
@@ -105,6 +113,10 @@ namespace RedditSharp
             DefaultWebAgent.RootDomain = "www.reddit.com";
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="accessToken">oauth access token.</param>
         public Reddit(string accessToken)
             : this(true)
         {
@@ -143,6 +155,11 @@ namespace RedditSharp
             if(initUser) Task.Run(InitOrUpdateUserAsync).Wait();
         }
 
+        /// <summary>
+        /// Get a reddit user by name.
+        /// </summary>
+        /// <param name="name">user name</param>
+        /// <returns></returns>
         public async Task<RedditUser> GetUserAsync(string name)
         {
             var request = WebAgent.CreateGet(string.Format(UserInfoUrl, name));
@@ -167,16 +184,21 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Returns the subreddit. 
+        /// Get a subreddit by name.
         /// </summary>
-        /// <param name="name">The name of the subreddit</param>
-        /// <returns>The Subreddit by given name</returns>
+        /// <param name="name">subreddit name with or without preceding /r/</param>
+        /// <returns></returns>
         public async Task<Subreddit> GetSubredditAsync(string name)
         {
             name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
             return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
+        /// <summary>
+        /// Get information about a domain.
+        /// </summary>
+        /// <param name="domain">domain name</param>
+        /// <returns></returns>
         public Domain GetDomain(string domain)
         {
             if (!domain.StartsWith("http://") && !domain.StartsWith("https://"))
@@ -185,7 +207,13 @@ namespace RedditSharp
             return new Domain(this, uri, WebAgent);
         }
 
-        public async Task<JToken> GetTokenAsync(Uri uri)
+        /// <summary>
+        /// Get a <see cref="JToken"/> from a url.
+        /// </summary>
+        /// <param name="uri">uri to fetch</param>
+        /// <param name="isLive">bool indicating if it's a live thread or not</param>
+        /// <returns></returns>
+        public async Task<JToken> GetTokenAsync(Uri uri, bool isLive = false)
         {
             var url = uri.AbsoluteUri;
 
@@ -197,19 +225,80 @@ namespace RedditSharp
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
 
-            return json[0]["data"]["children"].First;
+            if (isLive)
+                return json;
+            else
+                return json[0]["data"]["children"].First;
         }
 
+        /// <summary>
+        /// Get a <see cref="Post"/> by uri.
+        /// </summary>
+        /// <param name="uri">uri to fetch</param>
+        /// <returns></returns>
         public async Task<Post> GetPostAsync(Uri uri)
         {
+            if (!String.IsNullOrEmpty(WebAgent.AccessToken) && uri.AbsoluteUri.StartsWith("https://www.reddit.com"))
+                uri = new Uri(uri.AbsoluteUri.Replace("https://www.reddit.com", "https://oauth.reddit.com"));
             return await new Post().InitAsync(this, await GetTokenAsync(uri), WebAgent);
         }
+
         /// <summary>
-        /// 
+        /// Create a Reddit Live thread.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <param name="body"></param>
-        /// <param name="to"></param>
+        /// <param name="title">Required.</param>
+        /// <param name="description">Required</param>
+        /// <param name="resources"></param>
+        /// <param name="nsfw"></param>
+        /// <returns></returns>
+        public async Task<LiveUpdateEvent> CreateLiveEventAsync(string title,string description,string resources = "", bool nsfw = false)
+        {
+            if (String.IsNullOrEmpty(title))
+                throw new ArgumentException(nameof(title));
+
+            if (String.IsNullOrEmpty(description))
+                throw new ArgumentException(nameof(description));
+
+            var request = WebAgent.CreatePost(CreateLiveEventUrl);
+            WebAgent.WritePostBody(request, new
+            {
+                api_type = "json",
+                title = title,
+                description = description,
+                resources = resources,
+                nsfw = nsfw
+            });
+            var json = await WebAgent.ExecuteRequestAsync(request);
+
+            if (json["json"]["errors"].Any())
+                throw new Exception(json["json"]["errors"][0][0].ToString());
+
+            var id = json["json"]["data"]["id"].ToString();
+
+            return await GetLiveEvent(new Uri(String.Format(GetLiveEventUrl, id)));
+        }
+
+        /// <summary>
+        /// Get a reddit live thread.
+        /// </summary>
+        /// <param name="uri">Uri of the live thread.</param>
+        /// <returns></returns>
+        public async Task<LiveUpdateEvent> GetLiveEvent(Uri uri)
+        {
+            if (!uri.AbsoluteUri.EndsWith("about"))
+                uri = new Uri(uri.AbsoluteUri + "/about");
+
+            var token = await GetTokenAsync(uri);
+            return new LiveUpdateEvent().Init(this, token, WebAgent);
+        }
+
+
+        /// <summary>
+        /// Compose a private message.
+        /// </summary>
+        /// <param name="subject">message subject</param>
+        /// <param name="body">markdown body</param>
+        /// <param name="to">target author or subreddit</param>
         /// <param name="fromSubReddit">The subreddit to send the message as (optional).</param>
         /// <param name="captchaId"></param>
         /// <param name="captchaAnswer"></param>
@@ -286,6 +375,11 @@ namespace RedditSharp
             // TODO: Error
         }
 
+        /// <summary>
+        /// Get a <see cref="Thing"/> by full name.
+        /// </summary>
+        /// <param name="fullname"></param>
+        /// <returns></returns>
         public async Task<Thing> GetThingByFullnameAsync(string fullname)
         {
             var request = WebAgent.CreateGet(string.Format(GetThingUrl, fullname));
@@ -295,6 +389,13 @@ namespace RedditSharp
             return Thing.Parse(this, json["data"]["children"][0], WebAgent);
         }
 
+        /// <summary>
+        /// Get a <see cref="Comment"/>.
+        /// </summary>
+        /// <param name="subreddit">subreddit name in which the comment resides</param>
+        /// <param name="name">comment base36 id</param>
+        /// <param name="linkName">post base36 id</param>
+        /// <returns></returns>
         public Task<Comment> GetCommentAsync(string subreddit, string name, string linkName)
         {
             
@@ -308,6 +409,11 @@ namespace RedditSharp
             
         }
 
+        /// <summary>
+        /// Get a <see cref="Comment"/>.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
         public async Task<Comment> GetCommentAsync(Uri uri)
         {
             var url = string.Format(GetPostUrl, uri.AbsoluteUri);
@@ -320,12 +426,26 @@ namespace RedditSharp
             return new Comment().Init(this, json[1]["data"]["children"][0], WebAgent, sender);
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of items matching url search.
+        /// </summary>
+        /// <typeparam name="T"><see cref="Thing"/></typeparam>
+        /// <param name="url">query url</param>
+        /// <returns></returns>
         public Listing<T> SearchByUrl<T>(string url) where T : Thing
         {
             var urlSearchQuery = string.Format(UrlSearchPattern, url);
             return Search<T>(urlSearchQuery);
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of items matching search.
+        /// </summary>
+        /// <typeparam name="T"><see cref="Thing"/></typeparam>
+        /// <param name="query">string to query</param>
+        /// <param name="sortE">Order by <see cref="Sorting"/></param>
+        /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
+        /// <returns></returns>
         public Listing<T> Search<T>(string query, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
             string sort = sortE.ToString().ToLower();
@@ -333,6 +453,17 @@ namespace RedditSharp
             return new Listing<T>(this, string.Format(SearchUrl, query, sort, time), WebAgent);
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of items matching search with a given time period.
+        /// </summary>
+        /// <typeparam name="T"><see cref="Thing"/></typeparam>
+        /// <param name="from">DateTime from</param>
+        /// <param name="to">DateTime to</param>
+        /// <param name="query">string to query</param>
+        /// <param name="subreddit">subreddit in which to search</param>
+        /// <param name="sortE">Order by <see cref="Sorting"/></param>
+        /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
+        /// <returns></returns>
         public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
             string sort = sortE.ToString().ToLower();

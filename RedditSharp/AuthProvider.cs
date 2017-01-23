@@ -167,7 +167,13 @@ namespace RedditSharp
             }
             throw new AuthenticationException("Could not log in.");
         }
-		
+
+        /// <summary>
+        /// revokes an oauth token
+        /// </summary>
+        /// <param name="token">The oauth token..</param>
+        /// <param name="isRefresh">Set to true for refresh token.</param>
+        /// <returns>The access token</returns>
         public async Task RevokeTokenAsync(string token, bool isRefresh)
         {
             string tokenType = isRefresh ? "refresh_token" : "access_token";
@@ -185,6 +191,7 @@ namespace RedditSharp
             var data = await _webAgent.ExecuteRequestAsync(request);
 
         }
+
         /// <summary>
         /// Gets a user authenticated by OAuth2.
         /// </summary>

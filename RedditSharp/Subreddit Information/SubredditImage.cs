@@ -39,11 +39,29 @@ namespace RedditSharp
             
         }
 
+        /// <summary>
+        /// css link.
+        /// </summary>
         public string CssLink { get; set; }
+
+        /// <summary>
+        /// Name.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Url.
+        /// </summary>
         public Uri Url { get; set; }
+
+        /// <summary>
+        /// Subreddit style.
+        /// </summary>
         public SubredditStyle SubredditStyle { get; set; }
 
+        /// <summary>
+        /// Delete this subreddit image.
+        /// </summary>
         public async Task Delete()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);
@@ -57,6 +75,11 @@ namespace RedditSharp
             var data = await response.Content.ReadAsStringAsync();
             SubredditStyle.Images.Remove(this);
         }
+
+        /// <summary>
+        /// Delete this subreddit image.
+        /// </summary>
+        /// <returns></returns>
         public async Task DeleteAsync()
         {
             var request = WebAgent.CreatePost(DeleteImageUrl);

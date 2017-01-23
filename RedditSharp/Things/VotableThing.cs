@@ -42,30 +42,47 @@ namespace RedditSharp.Things
         private const string ReportUrl = "/api/report";
         private const string DistinguishUrl = "/api/distinguish";
 
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
+        private const string ApproveUrl = "/api/approve";
+        private const string DelUrl = "/api/del";
+        private const string RemoveUrl = "/api/remove";
+        private const string IgnoreReportsUrl = "/api/ignore_reports";
+        private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="webAgent"></param>
+        /// <param name="json"></param>
+        /// <returns></returns>
         protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await CommonInitAsync(reddit, webAgent, json);
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings));
             return this;
         }
+
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="webAgent"></param>
+        /// <param name="json"></param>
+        /// <returns></returns>
         protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             CommonInit(reddit, webAgent, json);
             JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
             return this;
         }
+
         private void CommonInit(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             Init(reddit, json);
             Reddit = reddit;
             WebAgent = webAgent;
         }
+
         private async Task CommonInitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await InitAsync(reddit, json);
@@ -73,15 +90,114 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
+        /// <summary>
+        /// The moderator who approved this item.  This will be null or empty if the item has not been approved.
+        /// </summary>
+        [JsonProperty("approved_by")]
+        public string ApprovedBy { get; set; }
 
+        /// <summary>
+        /// Author user name.
+        /// </summary>
+        [JsonProperty("author")]
+        public string AuthorName { get; set; }
+
+        /// <summary>
+        /// Css flair class of the item author.
+        /// </summary>
+        [JsonProperty("author_flair_css_class")]
+        public string AuthorFlairCssClass { get; set; }
+
+        /// <summary>
+        /// Flair text of the item author.
+        /// </summary>
+        [JsonProperty("author_flair_text")]
+        public string AuthorFlairText { get; set; }
+
+        /// <summary>
+        /// The moderator who removed this item.  This will be null or empty if the item has not been removed.
+        /// </summary>
+        [JsonProperty("banned_by")]
+        public string BannedBy { get; set; }
+
+        /// <summary>
+        /// Number of upvotes on this item.
+        /// </summary>
         [JsonProperty("downs")]
         public int Downvotes { get; set; }
+
+        /// <summary>
+        /// Returns true if this item has been edited by the author.
+        /// </summary>
+        [JsonProperty("edited")]
+        public bool Edited { get; set; }
+
+        /// <summary>
+        /// Returns true if this item is archived.
+        /// </summary>
+        [JsonProperty("archived")]
+        public bool IsArchived { get; set; }
+
+        /// <summary>
+        /// Returns true if this item has been approved.
+        /// Returns false if the item has not been approved.  A value of false does not indicate
+        /// an item has been removed.
+        /// 
+        /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
+        /// </summary>
+        [JsonProperty("approved")]
+        public bool? IsApproved { get; set; }
+
+        /// <summary>
+        /// Returns true if this item has been removed.
+        /// Returns false if the item has not been removed.  A value of false does not indicate
+        /// an item has been approved.
+        /// 
+        /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
+        /// </summary>
+        [JsonProperty("removed")]
+        public bool? IsRemoved { get; set; }
+
+        /// <summary>
+        /// Number of upvotes on this item.
+        /// </summary>
         [JsonProperty("ups")]
         public int Upvotes { get; set; }
+
+        /// <summary>
+        /// Current score of this item.
+        /// </summary>
         [JsonProperty("score")]
         public int Score { get; set; }
+
+        /// <summary>
+        /// Returns true if this item is saved.
+        /// </summary>
         [JsonProperty("saved")]
         public bool Saved { get; set; }
+
+        /// <summary>
+        /// Returns true if the item is sticked.
+        /// </summary>
+        [JsonProperty("stickied")]
+        public bool IsStickied { get; set; }
+
+        /// <summary>
+        /// Number of reports on this item.
+        /// </summary>
+        [JsonIgnore]
+        [Obsolete("Use ReportCount instead.", false)]
+        public int? NumReports => ReportCount;
+
+        /// <summary>
+        /// Number of reports on this item.
+        /// </summary>
+        [JsonProperty("num_reports")]
+        public int? ReportCount { get; set; }
+
+        /// <summary>
+        /// Returns the distinguish type.
+        /// </summary>
         [JsonProperty("distinguished")]
         [JsonConverter(typeof(DistinguishConverter))]
         public DistinguishType Distinguished { get; set; }
@@ -94,13 +210,25 @@ namespace RedditSharp.Things
         [JsonProperty("likes")]
         public bool? Liked { get; set; }
 
+        /// <summary>
+        /// Returns a list of reports made by moderators.
+        /// </summary>
         [JsonProperty("mod_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> ModReports { get; set; }
 
+        /// <summary>
+        /// Returns a list of reports made by users.
+        /// </summary>
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> UserReports { get; set; }
+
+        /// <summary>
+        /// Number of times this item has been gilded.
+        /// </summary>
+        [JsonProperty("gilded")]
+        public int Gilded { get; set; }
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.
@@ -131,11 +259,19 @@ namespace RedditSharp.Things
             return this.SetVoteAsync(VoteType.Upvote);
         }
 
+        /// <summary>
+        /// Downvote this item.
+        /// </summary>
         public Task DownvoteAsync()
+
         {
             return this.SetVoteAsync(VoteType.Downvote);
         }
 
+        /// <summary>
+        /// Vote on this item.
+        /// </summary>
+        /// <param name="type"></param>
         public async Task SetVoteAsync(VoteType type)
         {
             if (this.Vote == type) return;
@@ -162,6 +298,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Save this item.
+        /// </summary>
         public async Task SaveAsync()
         {
             var request = WebAgent.CreatePost(SaveUrl);
@@ -175,6 +314,9 @@ namespace RedditSharp.Things
             Saved = true;
         }
 
+        /// <summary>
+        /// Unsave this item.
+        /// </summary>
         public async Task UnsaveAsync()
         {
             var request = WebAgent.CreatePost(UnsaveUrl);
@@ -187,7 +329,11 @@ namespace RedditSharp.Things
             var data = await response.Content.ReadAsStringAsync();
             Saved = false;
         }
+
         //TODO clean this up, unnecessary calls
+        /// <summary>
+        /// Clear you vote on this item.
+        /// </summary>
         public async Task ClearVote()
         {
             var request = WebAgent.CreatePost(VoteUrl);
@@ -201,6 +347,7 @@ namespace RedditSharp.Things
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
         }
+
         /// <summary>
         /// Reports someone
         /// </summary>
@@ -238,8 +385,9 @@ namespace RedditSharp.Things
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
         }
+
         /// <summary>
-        /// Distingiush a comment
+        /// Distinguish an item
         /// </summary>
         /// <param name="distinguishType">Type you want to distinguish <see cref="DistinguishType"/></param>
         public async Task DistinguishAsync(DistinguishType distinguishType)
@@ -275,6 +423,49 @@ namespace RedditSharp.Things
             var json = JObject.Parse(data);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");
+        }
+
+        public Task ApproveAsync()
+        {
+            return SimpleActionAsync(ApproveUrl);
+        }
+
+        public Task RemoveAsync()
+        {
+            return RemoveImplAsync(false);
+        }
+
+        public Task RemoveSpamAsync()
+        {
+            return RemoveImplAsync(true);
+        }
+
+        protected async Task RemoveImplAsync(bool spam)
+        {
+            var request = WebAgent.CreatePost(RemoveUrl);
+            WebAgent.WritePostBody(request, new
+            {
+                id = FullName,
+                spam = spam,
+                uh = Reddit.User.Modhash
+            });
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
+        }
+
+        public Task DelAsync()
+        {
+            return SimpleActionAsync(DelUrl);
+        }
+
+        public Task IgnoreReportsAsync()
+        {
+            return SimpleActionAsync(IgnoreReportsUrl);
+        }
+
+        public Task UnIgnoreReportsAsync()
+        {
+            return SimpleActionAsync(UnIgnoreReportsUrl);
         }
 
         internal class DistinguishConverter : JsonConverter

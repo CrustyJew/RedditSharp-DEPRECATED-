@@ -15,6 +15,9 @@ namespace RedditSharp
         private Reddit Reddit { get; set; }
         private IWebAgent WebAgent { get; set; }
 
+        /// <summary>
+        /// Parent subreddit.
+        /// </summary>
         [JsonIgnore]
         public Subreddit Subreddit { get; set; }
 
@@ -44,6 +47,13 @@ namespace RedditSharp
             SpamFilter = new SpamFilterSettings();
         }
 
+        /// <summary>
+        /// Get the subreddit settings page.
+        /// </summary>
+        /// <param name="subreddit">A subreddit.</param>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
         public SubredditSettings(Subreddit subreddit, Reddit reddit, JObject json, IWebAgent webAgent) : this(reddit, subreddit, webAgent)
         {
             var data = json["data"];
@@ -117,25 +127,99 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Allow this subreddit to be included /r/all as well as the default and trending lists.
+        /// </summary>
         public bool AllowAsDefault { get; set; }
+
+        /// <summary>
+        /// Domain.
+        /// </summary>
         public string Domain { get; set; }
+
+        /// <summary>
+        /// Markdown of the sidebar.
+        /// </summary>
         public string Sidebar { get; set; }
+
+        /// <summary>
+        /// A valid IETF language tag (underscore supported).
+        /// </summary>
         public string Language { get; set; }
+
+        /// <summary>
+        /// Subreddit title.
+        /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Subreddit karma required to edit and create wiki pages.
+        /// </summary>
         public int WikiEditKarma { get; set; }
+
+        /// <summary>
+        /// Set to true to use domain css.
+        /// </summary>
         public bool UseDomainCss { get; set; }
+
+        /// <summary>
+        /// Set to true to use domain sidebar.
+        /// </summary>
         public bool UseDomainSidebar { get; set; }
+
+        /// <summary>
+        /// Header hover text.
+        /// </summary>
         public string HeaderHoverText { get; set; }
+
+        /// <summary>
+        /// Viewers must be over eighteen years old
+        /// </summary>
         public bool NSFW { get; set; }
+
+        /// <summary>
+        /// Public description text.
+        /// </summary>
         public string PublicDescription { get; set; }
+
+        /// <summary>
+        /// Wiki edit mode.
+        /// </summary>
         public WikiEditMode WikiEditMode { get; set; }
+
+        /// <summary>
+        /// Subreddit type.
+        /// </summary>
         public SubredditType SubredditType { get; set; }
+
+        /// <summary>
+        /// Set to true to show thumbnail images of content.
+        /// </summary>
         public bool ShowThumbnails { get; set; }
+        
+        /// <summary>
+        /// Account age (days) required to edit and create wiki pages.
+        /// </summary>
         public int WikiEditAge { get; set; }
+
+        /// <summary>
+        /// Content options.
+        /// </summary>
         public ContentOptions ContentOptions { get; set; }
+
+        /// <summary>
+        /// Spam filter settings.
+        /// </summary>
         public SpamFilterSettings SpamFilter { get; set; }
+
+        /// <summary>
+        /// Set to bool to allow images 
+        /// </summary>
         public bool AllowImages { get; set; }
 
+        /// <summary>
+        /// Update the subreddit settings.
+        /// </summary>
         public async Task UpdateSettings()
         {
             var request = WebAgent.CreatePost(SiteAdminUrl);
@@ -238,29 +322,65 @@ namespace RedditSharp
 
     public enum WikiEditMode
     {
+        /// <summary>
+        /// Wiki is disabled for all users except mods.
+        /// </summary>
         None,
+        /// <summary>
+        /// Only mods, approved wiki contributors, or those on a page's edit list may edit.
+        /// </summary>
         Moderators,
+        /// <summary>
+        /// Anyone who can submit to the subreddit may edit.
+        /// </summary>
         All
     }
 
     public enum SubredditType
     {
+        /// <summary>
+        /// Anyone can view and submit.
+        /// </summary>
         Public,
+        /// <summary>
+        /// Anyone can view, but only some are approved to submit links.
+        /// </summary>
         Restricted,
+        /// <summary>
+        /// Only approved members can view and submit.
+        /// </summary>
         Private
     }
 
     public enum ContentOptions
     {
+        /// <summary>
+        /// Any link type is allowed to be submitted.
+        /// </summary>
         All,
+        /// <summary>
+        /// Only links to external sites are allowed to be submitted.
+        /// </summary>
         LinkOnly,
+        /// <summary>
+        /// Only text/self posts are allowed to be submitted.
+        /// </summary>
         SelfOnly
     }
 
     public enum SpamFilterStrength
     {
+        /// <summary>
+        /// Low disables most filtering.
+        /// </summary>
         Low,
+        /// <summary>
+        /// High is the standard filter.
+        /// </summary>
         High,
+        /// <summary>
+        /// Filter every post initially and they will need to be approved manually to be visible.
+        /// </summary>
         All
     }
 }

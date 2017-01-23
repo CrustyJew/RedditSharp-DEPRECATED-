@@ -16,18 +16,15 @@ namespace RedditSharp.Things
     {
         private const string CommentUrl = "/api/comment";
         private const string EditUserTextUrl = "/api/editusertext";
-        private const string RemoveUrl = "/api/remove";
-        private const string DelUrl = "/api/del";
-        private const string ApproveUrl = "/api/approve";
         private const string SetAsReadUrl = "/api/read_message";
-        private const string IgnoreReportsUrl = "/api/ignore_reports";
-        private const string UnIgnoreReportsUrl = "/api/unignore_reports";
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = await CommonInitAsync(reddit, json, webAgent, sender);
@@ -36,6 +33,13 @@ namespace RedditSharp.Things
             return this;
         }
 
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns></returns>
         public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
         {
             var data = CommonInit(reddit, json, webAgent, sender);
@@ -44,6 +48,11 @@ namespace RedditSharp.Things
             return this;
         }
 
+        /// <summary>
+        /// Fill the object with comments.
+        /// </summary>
+        /// <param name="things"></param>
+        /// <returns></returns>
         public Comment PopulateComments(IEnumerator<Thing> things)
         {
             Thing first = things.Current;
@@ -154,44 +163,68 @@ namespace RedditSharp.Things
             Comments = subComments.ToArray();
         }
 
-        [JsonProperty("author")]
-        public string Author { get; set; }
-        [JsonProperty("banned_by")]
-        public string BannedBy { get; set; }
+        /// <summary>
+        /// Comment author user name.
+        /// </summary>
+        [JsonIgnore]
+        [Obsolete("Use AuthorName instead.", false)]
+        public string Author => base.AuthorName;
+
+        /// <summary>
+        /// Comment body markdown.
+        /// </summary>
         [JsonProperty("body")]
         public string Body { get; set; }
+
+        /// <summary>
+        /// Comment body html.
+        /// </summary>
         [JsonProperty("body_html")]
         public string BodyHtml { get; set; }
+
+        /// <summary>
+        /// Id of the parent <see cref="VotableThing"/>.
+        /// </summary>
         [JsonProperty("parent_id")]
         public string ParentId { get; set; }
+
+        /// <summary>
+        /// Parent subreddit name.
+        /// </summary>
         [JsonProperty("subreddit")]
         public string Subreddit { get; set; }
-        [JsonProperty("approved_by")]
-        public string ApprovedBy { get; set; }
-        [JsonProperty("author_flair_css_class")]
-        public string AuthorFlairCssClass { get; set; }
-        [JsonProperty("author_flair_text")]
-        public string AuthorFlairText { get; set; }
-        [JsonProperty("gilded")]
-        public int Gilded { get; set; }
+
+        /// <summary>
+        /// Link id.
+        /// </summary>
         [JsonProperty("link_id")]
         public string LinkId { get; set; }
+
+        /// <summary>
+        /// Parent link title.
+        /// </summary>
         [JsonProperty("link_title")]
         public string LinkTitle { get; set; }
-        [JsonProperty("num_reports")]
-        public int? NumReports { get; set; }
-        [JsonProperty("stickied")]
-        public bool IsStickied { get; set; }
 
+        /// <summary>
+        /// More comments.
+        /// </summary>
         [JsonIgnore]
         public More More { get; set; }
 
+        /// <summary>
+        /// Replies to this comment.
+        /// </summary>
         [JsonIgnore]
         public IList<Comment> Comments { get; private set; }
 
+        /// <summary>
+        /// Parent <see cref="VotableThing"/>
+        /// </summary>
         [JsonIgnore]
         public Thing Parent { get; internal set; }
 
+        /// <inheritdoc/>
         public override string Shortlink
         {
             get
@@ -210,6 +243,11 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Reply to this comment.
+        /// </summary>
+        /// <param name="message">markdown text of the reply.</param>
+        /// <returns></returns>
         public async Task<Comment> ReplyAsync(string message)
         {
             if (Reddit.User == null)
@@ -281,49 +319,9 @@ namespace RedditSharp.Things
             return data;
         }
 
-        public void ApproveAsync()
-        {
-            var data = SimpleActionAsync(ApproveUrl);
-        }
-
-        public Task DelAsync()
-        {
-            return SimpleActionAsync(DelUrl);
-        }
-
-        public Task IgnoreReportsAsync()
-        {
-            return SimpleActionAsync(IgnoreReportsUrl);
-        }
-
-        public void UnIgnoreReportsAsync()
-        {
-            var data = SimpleActionAsync(UnIgnoreReportsUrl);
-        }
-
-        public Task RemoveAsync()
-        {
-            return RemoveImplAsync(false);
-        }
-
-        public Task RemoveSpamAsync()
-        {
-            return RemoveImplAsync(true);
-        }
-
-        private async Task RemoveImplAsync(bool spam)
-        {
-            var request = WebAgent.CreatePost(RemoveUrl);
-            WebAgent.WritePostBody(request, new
-            {
-                id = FullName,
-                spam = spam,
-                uh = Reddit.User.Modhash
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-        }
-
+        /// <summary>
+        /// Mark this comment as read.
+        /// </summary>
         public async Task SetAsReadAsync()
         {
             var request = WebAgent.CreatePost(SetAsReadUrl);

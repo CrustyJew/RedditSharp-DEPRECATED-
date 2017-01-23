@@ -17,9 +17,15 @@ namespace RedditSharp
         [JsonIgnore]
         private IWebAgent WebAgent { get; set; }
 
+        /// <summary>
+        /// Domain name
+        /// </summary>
         [JsonIgnore]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of posts made for this domain.
+        /// </summary>
         public Listing<Post> Posts
         {
             get
@@ -28,6 +34,9 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of posts made for this domain that are in the new queue.
+        /// </summary>
         public Listing<Post> New
         {
             get
@@ -36,6 +45,9 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of posts made for this domain that are in the hot queue.
+        /// </summary>
         public Listing<Post> Hot
         {
             get
@@ -51,6 +63,7 @@ namespace RedditSharp
             Name = domain.Host;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return "/domain/" + Name;

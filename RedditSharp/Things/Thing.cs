@@ -1,4 +1,5 @@
 using System;
+using System.Security.Authentication;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using RedditSharp.Extensions;
@@ -7,6 +8,10 @@ namespace RedditSharp.Things
 {
     public class Thing
     {
+        protected Reddit Reddit { get; set; }
+
+        protected IWebAgent WebAgent { get; set; }
+
         internal void Init(JToken json)
         {
             if (json == null)
@@ -17,6 +22,7 @@ namespace RedditSharp.Things
             Kind = json["kind"].ValueOrDefault<string>();
             FetchedAt = DateTime.Now;
         }
+
         /// <summary>
         /// Shortlink to the item
         /// </summary>
@@ -25,8 +31,19 @@ namespace RedditSharp.Things
             get { return "http://redd.it/" + Id; }
         }
 
+        /// <summary>
+        /// Base36 id.
+        /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// reddit full name.  Kind_Base36 id.  Example.  t1_a1b2c3
+        /// </summary>
         public string FullName { get; set; }
+
+        /// <summary>
+        /// Thing kind.  t1, t2, t3 etc
+        /// </summary>
         public string Kind { get; set; }
 
         /// <summary>
@@ -45,6 +62,7 @@ namespace RedditSharp.Things
             }
         }
         // Awaitables don't have to be called asyncronously
+
         /// <summary>
         /// Parses what it is, based on the t(number) attribute
         /// </summary>
@@ -71,10 +89,15 @@ namespace RedditSharp.Things
                     return await new ModAction().InitAsync(reddit, json, webAgent);
                 case "more":
                     return await new More().InitAsync(reddit, json, webAgent);
+                case "LiveUpdate":
+                    return await new LiveUpdate().InitAsync(reddit, json, webAgent);
+                case "LiveUpdateEvent":
+                    return await new LiveUpdateEvent().InitAsync(reddit, json, webAgent);
                 default:
                     return null;
             }
         }
+
         /// <summary>
         /// Parses what it is, based on the t(number) attribute
         /// </summary>
@@ -101,10 +124,15 @@ namespace RedditSharp.Things
                     return new ModAction().Init(reddit, json, webAgent);
                 case "more":
                     return new More().Init(reddit, json, webAgent);
+                case "LiveUpdate":
+                    return new LiveUpdate().Init(reddit, json, webAgent);
+                case "LiveUpdateEvent":
+                    return new LiveUpdateEvent().Init(reddit, json, webAgent);
                 default:
                     return null;
             }
         }
+
         /// <summary>
         /// Tries to find the "Thing" you are looking for
         /// </summary>
@@ -138,9 +166,26 @@ namespace RedditSharp.Things
                 {
                     return await new More().InitAsync(reddit, json, webAgent);
                 }
+                else if (typeof(T) == typeof(LiveUpdate))
+                {
+                    return await new LiveUpdate().InitAsync(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(LiveUpdateEvent))
+                {
+                    return await new LiveUpdateEvent().InitAsync(reddit, json, webAgent);
+                }
             }
             return result;
         }
+
+        /// <summary>
+        /// Tries to find the "Thing" you are looking for
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns>The "Thing"</returns>
         public static Thing Parse<T>(Reddit reddit, JToken json, IWebAgent webAgent) where T : Thing
         {
             Thing result = Parse(reddit, json, webAgent);
@@ -166,8 +211,39 @@ namespace RedditSharp.Things
                 {
                     return new More().Init(reddit, json, webAgent);
                 }
+                else if (typeof(T) == typeof(LiveUpdate))
+                {
+                    return new LiveUpdate().Init(reddit, json, webAgent);
+                }
+                else if (typeof(T) == typeof(LiveUpdateEvent))
+                {
+                    return new LiveUpdateEvent().Init(reddit, json, webAgent);
+                }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Execute a simple POST request against the reddit api.  
+        /// Supports endpoints that require only id and modhash as
+        /// parameters.
+        /// </summary>
+        /// <param name="endpoint"></param>
+        /// <returns></returns>
+        protected virtual async Task<string> SimpleActionAsync(string endpoint)
+        {
+            if (Reddit.User == null)
+                throw new AuthenticationException("No user logged in.");
+            var request = WebAgent.CreatePost(endpoint);
+
+            WebAgent.WritePostBody(request, new
+            {
+                id = FullName,
+                uh = Reddit.User.Modhash
+            });
+            var response = await WebAgent.GetResponseAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
+            return data;
         }
     }
 }

@@ -16,46 +16,86 @@ namespace RedditSharp.Things
         private Reddit Reddit { get; set; }
         private IWebAgent WebAgent { get; set; }
 
+        /// <summary>
+        /// Message body markdown.
+        /// </summary>
         [JsonProperty("body")]
         public string Body { get; set; }
 
+        /// <summary>
+        /// Message body html.
+        /// </summary>
         [JsonProperty("body_html")]
         public string BodyHtml { get; set; }
 
+        /// <summary>
+        /// Returns true if is comment.
+        /// </summary>
         [JsonProperty("was_comment")]
         public bool IsComment { get; set; }
 
+        /// <summary>
+        /// DateTime message was sent.
+        /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime Sent { get; set; }
 
+        /// <summary>
+        /// DateTime message was sent in UTC.
+        /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime SentUTC { get; set; }
 
+        /// <summary>
+        /// Destination user or subreddit name.
+        /// </summary>
         [JsonProperty("dest")]
         public string Destination { get; set; }
 
+        /// <summary>
+        /// Message author.
+        /// </summary>
         [JsonProperty("author")]
         public string Author { get; set; }
 
+        /// <summary>
+        /// Subreddit (for comments).
+        /// </summary>
         [JsonProperty("subreddit")]
         public string Subreddit { get; set; }
 
+        /// <summary>
+        /// Returns true if the message is unread.
+        /// </summary>
         [JsonProperty("new")]
         public bool Unread { get; set; }
 
+        /// <summary>
+        /// Message subject.
+        /// </summary>
         [JsonProperty("subject")]
         public string Subject { get; set; }
 
+        /// <summary>
+        /// Parent id.
+        /// </summary>
         [JsonProperty("parent_id")]
         public string ParentID { get; set; }
 
+        /// <summary>
+        /// full name of the first message in this message chain.
+        /// </summary>
         [JsonProperty("first_message_name")]
         public string FirstMessageName { get; set; }
 
+        /// <summary>
+        /// Replies to this message.
+        /// </summary>
         [JsonIgnore]
         public PrivateMessage[] Replies { get; set; }
+
         /// <summary>
         /// Original message
         /// </summary>
@@ -75,6 +115,7 @@ namespace RedditSharp.Things
                     return firstMessage.Replies.First(x => x.FullName == ParentID);
             }
         }
+
         /// <summary>
         /// The thread of messages
         /// </summary>
@@ -89,6 +130,7 @@ namespace RedditSharp.Things
             }
         }
         // Awaitables don't have to be called asynchronously
+
         /// <summary>
         /// initializes trying to get the messages
         /// </summary>
@@ -102,12 +144,21 @@ namespace RedditSharp.Things
             await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
             return this;
         }
+
+        /// <summary>
+        /// initializes trying to get the messages
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns>A private message</returns>
         public PrivateMessage Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
             JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
+
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);
@@ -144,10 +195,11 @@ namespace RedditSharp.Things
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
         }
+
         /// <summary>
         /// Reply to the message
         /// </summary>
-        /// <param name="message">Text to reply with</param>
+        /// <param name="message">Markdown text.</param>
         public async Task ReplyAsync(string message)
         {
             if (Reddit.User == null)

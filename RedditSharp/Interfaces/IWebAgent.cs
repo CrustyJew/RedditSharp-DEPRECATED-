@@ -1,5 +1,3 @@
-using System.IO;
-using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;

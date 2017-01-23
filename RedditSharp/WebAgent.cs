@@ -28,6 +28,9 @@ namespace RedditSharp
         /// </summary>
         public static bool EnableRateLimit { get; set; }
 
+        /// <summary>
+        /// web protocol "http", "https"
+        /// </summary>
         public static string Protocol { get; set; }
 
         /// <summary>
@@ -95,6 +98,7 @@ namespace RedditSharp
             get { return _requestsThisBurst; }
         }
 
+
         static WebAgent()
         {
             //Static constructors are dumb, no likey -Meepster23
@@ -105,6 +109,11 @@ namespace RedditSharp
             _httpClient = new HttpClient();
         }
 
+        /// <summary>
+        /// Execute a request and return a <see cref="JToken"/>
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public virtual async Task<JToken> CreateAndExecuteRequestAsync(string url)
         {
             Uri uri;
@@ -178,6 +187,9 @@ namespace RedditSharp
 
         }
 
+        /// <summary>
+        /// Enforce the api throttle.
+        /// </summary>
         protected virtual void EnforceRateLimit()
         {
             lock (rateLimitLock)
@@ -226,6 +238,12 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Create a <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="url">target  uri</param>
+        /// <param name="method">http method</param>
+        /// <returns></returns>
         public virtual HttpRequestMessage CreateRequest(string url, string method)
         {
             EnforceRateLimit();
@@ -250,34 +268,60 @@ namespace RedditSharp
             {
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
             }
+
             request.Method = new HttpMethod(method);
             request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by meepster23");
             return request;
         }
+
+        /// <summary>
+        /// Create a <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="uri">target  uri</param>
+        /// <param name="method">http method</param>
+        /// <returns></returns>
         protected virtual HttpRequestMessage CreateRequest(Uri uri, string method)
         {
             EnforceRateLimit();
             var request = new HttpRequestMessage();
             request.RequestUri = uri;
             if (IsOAuth())// use OAuth
+
             {
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
             }
+
             request.Method = new HttpMethod(method);
             request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by /u/meepster23");
             return request;
         }
 
+        /// <summary>
+        /// Create a http GET <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="url">target url</param>
+        /// <returns></returns>
         public virtual HttpRequestMessage CreateGet(string url)
+
         {
             return CreateRequest(url, "GET");
         }
 
+        /// <summary>
+        /// Create a http GET <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="url">target uri</param>
+        /// <returns></returns>
         private HttpRequestMessage CreateGet(Uri url)
         {
             return CreateRequest(url, "GET");
         }
 
+        /// <summary>
+        /// Create a http POST <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="url">target url</param>
+        /// <returns></returns>
         public virtual HttpRequestMessage CreatePost(string url)
         {
             var request = CreateRequest(url, "POST");

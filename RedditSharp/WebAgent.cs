@@ -15,6 +15,8 @@ namespace RedditSharp
 {
     public class WebAgent : IWebAgent
     {
+
+        private const string OAuthDomainUrl = "oauth.reddit.com";
         private static HttpClient _httpClient;
         private object rateLimitLock = new object();
         /// <summary>
@@ -102,11 +104,21 @@ namespace RedditSharp
         static WebAgent()
         {
             //Static constructors are dumb, no likey -Meepster23
-            UserAgent = "";
-            RateLimit = RateLimitMode.Pace;
-            Protocol = "https";
-            RootDomain = "www.reddit.com";
+            UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
+            Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
+            RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
             _httpClient = new HttpClient();
+        }
+        public WebAgent() {
+
+        }
+        /// <summary>
+        /// Intializes a WebAgent with a specified access token and sets the default url to the oauth api address
+        /// </summary>
+        /// <param name="accessToken">Valid access token</param>
+        public WebAgent( string accessToken ) {
+            RootDomain = OAuthDomainUrl;
+            AccessToken = accessToken;
         }
 
         /// <summary>

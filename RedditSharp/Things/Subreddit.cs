@@ -15,6 +15,7 @@ namespace RedditSharp.Things
         private const string SubredditNewUrl = "/r/{0}/new.json?sort=new";
         private const string SubredditHotUrl = "/r/{0}/hot.json";
         private const string SubredditRisingUrl = "/r/{0}/rising.json";
+        private const string SubredditRandomUrl = "/r/{0}/random.json";
         private const string SubredditTopUrl = "/r/{0}/top.json?t={1}";
         private const string SubredditControversialUrl = "/r/{0}/controversial.json";
         private const string SubredditGildedUrl = "/r/{0}/gilded.json";
@@ -227,6 +228,19 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, string.Format(SubredditRisingUrl, Name), WebAgent);
             }
         }
+        /// <summary>
+        /// A random post
+        /// </summary>
+        public Post Random
+        {
+            get
+            {
+                if (Name == "/")
+                    return new Listing<Post>(Reddit, "/random.json", WebAgent).FirstOrDefault();
+                return new Listing<Post>(Reddit, string.Format(SubredditRandomUrl, Name), WebAgent).FirstOrDefault();
+            }
+        }
+
         /// <summary>
         /// List of Controversial posts
         /// </summary>

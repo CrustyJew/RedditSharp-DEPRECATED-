@@ -233,6 +233,11 @@ namespace RedditSharp
                 var response = request.GetResponse();
                 var data = Listing.WebAgent.GetResponseString(response.GetResponseStream());
                 var json = JToken.Parse(data);
+                //non-Listing endpoints (such as /random) return an array of Listing result(s)
+                if (json.Type == JTokenType.Array)
+                {
+                    json = json[0];
+                }
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listing.");
                 Parse(json);

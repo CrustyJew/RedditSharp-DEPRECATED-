@@ -16,22 +16,22 @@ namespace RedditSharp.Things
             Wiki = new Wiki(this);
         }
 
-        private const string SubredditPostUrl = "/r/{0}.json";
-        private const string SubredditNewUrl = "/r/{0}/new.json?sort=new";
-        private const string SubredditHotUrl = "/r/{0}/hot.json";
-        private const string SubredditRisingUrl = "/r/{0}/rising.json";
-        private const string SubredditTopUrl = "/r/{0}/top.json?t={1}";
-        private const string SubredditControversialUrl = "/r/{0}/controversial.json";
-        private const string SubredditGildedUrl = "/r/{0}/gilded.json";
+        private string SubredditPostUrl => $"/r/{Name}.json";
+        private string SubredditNewUrl => $"/r/{Name}/new.json?sort=new";
+        private string SubredditHotUrl => $"/r/{Name}/hot.json";
+        private string SubredditRisingUrl => $"/r/{Name}/rising.json";
+        private string SubredditTopUrl => $"/r/{Name}/top.json?t={1}";
+        private string SubredditControversialUrl => $"/r/{Name}/controversial.json";
+        private string SubredditGildedUrl => $"/r/{Name}/gilded.json";
         private const string SubscribeUrl = "/api/subscribe";
-        private const string GetSettingsUrl = "/r/{0}/about/edit.json";
-        private const string GetReducedSettingsUrl = "/r/{0}/about.json";
-        private const string ModqueueUrl = "/r/{0}/about/modqueue.json";
-        private const string UnmoderatedUrl = "/r/{0}/about/unmoderated.json";
+        private string GetSettingsUrl => $"/r/{Name}/about/edit.json";
+        private string GetReducedSettingsUrl => $"/r/{Name}/about.json";
+        private string ModqueueUrl => $"/r/{Name}/about/modqueue.json";
+        private string UnmoderatedUrl => $"/r/{Name}/about/unmoderated.json";
         private const string FlairTemplateUrl = "/api/flairtemplate";
         private const string ClearFlairTemplatesUrl = "/api/clearflairtemplates";
         private const string SetUserFlairUrl = "/api/flair";
-        private const string StylesheetUrl = "/r/{0}/about/stylesheet.json";
+        private string StylesheetUrl => $"/r/{Name}/about/stylesheet.json";
         private const string UploadImageUrl = "/api/upload_sr_img";
         private const string FlairSelectorUrl = "/api/flairselector";
         private const string AcceptModeratorInviteUrl = "/api/accept_moderator_invite";
@@ -40,17 +40,17 @@ namespace RedditSharp.Things
         private const string UnBanUserUrl = "/api/unfriend";
         private const string AddModeratorUrl = "/api/friend";
         private const string AddContributorUrl = "/api/friend";
-        private const string ModeratorsUrl = "/r/{0}/about/moderators.json";
+        private string ModeratorsUrl => $"/r/{Name}/about/moderators.json";
         private const string FrontPageUrl = "/.json";
         private const string SubmitLinkUrl = "/api/submit";
-        private const string FlairListUrl = "/r/{0}/api/flairlist.json";
-        private const string CommentsUrl = "/r/{0}/comments.json";
-        private const string SearchUrl = "/r/{0}/search.json?q={1}&restrict_sr=on&sort={2}&t={3}";
-        private const string SearchUrlDate = "/r/{0}/search.json?q=timestamp:{1}..{2}&restrict_sr=on&sort={3}&syntax=cloudsearch";
-        private const string ModLogUrl = "/r/{0}/about/log.json";
-        private const string ContributorsUrl = "/r/{0}/about/contributors.json";
-        private const string BannedUsersUrl = "/r/{0}/about/banned.json";
-        private const string ModmailUrl = "/r/{0}/message/moderator/inbox.json";
+        private string FlairListUrl => $"/r/{Name}/api/flairlist.json";
+        private string CommentsUrl => $"/r/{Name}/comments.json";
+        private string SearchUrl => $"/r/{Name}/search.json?q={1}&restrict_sr=on&sort={2}&t={3}";
+        private string SearchUrlDate => $"/r/{Name}/search.json?q=timestamp:{1}..{2}&restrict_sr=on&sort={3}&syntax=cloudsearch";
+        private string ModLogUrl => $"/r/{Name}/about/log.json";
+        private string ContributorsUrl => $"/r/{Name}/about/contributors.json";
+        private string BannedUsersUrl => $"/r/{Name}/about/banned.json";
+        private string ModmailUrl => $"/r/{Name}/message/moderator/inbox.json";
 
         /// <summary>
         /// Subreddit Wiki
@@ -63,96 +63,97 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; set; }
+        public DateTime? Created { get; }
 
         /// <summary>
         /// Subreddit description.
         /// </summary>
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; }
 
         /// <summary>
         /// Subreddit description html.
         /// </summary>
         [JsonProperty("description_html")]
-        public string DescriptionHTML { get; set; }
+        public string DescriptionHTML { get; }
 
         /// <summary>
         /// Subreddit display name.
         /// </summary>
         [JsonProperty("display_name")]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; private set; }
 
         /// <summary>
         /// Header image.
         /// </summary>
         [JsonProperty("header_img")]
-        public string HeaderImage { get; set; }
+        public string HeaderImage { get; }
 
         /// <summary>
         /// Header title.
         /// </summary>
         [JsonProperty("header_title")]
-        public string HeaderTitle { get; set; }
+        public string HeaderTitle { get; }
 
         /// <summary>
         /// Returns true of the subreddit is marked for users over 18.
         /// </summary>
         [JsonProperty("over_18")]
-        public bool NSFW { get; set; }
+        public bool NSFW { get; }
 
         /// <summary>
         /// Public description of the subreddit.
         /// </summary>
         [JsonProperty("public_description")]
-        public string PublicDescription { get; set; }
+        public string PublicDescription { get; }
 
         /// <summary>
         /// Total subscribers to the subreddit.
         /// </summary>
         [JsonProperty("subscribers")]
-        public int? Subscribers { get; set; }
+        public int? Subscribers { get; }
 
         /// <summary>
         /// Current active users .
         /// </summary>
         [JsonProperty("accounts_active")]
-        public int? ActiveUsers { get; set; }
+        public int? ActiveUsers { get; }
 
         /// <summary>
         /// Subreddit title.
         /// </summary>
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title { get; private set; }
 
         /// <summary>
         /// Subreddit url.
         /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Url { get; set; }
+        public Uri Url { get; private set; }
 
         /// <summary>
         /// Property determining whether the current logged in user is a moderator on this subreddit.
         /// </summary>
         [JsonProperty("user_is_moderator")]
-        public bool? UserIsModerator { get; set; }
+        public bool? UserIsModerator { get; }
 
         /// <summary>
         /// Property giving the moderator permissions of the logged in user on this subreddit.
         /// </summary>
         [JsonProperty("mod_permissions")]
         [JsonConverter(typeof(ModeratorPermissionConverter))]
-        public ModeratorPermission ModPermissions { get; set; }
+        public ModeratorPermission ModPermissions { get; }
 
         /// <summary>
         /// Property determining whether the current logged in user is banned from the subreddit.
         /// </summary>
         [JsonProperty("user_is_banned")]
-        public bool? UserIsBanned { get; set; }
+        public bool? UserIsBanned { get; }
 
         [JsonIgnore]
-        public string Name { get; set; }
+        public string Name { get; private set; }
+
         /// <summary>
         /// Top of the subreddit at a timeperiod
         /// </summary>
@@ -357,7 +358,7 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task<SubredditStyle> GetStylesheetAsync()
         {
-            var request = WebAgent.CreateGet(string.Format(StylesheetUrl, Name));
+            var request = WebAgent.CreateGet(StylesheetUrl);
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
@@ -370,7 +371,7 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task<IEnumerable<ModeratorUser>> GetModeratorsAsync()
         {
-            var request = WebAgent.CreateGet(string.Format(ModeratorsUrl, Name));
+            var request = WebAgent.CreateGet(ModeratorsUrl);
             var response = await WebAgent.GetResponseAsync(request);
             string responseString = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseString);
@@ -399,24 +400,12 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of contributors.
         /// </summary>
-        public Listing<Contributor> Contributors
-        {
-            get
-            {
-                return new Listing<Contributor>(Reddit, string.Format(ContributorsUrl, Name));
-            }
-        }
+        public Listing<Contributor> Contributors => new Listing<Contributor>(Reddit, ContributorsUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of banned users.
         /// </summary>
-        public Listing<BannedUser> BannedUsers
-        {
-            get
-            {
-                return new Listing<BannedUser>(Reddit, string.Format(BannedUsersUrl, Name));
-            }
-        }
+        public Listing<BannedUser> BannedUsers => new Listing<BannedUser>(Reddit, BannedUsersUrl);
 
         /// <summary>
         /// Subreddit modmail.
@@ -429,13 +418,11 @@ namespace RedditSharp.Things
             {
                 if (Reddit.User == null)
                     throw new AuthenticationException("No user logged in.");
-                return new Listing<PrivateMessage>(Reddit, string.Format(ModmailUrl, Name));
+                return new Listing<PrivateMessage>(Reddit, ModmailUrl);
             }
         }
 
-        protected override JToken GetJsonData(JToken json) {
-          return json["data"];
-        }
+        protected override JToken GetJsonData(JToken json) =>  json["data"];
 
         private void SetName()
         {
@@ -567,7 +554,7 @@ namespace RedditSharp.Things
         /// <param name="userEditable">set flair user editable</param>
         public async Task<string> GetFlairTextAsync(string user)
         {
-            var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
+            var request = WebAgent.CreateGet(FlairListUrl + "?name=" + user);
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
@@ -581,7 +568,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public async Task<string> GetFlairCssClassAsync(string user)
         {
-            var request = WebAgent.CreateGet(string.Format(FlairListUrl + "?name=" + user, Name));
+            var request = WebAgent.CreateGet(FlairListUrl + "?name=" + user);
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
@@ -848,7 +835,7 @@ namespace RedditSharp.Things
             }
             else if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "ALREADY_SUB")
             {
-                throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
+                throw new DuplicateLinkException($"Post failed when submitting.  The following link has already been submitted: {SubmitLinkUrl}");
             }
 
             return new Post(Reddit, json["json"]);
@@ -897,28 +884,19 @@ namespace RedditSharp.Things
         /// <summary>
         /// Gets the moderation log of the current subreddit
         /// </summary>
-        public Listing<ModAction> GetModerationLog()
-        {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name));
-        }
+        public Listing<ModAction> GetModerationLog() => new Listing<ModAction>(Reddit, ModLogUrl);
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken
         /// </summary>
         /// <param name="action">ModActionType of action performed</param>
-        public Listing<ModAction> GetModerationLog(ModActionType action)
-        {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}", Name, ModActionTypeConverter.GetRedditParamName(action)));
-        }
+        public Listing<ModAction> GetModerationLog(ModActionType action) => new Listing<ModAction>(Reddit, ModLogUrl + $"?type={ModActionTypeConverter.GetRedditParamName(action)}");
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by moderator(s) who performed the action
         /// </summary>
         /// <param name="mods">String array of mods to filter by</param>
-        public Listing<ModAction> GetModerationLog(string[] mods)
-        {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?mod={1}", Name, string.Join(",", mods)));
-        }
+        public Listing<ModAction> GetModerationLog(string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl + $"?mod={string.Join(",", mods)}");
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken and moderator(s) who performed the action
@@ -926,10 +904,7 @@ namespace RedditSharp.Things
         /// <param name="action">ModActionType of action performed</param>
         /// <param name="mods">String array of mods to filter by</param>
         /// <returns></returns>
-        public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods)
-        {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}&mod={2}", Name, ModActionTypeConverter.GetRedditParamName(action), string.Join(",", mods)));
-        }
+        public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl + $"?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}");
 
         /// <summary>
         /// Infinitely yields new <see cref="Comment"/> posted to the subreddit.
@@ -940,7 +915,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Comment>(Reddit, "/comments.json").GetListingStream();
-                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name)).GetListingStream();
+                return new Listing<Comment>(Reddit, CommentsUrl).GetListingStream();
             }
         }
 
@@ -953,21 +928,13 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Post>(Reddit, "/new.json").GetListingStream();
-                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name)).GetListingStream();
+                return new Listing<Post>(Reddit, SubredditNewUrl).GetListingStream();
             }
         }
 
         /// <summary>
         /// Infinitely yields new <see cref="ModAction"/> made on the subreddit.
         /// </summary>
-        public IEnumerable<ModAction> ModerationLogStream
-        {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name)).GetListingStream();
-                return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name)).GetListingStream();
-            }
-        }
+        public IEnumerable<ModAction> ModerationLogStream => new Listing<ModAction>(Reddit, ModLogUrl).GetListingStream();
     }
 }

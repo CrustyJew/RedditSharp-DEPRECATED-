@@ -35,25 +35,22 @@ namespace RedditSharp.Things
         /// <summary>
         /// Shortlink to the item
         /// </summary>
-        public virtual string Shortlink
-        {
-            get { return "http://redd.it/" + Id; }
-        }
+        public virtual string Shortlink =>  "http://redd.it/" + Id;
 
         /// <summary>
         /// Base36 id.
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// reddit full name.  Kind_Base36 id.  Example.  t1_a1b2c3
         /// </summary>
-        public string FullName { get; set; }
+        public string FullName { get; internal set; }
 
         /// <summary>
         /// Thing kind.  t1, t2, t3 etc
         /// </summary>
-        public string Kind { get; set; }
+        public string Kind { get; private set; }
 
         /// <summary>
         /// The time at which this object was fetched from reddit servers.
@@ -63,13 +60,8 @@ namespace RedditSharp.Things
         /// <summary>
         /// Gets the time since last fetch from reddit servers.
         /// </summary>
-        public TimeSpan TimeSinceFetch
-        {
-            get
-            {
-                return DateTime.Now - FetchedAt;
-            }
-        }
+        public TimeSpan TimeSinceFetch => DateTime.Now - FetchedAt;
+
         // Awaitables don't have to be called asyncronously
 
         /// <summary>

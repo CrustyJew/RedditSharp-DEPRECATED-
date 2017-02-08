@@ -26,136 +26,67 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of subreddits moderated by the logged in user.
         /// </summary>
-        public Listing<Subreddit> ModeratorSubreddits
-        {
-            get
-            {
-                return new Listing<Subreddit>(Reddit, ModeratorUrl);
-            }
-        }
+        public Listing<Subreddit> ModeratorSubreddits => new Listing<Subreddit>(Reddit, ModeratorUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unread messages.
         /// </summary>
-        public Listing<Thing> UnreadMessages
-        {
-            get
-            {
-                return new Listing<Thing>(Reddit, UnreadMessagesUrl);
-            }
-        }
+        public Listing<Thing> UnreadMessages => new Listing<Thing>(Reddit, UnreadMessagesUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of items in the Moderation Queue.
         /// </summary>
-        public Listing<VotableThing> ModerationQueue
-        {
-            get
-            {
-                return new Listing<VotableThing>(Reddit, ModQueueUrl);
-            }
-        }
+        public Listing<VotableThing> ModerationQueue => new Listing<VotableThing>(Reddit, ModQueueUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unmoderated Posts.
         /// </summary>
-        public Listing<Post> UnmoderatedLinks
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, UnmoderatedUrl);
-            }
-        }
+        public Listing<Post> UnmoderatedLinks => new Listing<Post>(Reddit, UnmoderatedUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of (old style) modmail.
         /// </summary>
-        public Listing<PrivateMessage> ModMail
-        {
-            get
-            {
-                return new Listing<PrivateMessage>(Reddit, ModMailUrl);
-            }
-        }
+        public Listing<PrivateMessage> ModMail => new Listing<PrivateMessage>(Reddit, ModMailUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of private messages.
         /// </summary>
-        public Listing<PrivateMessage> PrivateMessages
-        {
-            get
-            {
-                return new Listing<PrivateMessage>(Reddit, MessagesUrl);
-            }
-        }
+        public Listing<PrivateMessage> PrivateMessages => new Listing<PrivateMessage>(Reddit, MessagesUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of messages in the inbox.
         /// </summary>
-        public Listing<PrivateMessage> Inbox
-        {
-            get
-            {
-                return new Listing<PrivateMessage>(Reddit, InboxUrl);
-            }
-        }
+        public Listing<PrivateMessage> Inbox => new Listing<PrivateMessage>(Reddit, InboxUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of sent messages.
         /// </summary>
-        public Listing<PrivateMessage> Sent
-        {
-            get
-            {
-                return new Listing<PrivateMessage>(Reddit, SentUrl);
-            }
-        }
+        public Listing<PrivateMessage> Sent => new Listing<PrivateMessage>(Reddit, SentUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unmoderated links.
         /// </summary>
-        public Listing<Post> GetUnmoderatedLinks()
-        {
-            return new Listing<Post>(Reddit, UnmoderatedUrl);
-        }
+        public Listing<Post> GetUnmoderatedLinks() => new Listing<Post>(Reddit, UnmoderatedUrl);
 
         #region Obsolete Getter Methods
 
         [Obsolete("Use ModeratorSubreddits property instead")]
-        public Listing<Subreddit> GetModeratorReddits()
-        {
-            return ModeratorSubreddits;
-        }
+        public Listing<Subreddit> GetModeratorReddits() => ModeratorSubreddits;
 
         [Obsolete("Use UnreadMessages property instead")]
-        public Listing<Thing> GetUnreadMessages()
-        {
-            return UnreadMessages;
-        }
+        public Listing<Thing> GetUnreadMessages() => UnreadMessages;
 
         [Obsolete("Use ModerationQueue property instead")]
-        public Listing<VotableThing> GetModerationQueue()
-        {
-            return new Listing<VotableThing>(Reddit, ModQueueUrl);
-        }
+        public Listing<VotableThing> GetModerationQueue() => new Listing<VotableThing>(Reddit, ModQueueUrl);
 
         [Obsolete("Use ModMail property instead")]
-        public Listing<PrivateMessage> GetModMail()
-        {
-            return new Listing<PrivateMessage>(Reddit, ModMailUrl);
-        }
+        public Listing<PrivateMessage> GetModMail() => new Listing<PrivateMessage>(Reddit, ModMailUrl);
 
         [Obsolete("Use PrivateMessages property instead")]
-        public Listing<PrivateMessage> GetPrivateMessages()
-        {
-            return new Listing<PrivateMessage>(Reddit, MessagesUrl);
-        }
+        public Listing<PrivateMessage> GetPrivateMessages() => new Listing<PrivateMessage>(Reddit, MessagesUrl);
 
         [Obsolete("Use Inbox property instead")]
-        public Listing<PrivateMessage> GetInbox()
-        {
-            return new Listing<PrivateMessage>(Reddit, InboxUrl);
-        }
+        public Listing<PrivateMessage> GetInbox() => new Listing<PrivateMessage>(Reddit, InboxUrl);
 
         #endregion Obsolete Getter Methods
 
@@ -167,18 +98,18 @@ namespace RedditSharp.Things
         ///<para>Modhashes are not required when authenticated with OAuth.</para>
         /// </summary>
         [JsonProperty("modhash")]
-        public string Modhash { get; set; }
+        public string Modhash { get; }
 
         /// <summary>
         /// Returns true of the user has mail.
         /// </summary>
         [JsonProperty("has_mail")]
-        public bool HasMail { get; set; }
+        public bool HasMail { get; }
 
         /// <summary>
         /// Returns true of the user has modmail.
         /// </summary>
         [JsonProperty("has_mod_mail")]
-        public bool HasModMail { get; set; }
+        public bool HasModMail { get; }
     }
 }

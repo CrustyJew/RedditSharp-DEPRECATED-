@@ -33,14 +33,15 @@ namespace RedditSharp.Things
 
         public class LiveUpdateEventUser
         {
+            [JsonProperty]
             [JsonConverter(typeof(PermissionsConverter))]
-            public LiveUpdateEventPermission Permissions { get; set; }
+            public LiveUpdateEventPermission Permissions { get; }
 
             [JsonProperty("name")]
-            public string Name { get; set; }
+            public string Name { get; }
 
             [JsonProperty("id")]
-            public string Id { get; set; }
+            public string Id { get; }
         }
 
         private const string AcceptContributorInviteUrl = "/api/live/{0}/accept_contribtor_invite";
@@ -60,34 +61,34 @@ namespace RedditSharp.Things
         private const string ReportUrl = "/api/live/{0}/report";
 
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; private set; }
 
         [JsonProperty("description_html")]
-        public string DescriptionHtml { get; set; }
+        public string DescriptionHtml { get; }
 
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title { get; private set; }
 
         [JsonProperty("websocket_uri")]
-        public Uri WebsocketUri { get; set; }
+        public Uri WebsocketUri { get; }
 
         [JsonProperty("state")]
-        public string State { get; set; }
+        public string State { get; }
 
         [JsonProperty("nsfw")]
-        public bool NSFW { get; set; }
+        public bool NSFW { get; private set; }
 
         [JsonProperty("viewer_count")]
-        public int? ViewerCount { get; set; }
+        public int? ViewerCount { get; }
 
         [JsonProperty("viewer_count_fuzzed")]
-        public bool ViewerCountFuzzed { get; set; }
+        public bool ViewerCountFuzzed { get; }
 
         [JsonProperty("resources")]
-        public string Resources { get; set; }
+        public string Resources { get; private set; }
 
         [JsonProperty]
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Accept an invite to be a live thread contributor.

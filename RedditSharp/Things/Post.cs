@@ -31,109 +31,98 @@ namespace RedditSharp.Things
         /// Author of this post.
         /// </summary>
         [JsonProperty("author")]
-        public new string AuthorName { get; set; }
+        public new string AuthorName { get; }
 
         //TODO Discuss
-        public IObservable<Comment> Comments
-        {
-            get
-            {
-                return GetComments();
-            }
-        }
+        public IObservable<Comment> Comments => GetComments();
 
         /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]
-        public string Domain { get; set; }
+        public string Domain { get; }
 
         /// <summary>
         /// Returns true if this is a self post.
         /// </summary>
         [JsonProperty("is_self")]
-        public bool IsSelfPost { get; set; }
+        public bool IsSelfPost { get; }
 
         /// <summary>
         /// Css class of the link flair.
         /// </summary>
         [JsonProperty("link_flair_css_class")]
-        public string LinkFlairCssClass { get; set; }
+        public string LinkFlairCssClass { get; }
 
         /// <summary>
         /// Text of the link flair.
         /// </summary>
         [JsonProperty("link_flair_text")]
-        public string LinkFlairText { get; set; }
+        public string LinkFlairText { get; private set; }
 
         /// <summary>
         /// Number of comments on this post.
         /// </summary>
         [JsonProperty("num_comments")]
-        public int CommentCount { get; set; }
+        public int CommentCount { get; }
 
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
         [JsonProperty("over_18")]
-        public bool NSFW { get; set; }
+        public bool NSFW { get; }
 
         /// <summary>
         /// Post permalink.
         /// </summary>
         [JsonProperty("permalink")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Permalink { get; set; }
+        public Uri Permalink { get; }
 
         /// <summary>
         /// Post self text markdown.
         /// </summary>
         [JsonProperty("selftext")]
-        public string SelfText { get; set; }
+        public string SelfText { get; private set; }
 
         /// <summary>
         /// Post self text html.
         /// </summary>
         [JsonProperty("selftext_html")]
-        public string SelfTextHtml { get; set; }
+        public string SelfTextHtml { get; }
 
         /// <summary>
         /// Uri to the thumbnail image of this post.
         /// </summary>
         [JsonProperty("thumbnail")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Thumbnail { get; set; }
+        public Uri Thumbnail { get; }
 
         /// <summary>
         /// Post title.
         /// </summary>
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title { get; }
 
         /// <summary>
         /// Parent subkkeddit name.
         /// </summary>
         [JsonProperty("subreddit")]
-        public string SubredditName { get; set; }
+        public string SubredditName { get; }
 
         /// <summary>
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
-        public Subreddit Subreddit
-        {
-            get
-            {
-                return Task.Run(async () => { return await Reddit.GetSubredditAsync("/r/" + SubredditName); }).Result;
-            }
-        }
+        public Subreddit Subreddit =>
+          Task.Run(async () => { return await Reddit.GetSubredditAsync("/r/" + SubredditName); }).Result;
 
         /// <summary>
         /// Post uri.
         /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Url { get; set; }
+        public Uri Url { get; }
 
         /// <summary>
         /// Comment on this post.
@@ -189,52 +178,34 @@ namespace RedditSharp.Things
         /// <summary>
         /// Hide this post.
         /// </summary>
-        public Task HideAsync()
-        {
-            return SimpleActionAsync(HideUrl);
-        }
+        public Task HideAsync() => SimpleActionAsync(HideUrl);
 
         /// <summary>
         /// Unhide this post.
         /// </summary>
-        public Task UnhideAsync()
-        {
-            return SimpleActionAsync(UnhideUrl);
-        }
+        public Task UnhideAsync() => SimpleActionAsync(UnhideUrl);
 
         /// <summary>
         /// Mark this post not safe for work.
         /// </summary>
-        public Task MarkNSFWAsync()
-        {
-            return SimpleActionAsync(MarkNSFWUrl);
-        }
+        public Task MarkNSFWAsync() => SimpleActionAsync(MarkNSFWUrl);
 
         /// <summary>
         /// Mark this post as safe for work.
         /// </summary>
-        public Task UnmarkNSFWAsync()
-        {
-            return SimpleActionAsync(UnmarkNSFWUrl);
-        }
+        public Task UnmarkNSFWAsync() => SimpleActionAsync(UnmarkNSFWUrl);
 
         /// <summary>
         /// Set contest mode state.  Logged in user must be a moderator of parent subreddit.
         /// </summary>
         /// <param name="state"></param>
-        public Task ContestModeAsync(bool state)
-        {
-            return SimpleActionAsync(ContestModeUrl);
-        }
+        public Task ContestModeAsync(bool state) => SimpleActionAsync(ContestModeUrl);
 
         /// <summary>
         /// Set sticky state.  Logged in user must be a moderator of parent subreddit.
         /// </summary>
         /// <param name="state"></param>
-        public Task StickyModeAsync(bool state)
-        {
-            return SimpleActionToggleAsync(StickyModeUrl, state, true);
-        }
+        public Task StickyModeAsync(bool state) => SimpleActionToggleAsync(StickyModeUrl, state, true);
 
         /// <summary>
         /// Replaces the text in this post with the input text.
@@ -267,10 +238,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Update this post.
         /// </summary>
-        public async Task UpdateAsync()
-        {
-            Reddit.PopulateObject(GetJsonData(await Reddit.GetTokenAsync(Url)), this);
-        }
+        public async Task UpdateAsync() => Reddit.PopulateObject(GetJsonData(await Reddit.GetTokenAsync(Url)), this);
 
         /// <summary>
         /// Sets your claim
@@ -332,9 +300,7 @@ namespace RedditSharp.Things
         }
 
         //TODO discuss this
-        public IEnumerable<Comment> EnumerateCommentsAsync() {
-            return GetComments().ToEnumerable();
-        }
+        public IEnumerable<Comment> EnumerateCommentsAsync() => GetComments().ToEnumerable();
 
         /// <summary>
         /// Enumerate more comments.

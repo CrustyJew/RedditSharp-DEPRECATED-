@@ -34,81 +34,81 @@ namespace RedditSharp.Things
         /// Message body markdown.
         /// </summary>
         [JsonProperty("body")]
-        public string Body { get; set; }
+        public string Body { get; }
 
         /// <summary>
         /// Message body html.
         /// </summary>
         [JsonProperty("body_html")]
-        public string BodyHtml { get; set; }
+        public string BodyHtml { get; }
 
         /// <summary>
         /// Returns true if is comment.
         /// </summary>
         [JsonProperty("was_comment")]
-        public bool IsComment { get; set; }
+        public bool IsComment { get; }
 
         /// <summary>
         /// DateTime message was sent.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Sent { get; set; }
+        public DateTime Sent { get; }
 
         /// <summary>
         /// DateTime message was sent in UTC.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime SentUTC { get; set; }
+        public DateTime SentUTC { get; }
 
         /// <summary>
         /// Destination user or subreddit name.
         /// </summary>
         [JsonProperty("dest")]
-        public string Destination { get; set; }
+        public string Destination { get; }
 
         /// <summary>
         /// Message author.
         /// </summary>
         [JsonProperty("author")]
-        public string Author { get; set; }
+        public string Author { get; }
 
         /// <summary>
         /// Subreddit (for comments).
         /// </summary>
         [JsonProperty("subreddit")]
-        public string Subreddit { get; set; }
+        public string Subreddit { get; }
 
         /// <summary>
         /// Returns true if the message is unread.
         /// </summary>
         [JsonProperty("new")]
-        public bool Unread { get; set; }
+        public bool Unread { get; }
 
         /// <summary>
         /// Message subject.
         /// </summary>
         [JsonProperty("subject")]
-        public string Subject { get; set; }
+        public string Subject { get; }
 
         /// <summary>
         /// Parent id.
         /// </summary>
         [JsonProperty("parent_id")]
-        public string ParentID { get; set; }
+        public string ParentID { get; }
 
         /// <summary>
         /// full name of the first message in this message chain.
         /// </summary>
         [JsonProperty("first_message_name")]
-        public string FirstMessageName { get; set; }
+        public string FirstMessageName { get; }
 
         /// <summary>
         /// Replies to this message.
         /// </summary>
         [JsonIgnore]
-        public PrivateMessage[] Replies { get; set; }
+        public PrivateMessage[] Replies { get; private set; }
 
         /// <summary>
         /// Original message
@@ -145,9 +145,7 @@ namespace RedditSharp.Things
         }
         // Awaitables don't have to be called asynchronously
 
-        protected override JToken GetJsonData(JToken json) {
-          return json["data"];
-        }
+        protected override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>
         /// Mark the message read

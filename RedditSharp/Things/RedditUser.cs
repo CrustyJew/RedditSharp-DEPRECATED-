@@ -10,13 +10,13 @@ namespace RedditSharp.Things
         public RedditUser(Reddit reddit, JToken json) : base(reddit, json) {
         }
 
-        private const string OverviewUrl = "/user/{0}.json";
-        private const string CommentsUrl = "/user/{0}/comments.json";
-        private const string LinksUrl = "/user/{0}/submitted.json";
+        private string OverviewUrl => $"/user/{Name}.json";
+        private string CommentsUrl => $"/user/{Name}/comments.json";
+        private string LinksUrl => $"/user/{Name}/submitted.json";
         private const string SubscribedSubredditsUrl = "/subreddits/mine.json";
-        private const string LikedUrl = "/user/{0}/liked.json";
-        private const string DislikedUrl = "/user/{0}/disliked.json";
-        private const string SavedUrl = "/user/{0}/saved.json";
+        private string LikedUrl => $"/user/{Name}/liked.json";
+        private string DislikedUrl => "/user/{Name}/disliked.json";
+        private string SavedUrl => $"/user/{Name}/saved.json";
 
         private const int MAX_LIMIT = 100;
 
@@ -28,104 +28,68 @@ namespace RedditSharp.Things
         /// Reddit username.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Returns true if the user has reddit gold.
         /// </summary>
         [JsonProperty("is_gold")]
-        public bool HasGold { get; set; }
+        public bool HasGold { get; }
 
         /// <summary>
         /// Returns true if the user is a moderator of any subreddit.
         /// </summary>
         [JsonProperty("is_mod")]
-        public bool IsModerator { get; set; }
+        public bool IsModerator { get; }
 
         /// <summary>
         /// Total link karma of the user.
         /// </summary>
         [JsonProperty("link_karma")]
-        public int LinkKarma { get; set; }
+        public int LinkKarma { get; }
 
         /// <summary>
         /// Total comment karma of the user.
         /// </summary>
         [JsonProperty("comment_karma")]
-        public int CommentKarma { get; set; }
+        public int CommentKarma { get; }
 
         /// <summary>
         /// Date the user was created.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Created { get; set; }
+        public DateTime Created { get; }
 
         /// <summary>
         /// Return the users overview.
         /// </summary>
-        public Listing<VotableThing> Overview
-        {
-            get
-            {
-                return new Listing<VotableThing>(Reddit, string.Format(OverviewUrl, Name));
-            }
-        }
+        public Listing<VotableThing> Overview => new Listing<VotableThing>(Reddit, OverviewUrl);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts liked by the logged in user.
         /// </summary>
-        public Listing<Post> LikedPosts
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(LikedUrl, Name));
-            }
-        }
+        public Listing<Post> LikedPosts => new Listing<Post>(Reddit,LikedUrl);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts disliked by the logged in user.
         /// </summary>
-        public Listing<Post> DislikedPosts
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(DislikedUrl, Name));
-            }
-        }
+        public Listing<Post> DislikedPosts => new Listing<Post>(Reddit, DislikedUrl);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of comments made by the user.
         /// </summary>
-        public Listing<Comment> Comments
-        {
-            get
-            {
-                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name));
-            }
-        }
+        public Listing<Comment> Comments => new Listing<Comment>(Reddit, CommentsUrl);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts made by the user.
         /// </summary>
-        public Listing<Post> Posts
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(LinksUrl, Name));
-            }
-        }
+        public Listing<Post> Posts => new Listing<Post>(Reddit, LinksUrl);
 
         /// <summary>
         /// Return a list of subscribed subreddits for the logged in user.
         /// </summary>
-        public Listing<Subreddit> SubscribedSubreddits
-        {
-            get
-            {
-                return new Listing<Subreddit>(Reddit, SubscribedSubredditsUrl);
-            }
-        }
+        public Listing<Subreddit> SubscribedSubreddits => new Listing<Subreddit>(Reddit, SubscribedSubredditsUrl);
 
         /// <summary>
         /// Get a listing of comments and posts from the user sorted by <paramref name="sorting"/>, from time <paramref name="fromTime"/>
@@ -192,46 +156,16 @@ namespace RedditSharp.Things
         public Listing<VotableThing> GetSaved(Sort sorting = Sort.New, int limit = 25, FromTime fromTime = FromTime.All)
         {
             if ((limit < 1) || (limit > MAX_LIMIT))
-                throw new ArgumentOutOfRangeException("limit", "Valid range: [1," + MAX_LIMIT + "]");
+                throw new ArgumentOutOfRangeException("limit", "Valid range: [1, {MAX_LIMIT}]");
             string savedUrl = string.Format(SavedUrl, Name);
-            savedUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
+            savedUrl += $"?sort={Enum.GetName(typeof(Sort), sorting)}&limit={limit}&t={Enum.GetName(typeof(FromTime), fromTime)}";
 
             return new Listing<VotableThing>(Reddit, savedUrl);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
 
-        #region Obsolete Getter Methods
-
-        [Obsolete("Use Overview property instead")]
-        public Listing<VotableThing> GetOverview()
-        {
-            return Overview;
-        }
-
-        [Obsolete("Use Comments property instead")]
-        public Listing<Comment> GetComments()
-        {
-            return Comments;
-        }
-
-        [Obsolete("Use Posts property instead")]
-        public Listing<Post> GetPosts()
-        {
-            return Posts;
-        }
-
-        [Obsolete("Use SubscribedSubreddits property instead")]
-        public Listing<Subreddit> GetSubscribedSubreddits()
-        {
-            return SubscribedSubreddits;
-        }
-
-        #endregion Obsolete Getter Methods
     }
 
     public enum Sort

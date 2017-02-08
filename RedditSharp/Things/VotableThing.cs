@@ -55,49 +55,49 @@ namespace RedditSharp.Things
         /// The moderator who approved this item.  This will be null or empty if the item has not been approved.
         /// </summary>
         [JsonProperty("approved_by")]
-        public string ApprovedBy { get; set; }
+        public string ApprovedBy { get; }
 
         /// <summary>
         /// Author user name.
         /// </summary>
         [JsonProperty("author")]
-        public string AuthorName { get; set; }
+        public string AuthorName { get; }
 
         /// <summary>
         /// Css flair class of the item author.
         /// </summary>
         [JsonProperty("author_flair_css_class")]
-        public string AuthorFlairCssClass { get; set; }
+        public string AuthorFlairCssClass { get; }
 
         /// <summary>
         /// Flair text of the item author.
         /// </summary>
         [JsonProperty("author_flair_text")]
-        public string AuthorFlairText { get; set; }
+        public string AuthorFlairText { get; }
 
         /// <summary>
         /// The moderator who removed this item.  This will be null or empty if the item has not been removed.
         /// </summary>
         [JsonProperty("banned_by")]
-        public string BannedBy { get; set; }
+        public string BannedBy { get; }
 
         /// <summary>
         /// Number of upvotes on this item.
         /// </summary>
         [JsonProperty("downs")]
-        public int Downvotes { get; set; }
+        public int Downvotes { get; private set; }
 
         /// <summary>
         /// Returns true if this item has been edited by the author.
         /// </summary>
         [JsonProperty("edited")]
-        public bool Edited { get; set; }
+        public bool Edited { get; }
 
         /// <summary>
         /// Returns true if this item is archived.
         /// </summary>
         [JsonProperty("archived")]
-        public bool IsArchived { get; set; }
+        public bool IsArchived { get; }
 
         /// <summary>
         /// Returns true if this item has been approved.
@@ -107,7 +107,7 @@ namespace RedditSharp.Things
         /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
         /// </summary>
         [JsonProperty("approved")]
-        public bool? IsApproved { get; set; }
+        public bool? IsApproved { get; }
 
         /// <summary>
         /// Returns true if this item has been removed.
@@ -117,31 +117,31 @@ namespace RedditSharp.Things
         /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
         /// </summary>
         [JsonProperty("removed")]
-        public bool? IsRemoved { get; set; }
+        public bool? IsRemoved { get; }
 
         /// <summary>
         /// Number of upvotes on this item.
         /// </summary>
         [JsonProperty("ups")]
-        public int Upvotes { get; set; }
+        public int Upvotes { get; private set; }
 
         /// <summary>
         /// Current score of this item.
         /// </summary>
         [JsonProperty("score")]
-        public int Score { get; set; }
+        public int Score { get; }
 
         /// <summary>
         /// Returns true if this item is saved.
         /// </summary>
         [JsonProperty("saved")]
-        public bool Saved { get; set; }
+        public bool Saved { get; private set; }
 
         /// <summary>
         /// Returns true if the item is sticked.
         /// </summary>
         [JsonProperty("stickied")]
-        public bool IsStickied { get; set; }
+        public bool IsStickied { get; }
 
         /// <summary>
         /// Number of reports on this item.
@@ -154,14 +154,14 @@ namespace RedditSharp.Things
         /// Number of reports on this item.
         /// </summary>
         [JsonProperty("num_reports")]
-        public int? ReportCount { get; set; }
+        public int? ReportCount { get; }
 
         /// <summary>
         /// Returns the distinguish type.
         /// </summary>
         [JsonProperty("distinguished")]
         [JsonConverter(typeof(DistinguishConverter))]
-        public DistinguishType Distinguished { get; set; }
+        public DistinguishType Distinguished { get; }
 
         /// <summary>
         /// True if the logged in user has upvoted this.
@@ -169,27 +169,27 @@ namespace RedditSharp.Things
         /// Null if they have not cast a vote.
         /// </summary>
         [JsonProperty("likes")]
-        public bool? Liked { get; set; }
+        public bool? Liked { get; private set; }
 
         /// <summary>
         /// Returns a list of reports made by moderators.
         /// </summary>
         [JsonProperty("mod_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
-        public ICollection<Report> ModReports { get; set; }
+        public ICollection<Report> ModReports { get; }
 
         /// <summary>
         /// Returns a list of reports made by users.
         /// </summary>
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
-        public ICollection<Report> UserReports { get; set; }
+        public ICollection<Report> UserReports { get; }
 
         /// <summary>
         /// Number of times this item has been gilded.
         /// </summary>
         [JsonProperty("gilded")]
-        public int Gilded { get; set; }
+        public int Gilded { get; }
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.
@@ -540,17 +540,17 @@ namespace RedditSharp.Things
         /// <summary>
         /// Report reason
         /// </summary>
-        public string Reason { get; set; }
+        public string Reason { get; internal set; }
 
         /// <summary>
         /// Moderator who made the report.  Empty if report was made by
         /// a regular user.
         /// </summary>
-        public string ModeratorName { get; set; }
+        public string ModeratorName { get; internal set; }
 
         /// <summary>
         /// Number of reports matching <see cref="Reason"/>
         /// </summary>
-        public int Count { get; set; }
+        public int Count { get; internal set; }
     }
 }

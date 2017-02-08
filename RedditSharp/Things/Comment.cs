@@ -31,9 +31,7 @@ namespace RedditSharp.Things
             ParseComments(json, sender);
         }
 
-        protected override JToken GetJsonData(JToken json) {
-            return json;
-        }
+        protected override JToken GetJsonData(JToken json) => json;
 
         /// <summary>
         /// Fill the object with comments.
@@ -113,43 +111,43 @@ namespace RedditSharp.Things
         /// Comment body markdown.
         /// </summary>
         [JsonProperty("body")]
-        public string Body { get; set; }
+        public string Body { get; private set; }
 
         /// <summary>
         /// Comment body html.
         /// </summary>
         [JsonProperty("body_html")]
-        public string BodyHtml { get; set; }
+        public string BodyHtml { get; }
 
         /// <summary>
         /// Id of the parent <see cref="VotableThing"/>.
         /// </summary>
         [JsonProperty("parent_id")]
-        public string ParentId { get; set; }
+        public string ParentId { get; }
 
         /// <summary>
         /// Parent subreddit name.
         /// </summary>
         [JsonProperty("subreddit")]
-        public string Subreddit { get; set; }
+        public string Subreddit { get; }
 
         /// <summary>
         /// Link id.
         /// </summary>
         [JsonProperty("link_id")]
-        public string LinkId { get; set; }
+        public string LinkId { get; }
 
         /// <summary>
         /// Parent link title.
         /// </summary>
         [JsonProperty("link_title")]
-        public string LinkTitle { get; set; }
+        public string LinkTitle { get; }
 
         /// <summary>
         /// More comments.
         /// </summary>
         [JsonIgnore]
-        public More More { get; set; }
+        public More More { get; private set; }
 
         /// <summary>
         /// Replies to this comment.

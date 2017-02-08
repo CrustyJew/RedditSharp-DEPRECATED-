@@ -14,25 +14,25 @@ namespace RedditSharp.Things
         private const string DeleteUpdateUrl = "/api/live/{0}/delete_update";
 
         [JsonProperty("body")]
-        public string Body { get; set; }
+        public string Body { get; }
 
         [JsonProperty("body_html")]
-        public string BodyHtml { get; set; }
+        public string BodyHtml { get; }
 
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; }
 
         [JsonProperty("mobile_embeds")]
-        public ICollection<MobileEmbed> MobileEmbeds { get; set; }
+        public ICollection<MobileEmbed> MobileEmbeds { get; }
 
         [JsonProperty("author")]
-        public string Author { get; set; }
+        public string Author { get; }
 
         [JsonProperty("embeds")]
-        public ICollection<Embed> Embeds { get; set; }
+        public ICollection<Embed> Embeds { get; }
 
         [JsonProperty("stricken")]
-        public bool IsStricken { get; set; }
+        public bool IsStricken { get; }
 
         public Task StrikeAsync() => SimpleActionAsync(StrikeUpdateUrl);
 
@@ -41,55 +41,55 @@ namespace RedditSharp.Things
         public class MobileEmbed
         {
             [JsonProperty("provider_url")]
-            public string ProviderUrl { get; set; }
+            public string ProviderUrl { get; }
 
             [JsonProperty("description")]
-            public string Description { get; set; }
+            public string Description { get; }
 
             [JsonProperty("original_url")]
-            public string Original_Url { get; set; }
+            public string Original_Url { get; }
 
             [JsonProperty("url")]
-            public string Url { get; set; }
+            public string Url { get; }
 
             [JsonProperty("title")]
-            public string Title { get; set; }
+            public string Title { get; }
 
             [JsonProperty("thumbnail_width")]
-            public int ThumbnailWidth { get; set; }
+            public int ThumbnailWidth { get; }
 
             [JsonProperty("thumbnail_height")]
-            public int ThumbnailHeight { get; set; }
+            public int ThumbnailHeight { get; }
 
             [JsonProperty("thumbnail_url")]
-            public string ThumbnailUrl { get; set; }
+            public string ThumbnailUrl { get; }
 
             [JsonProperty("author_name")]
-            public string AuthorName { get; set; }
+            public string AuthorName { get; }
 
             [JsonProperty("version")]
-            public string Version { get; set; }
+            public string Version { get; }
 
             [JsonProperty("provider_name")]
-            public string ProviderName { get; set; }
+            public string ProviderName { get; }
 
             [JsonProperty("type")]
-            public string Type { get; set; }
+            public string Type { get; }
 
             [JsonProperty("author_url")]
-            public string AuthorUrl { get; set; }
+            public string AuthorUrl { get; }
         }
 
         public class Embed
         {
             [JsonProperty("url")]
-            public string AuthorUrl { get; set; }
+            public string AuthorUrl { get; }
 
             [JsonProperty("width")]
-            public int Width { get; set; }
+            public int Width { get; }
 
             [JsonProperty("height")]
-            public int Height { get; set; }
+            public int Height { get; }
         }
     }
 }

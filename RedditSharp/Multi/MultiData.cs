@@ -17,13 +17,13 @@ namespace RedditSharp.Multi
         /// Kind of Multi
         /// </summary>
         [JsonProperty("kind")]
-        public string Kind { get; set; }
+        public string Kind { get; }
 
         /// <summary>
         /// Internal Model Data of the Multi Class
         /// </summary>
         [JsonIgnore]
-        public MData Data { get; set; }
+        public MData Data { get; private set; }
 
         /// <summary>
         /// Creates an implementation of MultiData

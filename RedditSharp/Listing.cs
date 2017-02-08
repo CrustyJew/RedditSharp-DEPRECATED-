@@ -32,9 +32,9 @@ namespace RedditSharp
         /// </summary>
         internal const int DefaultListingPerRequest = 25;
 
-        private Reddit Reddit { get; set; }
+        private Reddit Reddit { get; }
         private IWebAgent WebAgent => Reddit?.WebAgent;
-        private string Url { get; set; }
+        private string Url { get; }
 
         /// <summary>
         /// Creates a new Listing instance
@@ -170,13 +170,7 @@ namespace RedditSharp
                 MaximumLimit = maximumLimit;
             }
 
-            public T Current
-            {
-                get
-                {
-                    return (T)CurrentPage[CurrentPageIndex];
-                }
-            }
+            public T Current => (T)CurrentPage[CurrentPageIndex];
 
             private Task FetchNextPageAsync()
             {

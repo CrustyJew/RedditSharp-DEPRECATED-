@@ -9,28 +9,20 @@ using System.Threading.Tasks;
 
 namespace RedditSharp.Multi
 {
-    public class Multi
+    public class Multi : RedditObject
     {
-        private Reddit Reddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
-
         #region Constant API URLs
         private const string GetCurrentUserMultiUrl = "/api/multi/mine";
-        private const string GetPublicUserMultiUrl = "/api/multi/user/{0}";
-        private const string GetMultiPathUrl = "/api/multi/{0}";
-        private const string GetMultiDescriptionPathUrl = "/api/multi/{0}/description";
-        private const string GetMultiSubUrl = "/api/multi/{0}/r/{1}";
+        private string GetPublicUserMultiUrl(string user) => $"/api/multi/user/{user}";
+        private string GetMultiPathUrl(string path) => $"/api/multi/{path}";
+        private string GetMultiDescriptionPathUrl(string path) => $"/api/multi/{path}/description";
+        private string GetMultiSubUrl(string path, string subredddit) => "/api/multi/{path}/r/{1}";
         private const string PostMultiRenameUrl = "/api/multi/rename";
-        private const string PutSubMultiUrl = "/api/multi/{0}/r/{1}";
+        private string PutSubMultiUrl(string path, string subreddit) => $"/api/multi/{path}/r/{subreddit}";
         private const string CopyMultiUrl = "/api/multi/copy";
-
         #endregion
 
-
-        public Multi(Reddit reddit, IWebAgent webAgent)
-        {
-            Reddit = reddit;
-            WebAgent = webAgent;
+        public Multi(Reddit reddit) : base(reddit) {
         }
 
         /// <summary>
@@ -57,7 +49,7 @@ namespace RedditSharp.Multi
         /// <returns>A list of MultiData containing the public Multis of the searched user</returns>
         public async Task<IList<MultiData>> GetPublicUserMultisAsync(string username)
         {
-            var request = WebAgent.CreateGet(string.Format(GetPublicUserMultiUrl,username));
+            var request = WebAgent.CreateGet(GetPublicUserMultiUrl(username));
             var json = await WebAgent.ExecuteRequestAsync(request);
 
             List<MultiData> results = new List<MultiData>();
@@ -75,7 +67,7 @@ namespace RedditSharp.Multi
         /// <returns>A MultiData containing the information for the found Multi</returns>
         public async Task<MultiData> GetMultiByPathAsync(string path)
         {
-            var request = WebAgent.CreateGet(string.Format(GetMultiPathUrl, path));
+            var request = WebAgent.CreateGet(GetMultiPathUrl(path));
             var json = await WebAgent.ExecuteRequestAsync(request);
             var result = new MultiData(Reddit, json, WebAgent);
             return result;
@@ -88,7 +80,7 @@ namespace RedditSharp.Multi
         /// <returns>A MultiData containing the description for the found Multi</returns>
         public async Task<MultiData> GetMultiDescriptionAsync(string path)
         {
-            var request = WebAgent.CreateGet(string.Format(GetMultiDescriptionPathUrl, path));
+            var request = WebAgent.CreateGet(GetMultiDescriptionPathUrl(path));
             var json = await WebAgent.ExecuteRequestAsync(request);
             var result = new MultiData(Reddit, json, WebAgent, false);
             return result;
@@ -102,7 +94,7 @@ namespace RedditSharp.Multi
         /// <returns>A MultiSubs element containing the information for the searched subreddit</returns>
         public async Task<MultiSubs> GetSubInformationAsync(string path, string subreddit)
         {
-            var request = WebAgent.CreateGet(string.Format(GetMultiSubUrl, path,subreddit));
+            var request = WebAgent.CreateGet(GetMultiSubUrl(path, subreddit));
             var json = await WebAgent.ExecuteRequestAsync(request);
             var result = new MultiSubs(Reddit, json, WebAgent);
             return result;
@@ -143,11 +135,11 @@ namespace RedditSharp.Multi
         public async Task<string> PutSubMultiAsync(string path, string subName)
         {
             if (Reddit.User == null)
-            { 
+            {
                 throw new AuthenticationException("No user logged in.");
              }
 
-            var request = WebAgent.CreateRequest(string.Format(PutSubMultiUrl,path,subName),"PUT");
+            var request = WebAgent.CreateRequest(PutSubMultiUrl(path ,subName),"PUT");
             JObject modelData = new JObject();
             modelData.Add("name", subName);
 
@@ -176,7 +168,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiDescriptionPathUrl, path),"PUT");
+            var request = WebAgent.CreateRequest(GetMultiDescriptionPathUrl(path),"PUT");
             JObject modelData = new JObject();
             modelData.Add("body_md", description);
             WebAgent.WritePostBody(request, new
@@ -228,7 +220,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiSubUrl, path, subname),"DELETE");
+            var request = WebAgent.CreateRequest(GetMultiSubUrl(path, subname),"DELETE");
             WebAgent.WritePostBody(request, new
                 {
                     multipath = path,
@@ -251,7 +243,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiPathUrl, path),"DELETE");
+            var request = WebAgent.CreateRequest(GetMultiPathUrl(path),"DELETE");
             WebAgent.WritePostBody(request, new
             {
                 multipath = path,
@@ -277,10 +269,10 @@ namespace RedditSharp.Multi
         public async Task<string> PostMultiAsync(MData m, string path)
         {
             if(Reddit.User == null)
-            { 
+            {
                 throw new AuthenticationException("No user logged in");
             }
-            var request = WebAgent.CreatePost(string.Format(GetMultiPathUrl,path));
+            var request = WebAgent.CreatePost(GetMultiPathUrl(path));
             JObject modelData = new JObject();
             modelData.Add("description_md",m.DescriptionMD);
             modelData.Add("display_name",m.DisplayName);
@@ -325,7 +317,7 @@ namespace RedditSharp.Multi
             {
                 throw new AuthenticationException("No user logged in");
             }
-            var request = WebAgent.CreateRequest(string.Format(GetMultiPathUrl, path),"PUT");
+            var request = WebAgent.CreateRequest(GetMultiPathUrl(path),"PUT");
             JObject modelData = new JObject();
             modelData.Add("description_md", m.DescriptionMD);
             modelData.Add("display_name", m.DisplayName);

@@ -6,31 +6,25 @@ using System.Net;
 
 namespace RedditSharp
 {
-    public class SubredditStyle
+    public class SubredditStyle : RedditObject
     {
         private const string UploadImageUrl = "/api/upload_sr_img";
         private const string UpdateCssUrl = "/api/subreddit_stylesheet";
 
-        private Reddit Reddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
-
-        public SubredditStyle(Reddit reddit, Subreddit subreddit, IWebAgent webAgent)
+        public SubredditStyle(Subreddit subreddit) : base(subreddit?.Reddit)
         {
-            Reddit = reddit;
             Subreddit = subreddit;
-            WebAgent = webAgent;
         }
 
-        public SubredditStyle(Reddit reddit, Subreddit subreddit, JToken json, IWebAgent webAgent) : this(reddit, subreddit, webAgent)
+        public SubredditStyle(Subreddit subreddit, JToken json) : this(subreddit)
         {
             Images = new List<SubredditImage>();
             var data = json["data"];
             CSS = WebUtility.HtmlDecode(data["stylesheet"].Value<string>());
             foreach (var image in data["images"])
             {
-                Images.Add(new SubredditImage(
-                    Reddit, this, image["link"].Value<string>(),
-                    image["name"].Value<string>(), image["url"].Value<string>(), WebAgent));
+                Images.Add(new SubredditImage(this, image["link"].Value<string>(),
+                    image["name"].Value<string>(), image["url"].Value<string>()));
             }
         }
 

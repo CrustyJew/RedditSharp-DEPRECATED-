@@ -14,31 +14,31 @@ namespace RedditSharp
         /// Flair text.
         /// </summary>
         [JsonProperty("flair_text")]
-        public string Text { get; set; }
+        public string Text { get; }
 
         /// <summary>
         /// Flair clss class.
         /// </summary>
         [JsonProperty("flair_css_class")]
-        public string CssClass { get; set; }
+        public string CssClass { get; }
 
         /// <summary>
         /// Flair template id.
         /// </summary>
         [JsonProperty("flair_template_id")]
-        public string TemplateId { get; set; }
+        public string TemplateId { get; }
 
         /// <summary>
         /// Set to true if this is user editable.
         /// </summary>
         [JsonProperty("flair_text_editable")]
-        public bool IsEditable { get; set; }
+        public bool IsEditable { get; }
 
         /// <summary>
         /// Position of the flair left or right.
         /// </summary>
         [JsonProperty("flair_position")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public FlairPosition FlairPosition { get; set; }
+        public FlairPosition FlairPosition { get; }
     }
 }

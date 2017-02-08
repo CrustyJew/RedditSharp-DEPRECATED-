@@ -313,7 +313,7 @@ namespace RedditSharp.Things
                 var response = await WebAgent.GetResponseAsync(request);
                 var data = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(data);
-                return new SubredditSettings(this, Reddit, json, WebAgent);
+                return new SubredditSettings(this, json);
             }
             catch // TODO: More specific catch
             {
@@ -322,7 +322,7 @@ namespace RedditSharp.Things
                 var response = await WebAgent.GetResponseAsync(request);
                 var data = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(data);
-                return new SubredditSettings(this, Reddit, json, WebAgent);
+                return new SubredditSettings(this, json);
             }
 
         }
@@ -362,8 +362,7 @@ namespace RedditSharp.Things
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
-            return new SubredditStyle(Reddit, this, json, WebAgent);
-
+            return new SubredditStyle(this, json);
         }
 
         /// <summary>

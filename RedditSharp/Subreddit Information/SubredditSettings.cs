@@ -7,25 +7,20 @@ using System.Net;
 
 namespace RedditSharp
 {
-    public class SubredditSettings
+    public class SubredditSettings : RedditObject
     {
         private const string SiteAdminUrl = "/api/site_admin";
         private const string DeleteHeaderImageUrl = "/api/delete_sr_header";
-
-        private Reddit Reddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
-        public Subreddit Subreddit { get; set; }
+        public Subreddit Subreddit { get; }
 
-        public SubredditSettings(Reddit reddit, Subreddit subreddit, IWebAgent webAgent)
+        public SubredditSettings(Subreddit subreddit) : base(subreddit?.Reddit)
         {
             Subreddit = subreddit;
-            Reddit = reddit;
-            WebAgent = webAgent;
             // Default settings, for use when reduced information is given
             AllowAsDefault = true;
             AllowImages = false;
@@ -54,7 +49,7 @@ namespace RedditSharp
         /// <param name="reddit"></param>
         /// <param name="json"></param>
         /// <param name="webAgent"></param>
-        public SubredditSettings(Subreddit subreddit, Reddit reddit, JObject json, IWebAgent webAgent) : this(reddit, subreddit, webAgent)
+        public SubredditSettings(Subreddit subreddit, JObject json) : this(subreddit)
         {
             var data = json["data"];
             AllowAsDefault = data["default_set"].ValueOrDefault<bool>();
@@ -196,7 +191,7 @@ namespace RedditSharp
         /// Set to true to show thumbnail images of content.
         /// </summary>
         public bool ShowThumbnails { get; set; }
-        
+
         /// <summary>
         /// Account age (days) required to edit and create wiki pages.
         /// </summary>
@@ -213,7 +208,7 @@ namespace RedditSharp
         public SpamFilterSettings SpamFilter { get; set; }
 
         /// <summary>
-        /// Set to bool to allow images 
+        /// Set to bool to allow images
         /// </summary>
         public bool AllowImages { get; set; }
 

@@ -7,13 +7,9 @@ using RedditSharp.Extensions;
 
 namespace RedditSharp.Things
 {
-    public class Thing
+    public class Thing : RedditObject
     {
-        public Reddit Reddit { get; }
-        public IWebAgent WebAgent => Reddit?.WebAgent;
-
-        public Thing(Reddit reddit, JToken json) {
-          Reddit = reddit;
+        public Thing(Reddit reddit, JToken json) : base(reddit) {
           Populate(json);
         }
 

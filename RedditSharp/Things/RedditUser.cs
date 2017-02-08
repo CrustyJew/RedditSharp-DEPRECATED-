@@ -7,6 +7,9 @@ namespace RedditSharp.Things
 {
     public class RedditUser : Thing
     {
+        public RedditUser(Reddit reddit, JToken json) : base(reddit, json) {
+        }
+
         private const string OverviewUrl = "/user/{0}.json";
         private const string CommentsUrl = "/user/{0}/comments.json";
         private const string LinksUrl = "/user/{0}/submitted.json";
@@ -17,55 +20,16 @@ namespace RedditSharp.Things
 
         private const int MAX_LIMIT = 100;
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns>A reddit user</returns>
-        public async Task<RedditUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings));
-            return this;
+        protected override JToken GetJsonData(JToken json) {
+            return json["name"] == null ? json["data"] : json;
         }
-
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns>A reddit user</returns>
-        public RedditUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
-        }
-
-        [JsonIgnore]
-        protected Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        protected IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Reddit username.
         /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; }
-        
+
         /// <summary>
         /// Returns true if the user has reddit gold.
         /// </summary>
@@ -104,7 +68,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<VotableThing>(Reddit, string.Format(OverviewUrl, Name), WebAgent);
+                return new Listing<VotableThing>(Reddit, string.Format(OverviewUrl, Name));
             }
         }
 
@@ -115,7 +79,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(LikedUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(LikedUrl, Name));
             }
         }
 
@@ -126,7 +90,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(DislikedUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(DislikedUrl, Name));
             }
         }
 
@@ -137,7 +101,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name), WebAgent);
+                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name));
             }
         }
 
@@ -148,7 +112,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(LinksUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(LinksUrl, Name));
             }
         }
 
@@ -159,7 +123,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Subreddit>(Reddit, SubscribedSubredditsUrl, WebAgent);
+                return new Listing<Subreddit>(Reddit, SubscribedSubredditsUrl);
             }
         }
 
@@ -178,7 +142,7 @@ namespace RedditSharp.Things
             string overviewUrl = string.Format(OverviewUrl, Name);
             overviewUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
 
-            return new Listing<VotableThing>(Reddit, overviewUrl, WebAgent);
+            return new Listing<VotableThing>(Reddit, overviewUrl);
         }
 
         /// <summary>
@@ -196,7 +160,7 @@ namespace RedditSharp.Things
             string commentsUrl = string.Format(CommentsUrl, Name);
             commentsUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
 
-            return new Listing<Comment>(Reddit, commentsUrl, WebAgent);
+            return new Listing<Comment>(Reddit, commentsUrl);
         }
 
         /// <summary>
@@ -214,7 +178,7 @@ namespace RedditSharp.Things
             string linksUrl = string.Format(LinksUrl, Name);
             linksUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
 
-            return new Listing<Post>(Reddit, linksUrl, WebAgent);
+            return new Listing<Post>(Reddit, linksUrl);
         }
 
         /// <summary>
@@ -232,7 +196,7 @@ namespace RedditSharp.Things
             string savedUrl = string.Format(SavedUrl, Name);
             savedUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
 
-            return new Listing<VotableThing>(Reddit, savedUrl, WebAgent);
+            return new Listing<VotableThing>(Reddit, savedUrl);
         }
 
         /// <inheritdoc/>

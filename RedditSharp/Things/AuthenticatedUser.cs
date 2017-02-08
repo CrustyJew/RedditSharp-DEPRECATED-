@@ -7,6 +7,9 @@ namespace RedditSharp.Things
 {
     public class AuthenticatedUser : RedditUser
     {
+        public AuthenticatedUser(Reddit reddit, JToken json) : base (reddit, json) {
+        }
+
         private const string ModeratorUrl = "/reddits/mine/moderator.json";
         private const string UnreadMessagesUrl = "/message/unread.json?mark=true&limit=25";
         private const string ModQueueUrl = "/r/mod/about/modqueue.json";
@@ -16,44 +19,8 @@ namespace RedditSharp.Things
         private const string InboxUrl = "/message/inbox.json";
         private const string SentUrl = "/message/sent.json";
 
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            await CommonInitAsync(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public new AuthenticatedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
-                reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(reddit, json, webAgent);
-        }
-
-        private async Task CommonInitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            await base.InitAsync(reddit, json, webAgent).ConfigureAwait(false);
+        protected override JToken GetJsonData(JToken json) {
+          return json["name"] == null ? json["data"] : json;
         }
 
         /// <summary>
@@ -63,7 +30,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Subreddit>(Reddit, ModeratorUrl, WebAgent);
+                return new Listing<Subreddit>(Reddit, ModeratorUrl);
             }
         }
 
@@ -74,7 +41,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Thing>(Reddit, UnreadMessagesUrl, WebAgent);
+                return new Listing<Thing>(Reddit, UnreadMessagesUrl);
             }
         }
 
@@ -85,7 +52,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<VotableThing>(Reddit, ModQueueUrl, WebAgent);
+                return new Listing<VotableThing>(Reddit, ModQueueUrl);
             }
         }
 
@@ -96,7 +63,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Post>(Reddit, UnmoderatedUrl, WebAgent);
+                return new Listing<Post>(Reddit, UnmoderatedUrl);
             }
         }
 
@@ -107,7 +74,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<PrivateMessage>(Reddit, ModMailUrl, WebAgent);
+                return new Listing<PrivateMessage>(Reddit, ModMailUrl);
             }
         }
 
@@ -118,7 +85,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<PrivateMessage>(Reddit, MessagesUrl, WebAgent);
+                return new Listing<PrivateMessage>(Reddit, MessagesUrl);
             }
         }
 
@@ -129,7 +96,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<PrivateMessage>(Reddit, InboxUrl, WebAgent);
+                return new Listing<PrivateMessage>(Reddit, InboxUrl);
             }
         }
 
@@ -140,7 +107,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<PrivateMessage>(Reddit, SentUrl, WebAgent);
+                return new Listing<PrivateMessage>(Reddit, SentUrl);
             }
         }
 
@@ -149,7 +116,7 @@ namespace RedditSharp.Things
         /// </summary>
         public Listing<Post> GetUnmoderatedLinks()
         {
-            return new Listing<Post>(Reddit, UnmoderatedUrl, WebAgent);
+            return new Listing<Post>(Reddit, UnmoderatedUrl);
         }
 
         #region Obsolete Getter Methods
@@ -169,32 +136,32 @@ namespace RedditSharp.Things
         [Obsolete("Use ModerationQueue property instead")]
         public Listing<VotableThing> GetModerationQueue()
         {
-            return new Listing<VotableThing>(Reddit, ModQueueUrl, WebAgent);
+            return new Listing<VotableThing>(Reddit, ModQueueUrl);
         }
 
         [Obsolete("Use ModMail property instead")]
         public Listing<PrivateMessage> GetModMail()
         {
-            return new Listing<PrivateMessage>(Reddit, ModMailUrl, WebAgent);
+            return new Listing<PrivateMessage>(Reddit, ModMailUrl);
         }
 
         [Obsolete("Use PrivateMessages property instead")]
         public Listing<PrivateMessage> GetPrivateMessages()
         {
-            return new Listing<PrivateMessage>(Reddit, MessagesUrl, WebAgent);
+            return new Listing<PrivateMessage>(Reddit, MessagesUrl);
         }
 
         [Obsolete("Use Inbox property instead")]
         public Listing<PrivateMessage> GetInbox()
         {
-            return new Listing<PrivateMessage>(Reddit, InboxUrl, WebAgent);
+            return new Listing<PrivateMessage>(Reddit, InboxUrl);
         }
 
         #endregion Obsolete Getter Methods
 
         /// <summary>
         /// User modhash.
-        /// <para>A modhash is a token that the reddit API requires to help prevent CSRF. Modhashes can be 
+        /// <para>A modhash is a token that the reddit API requires to help prevent CSRF. Modhashes can be
         /// obtained via the /api/me.json call or in response data of listing endpoints.  The preferred way
         /// to send a modhash is to include an X-Modhash custom HTTP header with your requests.</para>
         ///<para>Modhashes are not required when authenticated with OAuth.</para>

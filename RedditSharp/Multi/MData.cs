@@ -51,7 +51,7 @@ namespace RedditSharp.Multi
         public string CopiedFrom { get; set; }
 
         /// <summary>
-        /// URL of the icon to use. 
+        /// URL of the icon to use.
         /// </summary>
         [JsonProperty("icon_url")]
         public string IconUrl { get; set; }
@@ -123,7 +123,7 @@ namespace RedditSharp.Multi
                     Subreddits.Add(new MultiSubs(reddit, json["subreddits"][i], webAgent));
                 }
             }
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            reddit.PopulateObject(json, this);
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace RedditSharp.Multi
         /// <param name="webAgent">Web Agent to implement the creation</param>
         protected internal MultiSubs(Reddit reddit, JToken json, IWebAgent webAgent)
         {
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            reddit.PopulateObject(json, this);
         }
 
         /// <summary>

@@ -11,6 +11,11 @@ namespace RedditSharp.Things
 {
     public class Subreddit : Thing
     {
+        public Subreddit(Reddit reddit, JToken json) : base(reddit, json) {
+            SetName();
+            Wiki = new Wiki(this);
+        }
+
         private const string SubredditPostUrl = "/r/{0}.json";
         private const string SubredditNewUrl = "/r/{0}/new.json?sort=new";
         private const string SubredditHotUrl = "/r/{0}/hot.json";
@@ -46,12 +51,6 @@ namespace RedditSharp.Things
         private const string ContributorsUrl = "/r/{0}/about/contributors.json";
         private const string BannedUsersUrl = "/r/{0}/about/banned.json";
         private const string ModmailUrl = "/r/{0}/message/moderator/inbox.json";
-
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Subreddit Wiki
@@ -163,9 +162,9 @@ namespace RedditSharp.Things
         {
             if (Name == "/")
             {
-                return new Listing<Post>(Reddit, "/top.json?t=" + Enum.GetName(typeof(FromTime), timePeriod).ToLower(), WebAgent);
+                return new Listing<Post>(Reddit, "/top.json?t=" + Enum.GetName(typeof(FromTime), timePeriod).ToLower());
             }
-            return new Listing<Post>(Reddit, string.Format(SubredditTopUrl, Name, Enum.GetName(typeof(FromTime), timePeriod)).ToLower(), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(SubredditTopUrl, Name, Enum.GetName(typeof(FromTime), timePeriod)).ToLower());
         }
         /// <summary>
         /// All posts on a subredit
@@ -175,8 +174,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json", WebAgent);
-                return new Listing<Post>(Reddit, string.Format(SubredditPostUrl, Name), WebAgent);
+                    return new Listing<Post>(Reddit, "/.json");
+                return new Listing<Post>(Reddit, string.Format(SubredditPostUrl, Name));
             }
         }
         /// <summary>
@@ -187,8 +186,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Comment>(Reddit, "/comments.json", WebAgent);
-                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name), WebAgent);
+                    return new Listing<Comment>(Reddit, "/comments.json");
+                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name));
             }
         }
         /// <summary>
@@ -199,8 +198,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Post>(Reddit, "/new.json", WebAgent);
-                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name), WebAgent);
+                    return new Listing<Post>(Reddit, "/new.json");
+                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name));
             }
         }
         /// <summary>
@@ -211,8 +210,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json", WebAgent);
-                return new Listing<Post>(Reddit, string.Format(SubredditHotUrl, Name), WebAgent);
+                    return new Listing<Post>(Reddit, "/.json");
+                return new Listing<Post>(Reddit, string.Format(SubredditHotUrl, Name));
             }
         }
         /// <summary>
@@ -223,8 +222,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json", WebAgent);
-                return new Listing<Post>(Reddit, string.Format(SubredditRisingUrl, Name), WebAgent);
+                    return new Listing<Post>(Reddit, "/.json");
+                return new Listing<Post>(Reddit, string.Format(SubredditRisingUrl, Name));
             }
         }
         /// <summary>
@@ -235,8 +234,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json", WebAgent);
-                return new Listing<Post>(Reddit, string.Format(SubredditControversialUrl, Name), WebAgent);
+                    return new Listing<Post>(Reddit, "/.json");
+                return new Listing<Post>(Reddit, string.Format(SubredditControversialUrl, Name));
             }
         }
         /// <summary>
@@ -247,8 +246,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<VotableThing>(Reddit, "/.json", WebAgent);
-                return new Listing<VotableThing>(Reddit, string.Format(SubredditGildedUrl, Name), WebAgent);
+                    return new Listing<VotableThing>(Reddit, "/.json");
+                return new Listing<VotableThing>(Reddit, string.Format(SubredditGildedUrl, Name));
             }
         }
 
@@ -259,7 +258,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<VotableThing>(Reddit, string.Format(ModqueueUrl, Name), WebAgent);
+                return new Listing<VotableThing>(Reddit, string.Format(ModqueueUrl, Name));
             }
         }
         /// <summary>
@@ -269,7 +268,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(UnmoderatedUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(UnmoderatedUrl, Name));
             }
         }
         /// <summary>
@@ -284,7 +283,7 @@ namespace RedditSharp.Things
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrl, Name, Uri.EscapeUriString(terms), sort, time), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(SearchUrl, Name, Uri.EscapeUriString(terms), sort, time));
         }
         /// <summary>
         /// Search for a list of posts from a specific time to another time
@@ -297,7 +296,7 @@ namespace RedditSharp.Things
         {
             string sort = sortE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, from.DateTimeToUnixTimestamp(), to.DateTimeToUnixTimestamp(), sort), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, from.DateTimeToUnixTimestamp(), to.DateTimeToUnixTimestamp(), sort));
         }
         /// <summary>
         /// Settings of the subreddit, as best as possible
@@ -404,7 +403,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<Contributor>(Reddit, string.Format(ContributorsUrl, Name), WebAgent);
+                return new Listing<Contributor>(Reddit, string.Format(ContributorsUrl, Name));
             }
         }
 
@@ -415,7 +414,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return new Listing<BannedUser>(Reddit, string.Format(BannedUsersUrl, Name), WebAgent);
+                return new Listing<BannedUser>(Reddit, string.Format(BannedUsersUrl, Name));
             }
         }
 
@@ -430,41 +429,14 @@ namespace RedditSharp.Things
             {
                 if (Reddit.User == null)
                     throw new AuthenticationException("No user logged in.");
-                return new Listing<PrivateMessage>(Reddit, string.Format(ModmailUrl, Name), WebAgent);
+                return new Listing<PrivateMessage>(Reddit, string.Format(ModmailUrl, Name));
             }
         }
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public async Task<Subreddit> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
-            SetName();
-
-            return this;
+        protected override JToken GetJsonData(JToken json) {
+          return json["data"];
         }
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public Subreddit Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
-            SetName();
-
-            return this;
-        }
         private void SetName()
         {
             Name = Url.ToString();
@@ -475,14 +447,6 @@ namespace RedditSharp.Things
             Name = Name.TrimEnd('/');
         }
 
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
-            Wiki = new Wiki(reddit, this, webAgent);
-        }
-
         /// <summary>
         /// http://www.reddit.com/r/all
         /// </summary>
@@ -490,14 +454,12 @@ namespace RedditSharp.Things
         /// <returns>http://www.reddit.com/r/all</returns>
         public static Subreddit GetRSlashAll(Reddit reddit)
         {
-            var rSlashAll = new Subreddit
+            var rSlashAll = new Subreddit(reddit, null)
             {
                 DisplayName = "/r/all",
                 Title = "/r/all",
                 Url = new Uri("/r/all", UriKind.Relative),
                 Name = "all",
-                Reddit = reddit,
-                WebAgent = reddit.WebAgent
             };
             return rSlashAll;
         }
@@ -509,14 +471,12 @@ namespace RedditSharp.Things
         /// <returns>the frontpage of reddit</returns>
         public static Subreddit GetFrontPage(Reddit reddit)
         {
-            var frontPage = new Subreddit
+            var frontPage = new Subreddit(reddit, null)
             {
                 DisplayName = "Front Page",
                 Title = "reddit: the front page of the internet",
                 Url = new Uri("/", UriKind.Relative),
                 Name = "/",
-                Reddit = reddit,
-                WebAgent = reddit.WebAgent
             };
             return frontPage;
         }
@@ -891,7 +851,7 @@ namespace RedditSharp.Things
                 throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
 
-            return new Post().Init(Reddit, json["json"], WebAgent);
+            return new Post(Reddit, json["json"]);
         }
         /// <summary>
         /// Submits a link post in the current subreddit using the logged-in user
@@ -939,7 +899,7 @@ namespace RedditSharp.Things
         /// </summary>
         public Listing<ModAction> GetModerationLog()
         {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name), WebAgent);
+            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name));
         }
 
         /// <summary>
@@ -948,7 +908,7 @@ namespace RedditSharp.Things
         /// <param name="action">ModActionType of action performed</param>
         public Listing<ModAction> GetModerationLog(ModActionType action)
         {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}", Name, ModActionTypeConverter.GetRedditParamName(action)), WebAgent);
+            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}", Name, ModActionTypeConverter.GetRedditParamName(action)));
         }
 
         /// <summary>
@@ -957,7 +917,7 @@ namespace RedditSharp.Things
         /// <param name="mods">String array of mods to filter by</param>
         public Listing<ModAction> GetModerationLog(string[] mods)
         {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?mod={1}", Name, string.Join(",", mods)), WebAgent);
+            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?mod={1}", Name, string.Join(",", mods)));
         }
 
         /// <summary>
@@ -968,7 +928,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods)
         {
-            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}&mod={2}", Name, ModActionTypeConverter.GetRedditParamName(action), string.Join(",", mods)), WebAgent);
+            return new Listing<ModAction>(Reddit, string.Format(ModLogUrl + "?type={1}&mod={2}", Name, ModActionTypeConverter.GetRedditParamName(action), string.Join(",", mods)));
         }
 
         /// <summary>
@@ -979,8 +939,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Comment>(Reddit, "/comments.json", WebAgent).GetListingStream();
-                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name), WebAgent).GetListingStream();
+                    return new Listing<Comment>(Reddit, "/comments.json").GetListingStream();
+                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name)).GetListingStream();
             }
         }
 
@@ -992,8 +952,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<Post>(Reddit, "/new.json", WebAgent).GetListingStream();
-                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name), WebAgent).GetListingStream();
+                    return new Listing<Post>(Reddit, "/new.json").GetListingStream();
+                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name)).GetListingStream();
             }
         }
 
@@ -1005,8 +965,8 @@ namespace RedditSharp.Things
             get
             {
                 if (Name == "/")
-                    return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name), WebAgent).GetListingStream();
-                return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name), WebAgent).GetListingStream();
+                    return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name)).GetListingStream();
+                return new Listing<ModAction>(Reddit, string.Format(ModLogUrl, this.Name)).GetListingStream();
             }
         }
     }

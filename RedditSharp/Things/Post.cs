@@ -24,55 +24,15 @@ namespace RedditSharp.Things
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="post"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            await CommonInitAsync(reddit, post, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="post"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            base.Init(reddit, webAgent, post);
-            Reddit = reddit;
-            WebAgent = webAgent;
-        }
-
-        private async Task CommonInitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            await base.InitAsync(reddit, webAgent, post);
-            Reddit = reddit;
-            WebAgent = webAgent;
+        public Post(Reddit reddit, JToken json) : base(reddit, json) {
         }
 
         /// <summary>
         /// Author of this post.
         /// </summary>
         [JsonProperty("author")]
-        public string AuthorName { get; set; }
+        public new string AuthorName { get; set; }
 
-        
         //TODO Discuss
         public IObservable<Comment> Comments
         {
@@ -111,7 +71,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("num_comments")]
         public int CommentCount { get; set; }
-        
+
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
@@ -151,7 +111,7 @@ namespace RedditSharp.Things
         public string Title { get; set; }
 
         /// <summary>
-        /// Parent subreddit name.
+        /// Parent subkkeddit name.
         /// </summary>
         [JsonProperty("subreddit")]
         public string SubredditName { get; set; }
@@ -175,7 +135,6 @@ namespace RedditSharp.Things
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; set; }
 
-
         /// <summary>
         /// Comment on this post.
         /// </summary>
@@ -198,7 +157,7 @@ namespace RedditSharp.Things
             var json = JObject.Parse(data);
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-            return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
+            return new Comment(Reddit, json["json"]["data"]["things"][0], this);
         }
 
         private async Task<string> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
@@ -310,9 +269,9 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task UpdateAsync()
         {
-            JToken post = await Reddit.GetTokenAsync(this.Url);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, Reddit.JsonSerializerSettings);
+            Reddit.PopulateObject(GetJsonData(await Reddit.GetTokenAsync(Url)), this);
         }
+
         /// <summary>
         /// Sets your claim
         /// </summary>
@@ -364,14 +323,9 @@ namespace RedditSharp.Things
             var comments = new List<Comment>();
             foreach (var comment in postJson)
             {
-                Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
-                if (newComment.Kind == "more")
-                {
-                }
-                else
-                {
+                Comment newComment = new Comment(Reddit, comment, this);
+                if (newComment.Kind != "more")
                     comments.Add(newComment);
-                }
             }
 
             return comments;
@@ -401,10 +355,10 @@ namespace RedditSharp.Things
                 More moreComments = null;
                 foreach (var comment in postJson)
                 {
-                    Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
+                    Comment newComment = new Comment(Reddit, comment, this);
                     if (newComment.Kind == "more")
                     {
-                        moreComments = new More().Init(Reddit, comment, WebAgent);
+                        moreComments = new More(Reddit, comment);
                     }
                     else
                     {

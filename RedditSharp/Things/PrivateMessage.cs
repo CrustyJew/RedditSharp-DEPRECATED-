@@ -10,11 +10,25 @@ namespace RedditSharp.Things
 {
     public class PrivateMessage : Thing
     {
+        public PrivateMessage(Reddit reddit, JToken json) : base(reddit, json) {
+            var data = json["data"];
+            if (data["replies"] != null && data["replies"].Any())
+            {
+                if (data["replies"]["data"] != null)
+                {
+                    if (data["replies"]["data"]["children"] != null)
+                    {
+                        var replies = new List<PrivateMessage>();
+                        foreach (var reply in data["replies"]["data"]["children"])
+                            replies.Add(new PrivateMessage(Reddit, reply));
+                        Replies = replies.ToArray();
+                    }
+                }
+            }
+        }
+
         private const string SetAsReadUrl = "/api/read_message";
         private const string CommentUrl = "/api/comment";
-
-        private Reddit Reddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Message body markdown.
@@ -107,7 +121,7 @@ namespace RedditSharp.Things
                 if (string.IsNullOrEmpty(ParentID))
                     return null;
                 var id = ParentID.Remove(0, 3);
-                var listing = new Listing<PrivateMessage>(Reddit, "/message/messages/" + id + ".json", WebAgent);
+                var listing = new Listing<PrivateMessage>(Reddit, "/message/messages/" + id + ".json");
                 var firstMessage = listing.First();
                 if (firstMessage.FullName == ParentID)
                     return listing.First();
@@ -126,58 +140,13 @@ namespace RedditSharp.Things
                 if (string.IsNullOrEmpty(ParentID))
                     return null;
                 var id = ParentID.Remove(0, 3);
-                return new Listing<PrivateMessage>(Reddit, "/message/messages/" + id + ".json", WebAgent);
+                return new Listing<PrivateMessage>(Reddit, "/message/messages/" + id + ".json");
             }
         }
         // Awaitables don't have to be called asynchronously
 
-        /// <summary>
-        /// initializes trying to get the messages
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns>A private message</returns>
-        public async Task<PrivateMessage> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        /// <summary>
-        /// initializes trying to get the messages
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns>A private message</returns>
-        public PrivateMessage Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
-            var data = json["data"];
-            if (data["replies"] != null && data["replies"].Any())
-            {
-                if (data["replies"]["data"] != null)
-                {
-                    if (data["replies"]["data"]["children"] != null)
-                    {
-                        var replies = new List<PrivateMessage>();
-                        foreach (var reply in data["replies"]["data"]["children"])
-                            replies.Add(new PrivateMessage().Init(reddit, reply, webAgent));
-                        Replies = replies.ToArray();
-                    }
-                }
-            }
+        protected override JToken GetJsonData(JToken json) {
+          return json["data"];
         }
 
         /// <summary>

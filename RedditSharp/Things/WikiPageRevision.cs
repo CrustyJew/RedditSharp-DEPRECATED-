@@ -7,6 +7,10 @@ namespace RedditSharp.Things
 {
     public class WikiPageRevision : Thing
     {
+        protected internal WikiPageRevision(Reddit reddit, JToken json) : base(reddit, json) {
+            Author = new RedditUser(Reddit, json["author"]);
+        }
+
         /// <summary>
         /// Revision id.
         /// </summary>
@@ -38,24 +42,5 @@ namespace RedditSharp.Things
         [JsonIgnore]
         public RedditUser Author { get; set; }
 
-        protected internal WikiPageRevision() { }
-
-        internal async Task<WikiPageRevision> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(()=>JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-        internal WikiPageRevision Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Author = new RedditUser().Init(reddit, json["author"], webAgent);
-        }
     }
 }

@@ -38,7 +38,7 @@ namespace RedditSharp
 
         #endregion
 
-        
+
         internal IWebAgent WebAgent { get; set; }
         /// <summary>
         /// Captcha solver instance to use when solving captchas.
@@ -59,7 +59,7 @@ namespace RedditSharp
             set { DefaultWebAgent.RateLimit = value; }
         }
 
-        internal JsonSerializerSettings JsonSerializerSettings { get; set; }
+        internal JsonSerializer JsonSerializer { get; }
 
         /// <summary>
         /// Gets the FrontPage using the current Reddit instance.
@@ -90,11 +90,10 @@ namespace RedditSharp
         {
             DefaultWebAgent defaultAgent = new DefaultWebAgent();
 
-            JsonSerializerSettings = new JsonSerializerSettings
-                {
+            JsonSerializer = JsonSerializer.Create(new JsonSerializerSettings {
                     CheckAdditionalContent = false,
                     DefaultValueHandling = DefaultValueHandling.Ignore
-                };
+                });
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
@@ -128,16 +127,9 @@ namespace RedditSharp
         /// Creates a Reddit instance with the given WebAgent implementation
         /// </summary>
         /// <param name="agent">Implementation of IWebAgent interface. Used to generate requests.</param>
-        public Reddit(IWebAgent agent)
-        {
-            WebAgent = agent;
-            JsonSerializerSettings = new JsonSerializerSettings
-            {
-                CheckAdditionalContent = false,
-                DefaultValueHandling = DefaultValueHandling.Ignore
-            };
-            CaptchaSolver = new ConsoleCaptchaSolver();
+        public Reddit(IWebAgent agent) : this(agent, false) {
         }
+
         /// <summary>
         /// Creates a Reddit instance with the given WebAgent implementation
         /// </summary>
@@ -146,13 +138,23 @@ namespace RedditSharp
         public Reddit(IWebAgent agent, bool initUser)
         {
             WebAgent = agent;
-            JsonSerializerSettings = new JsonSerializerSettings
+            JsonSerializer = JsonSerializer.Create(new JsonSerializerSettings
             {
                 CheckAdditionalContent = false,
                 DefaultValueHandling = DefaultValueHandling.Ignore
-            };
+            });
             CaptchaSolver = new ConsoleCaptchaSolver();
             if(initUser) Task.Run(InitOrUpdateUserAsync).Wait();
+        }
+
+        internal void PopulateObject(JToken json, object obj) {
+            if (json == null)
+                throw new ArgumentNullException(nameof(json));
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+            using (var reader = json.CreateReader()) {
+                JsonSerializer.Populate(reader, obj);
+            }
         }
 
         /// <summary>
@@ -166,7 +168,7 @@ namespace RedditSharp
             var response = await WebAgent.GetResponseAsync(request);
             var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
-            return new RedditUser().Init(this, json, WebAgent);
+            return new RedditUser(this, json);
         }
 
         /// <summary>
@@ -180,7 +182,7 @@ namespace RedditSharp
             var response = await WebAgent.GetResponseAsync(request);
             var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
-            User = new AuthenticatedUser().Init(this, json, WebAgent);
+            User = new AuthenticatedUser(this, json);
         }
 
         /// <summary>
@@ -204,7 +206,7 @@ namespace RedditSharp
             if (!domain.StartsWith("http://") && !domain.StartsWith("https://"))
                 domain = "http://" + domain;
             var uri = new Uri(domain);
-            return new Domain(this, uri, WebAgent);
+            return new Domain(this, uri);
         }
 
         /// <summary>
@@ -240,7 +242,7 @@ namespace RedditSharp
         {
             if (!String.IsNullOrEmpty(WebAgent.AccessToken) && uri.AbsoluteUri.StartsWith("https://www.reddit.com"))
                 uri = new Uri(uri.AbsoluteUri.Replace("https://www.reddit.com", "https://oauth.reddit.com"));
-            return await new Post().InitAsync(this, await GetTokenAsync(uri), WebAgent);
+            return new Post(this, await GetTokenAsync(uri));
         }
 
         /// <summary>
@@ -289,7 +291,7 @@ namespace RedditSharp
                 uri = new Uri(uri.AbsoluteUri + "/about");
 
             var token = await GetTokenAsync(uri);
-            return new LiveUpdateEvent().Init(this, token, WebAgent);
+            return new LiveUpdateEvent(this, token);
         }
 
 
@@ -371,7 +373,7 @@ namespace RedditSharp
             var response = await WebAgent.GetResponseAsync(request);
             var result = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(result);
-            return new AuthenticatedUser().Init(this, json, WebAgent);
+            return new AuthenticatedUser(this, json);
             // TODO: Error
         }
 
@@ -386,7 +388,7 @@ namespace RedditSharp
             var response = await WebAgent.GetResponseAsync(request);
             var result = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(result);
-            return Thing.Parse(this, json["data"]["children"][0], WebAgent);
+            return Thing.Parse(this, json["data"]["children"][0]);
         }
 
         /// <summary>
@@ -398,7 +400,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Task<Comment> GetCommentAsync(string subreddit, string name, string linkName)
         {
-            
+
                 if (linkName.StartsWith("t3_"))
                     linkName = linkName.Substring(3);
                 if (name.StartsWith("t1_"))
@@ -406,7 +408,7 @@ namespace RedditSharp
 
                 var url = string.Format(GetCommentUrl, subreddit, linkName, name);
                 return GetCommentAsync(new Uri(url));
-            
+
         }
 
         /// <summary>
@@ -422,8 +424,8 @@ namespace RedditSharp
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
 
-            var sender = new Post().Init(this, json[0]["data"]["children"][0], WebAgent);
-            return new Comment().Init(this, json[1]["data"]["children"][0], WebAgent, sender);
+            var sender = new Post(this, json[0]["data"]["children"][0]);
+            return new Comment(this, json[1]["data"]["children"][0], sender);
         }
 
         /// <summary>
@@ -450,7 +452,7 @@ namespace RedditSharp
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-            return new Listing<T>(this, string.Format(SearchUrl, query, sort, time), WebAgent);
+            return new Listing<T>(this, string.Format(SearchUrl, query, sort, time));
         }
 
         /// <summary>
@@ -473,7 +475,7 @@ namespace RedditSharp
             var toUnix = (to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
 
             string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
-            return new Listing<T>(this, string.Format(SearchUrl, searchQuery, sort, time), WebAgent);
+            return new Listing<T>(this, string.Format(SearchUrl, searchQuery, sort, time));
         }
 
 
@@ -485,7 +487,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<Subreddit> GetNewSubreddits()
         {
-            return new Listing<Subreddit>(this, NewSubredditsUrl, WebAgent);
+            return new Listing<Subreddit>(this, NewSubredditsUrl);
         }
 
         /// <summary>
@@ -494,7 +496,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<Subreddit> GetPopularSubreddits()
         {
-            return new Listing<Subreddit>(this, PopularSubredditsUrl, WebAgent);
+            return new Listing<Subreddit>(this, PopularSubredditsUrl);
         }
 
         /// <summary>
@@ -503,7 +505,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<Subreddit> GetGoldSubreddits()
         {
-            return new Listing<Subreddit>(this, GoldSubredditsUrl, WebAgent);
+            return new Listing<Subreddit>(this, GoldSubredditsUrl);
         }
 
         /// <summary>
@@ -512,7 +514,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<Subreddit> GetDefaultSubreddits()
         {
-            return new Listing<Subreddit>(this, DefaultSubredditsUrl, WebAgent);
+            return new Listing<Subreddit>(this, DefaultSubredditsUrl);
         }
 
         /// <summary>
@@ -521,7 +523,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<Subreddit> SearchSubreddits(string query)
         {
-            return new Listing<Subreddit>(this, string.Format(SearchSubredditsUrl, query), WebAgent);
+            return new Listing<Subreddit>(this, string.Format(SearchSubredditsUrl, query));
         }
 
         #endregion SubredditSearching
@@ -534,7 +536,7 @@ namespace RedditSharp
             var response = await WebAgent.GetResponseAsync(request);
             var data = await response.Content.ReadAsStringAsync();
             var json = JToken.Parse(data);
-            var ret = await Thing.ParseAsync(this, json, WebAgent);
+            var ret = Thing.Parse(this, json);
             return (T)ret;
         }
         #endregion

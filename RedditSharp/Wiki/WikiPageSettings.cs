@@ -17,15 +17,11 @@ namespace RedditSharp
         [JsonIgnore]
         public IEnumerable<RedditUser> Editors { get; set; }
 
-        public WikiPageSettings()
-        {
-        }
-
-        protected internal WikiPageSettings(Reddit reddit, JToken json, IWebAgent webAgent)
+        protected internal WikiPageSettings(Reddit reddit, JToken json)
         {
             var editors = json["editors"].ToArray();
-            Editors = editors.Select(x => new RedditUser().Init(reddit, x, webAgent));
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            Editors = editors.Select(x => new RedditUser(reddit, x));
+            reddit.PopulateObject(json, this);
         }
     }
 }

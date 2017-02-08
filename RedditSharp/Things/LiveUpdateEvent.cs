@@ -26,6 +26,11 @@ namespace RedditSharp.Things
             All = Update | Manage | Settings | Edit | Close
         }
 
+        public LiveUpdateEvent(Reddit reddit, JToken json) : base(reddit, json) {
+            FullName = Name;
+            Name = Name.Replace("LiveUpdateEvent_", "");
+        }
+
         public class LiveUpdateEventUser
         {
             [JsonConverter(typeof(PermissionsConverter))]
@@ -83,12 +88,6 @@ namespace RedditSharp.Things
 
         [JsonProperty]
         public string Name { get; set; }
-
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Accept an invite to be a live thread contributor.
@@ -210,7 +209,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public Listing<Post> GetDiscussions()
         {
-            return new Listing<Post>(Reddit, String.Format(DiscussionsUrl, Name), WebAgent);
+            return new Listing<Post>(Reddit, String.Format(DiscussionsUrl, Name));
         }
 
         /// <summary>
@@ -219,7 +218,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public Listing<LiveUpdate> GetThread()
         {
-            return new Listing<LiveUpdate>(Reddit, string.Format(GetUrl, Name), WebAgent);
+            return new Listing<LiveUpdate>(Reddit, string.Format(GetUrl, Name));
         }
 
         /// <summary>
@@ -509,31 +508,6 @@ namespace RedditSharp.Things
                 return true;
 
             return false;
-        }
-
-        public async Task<LiveUpdateEvent> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            FullName = Name;
-            Name = Name.Replace("LiveUpdateEvent_", "");
-            return this;
-        }
-
-        public LiveUpdateEvent Init(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            FullName = Name;
-            Name = Name.Replace("LiveUpdateEvent_", "");
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
         }
 
         private string GetPermissionsString(LiveUpdateEventPermission input)

@@ -15,7 +15,7 @@ namespace RedditSharp
         private Reddit Reddit { get; set; }
 
         [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
+        private IWebAgent WebAgent => Reddit?.WebAgent;
 
         /// <summary>
         /// Domain name
@@ -30,7 +30,7 @@ namespace RedditSharp
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(DomainPostUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(DomainPostUrl, Name));
             }
         }
 
@@ -41,7 +41,7 @@ namespace RedditSharp
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(DomainNewUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(DomainNewUrl, Name));
             }
         }
 
@@ -52,14 +52,13 @@ namespace RedditSharp
         {
             get
             {
-                return new Listing<Post>(Reddit, string.Format(DomainHotUrl, Name), WebAgent);
+                return new Listing<Post>(Reddit, string.Format(DomainHotUrl, Name));
             }
         }
 
-        protected internal Domain(Reddit reddit, Uri domain, IWebAgent webAgent)
+        protected internal Domain(Reddit reddit, Uri domain)
         {
             Reddit = reddit;
-            WebAgent = webAgent;
             Name = domain.Host;
         }
 

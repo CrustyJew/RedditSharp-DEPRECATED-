@@ -35,11 +35,11 @@ namespace RedditSharp.Multi
         protected internal MultiData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs = true)
         {
             Data = new MData(reddit, json["data"], webAgent, subs);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            reddit.PopulateObject(json, this);
         }
     }
 
-    
 
-   
+
+
 }

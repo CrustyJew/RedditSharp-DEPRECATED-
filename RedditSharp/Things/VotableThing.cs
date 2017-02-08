@@ -11,6 +11,9 @@ namespace RedditSharp.Things
 {
     public class VotableThing : CreatedThing
     {
+        public VotableThing(Reddit reddit, JToken json) : base(reddit, json) {
+        }
+
         public enum VoteType
         {
             Upvote = 1,
@@ -47,48 +50,6 @@ namespace RedditSharp.Things
         private const string RemoveUrl = "/api/remove";
         private const string IgnoreReportsUrl = "/api/ignore_reports";
         private const string UnIgnoreReportsUrl = "/api/unignore_reports";
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="webAgent"></param>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
-        {
-            await CommonInitAsync(reddit, webAgent, json);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="webAgent"></param>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        protected VotableThing Init(Reddit reddit, IWebAgent webAgent, JToken json)
-        {
-            CommonInit(reddit, webAgent, json);
-            JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, IWebAgent webAgent, JToken json)
-        {
-            Init(reddit, json);
-            Reddit = reddit;
-            WebAgent = webAgent;
-        }
-
-        private async Task CommonInitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
-        {
-            await InitAsync(reddit, json);
-            Reddit = reddit;
-            WebAgent = webAgent;
-        }
 
         /// <summary>
         /// The moderator who approved this item.  This will be null or empty if the item has not been approved.
@@ -142,7 +103,7 @@ namespace RedditSharp.Things
         /// Returns true if this item has been approved.
         /// Returns false if the item has not been approved.  A value of false does not indicate
         /// an item has been removed.
-        /// 
+        ///
         /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
         /// </summary>
         [JsonProperty("approved")]
@@ -152,7 +113,7 @@ namespace RedditSharp.Things
         /// Returns true if this item has been removed.
         /// Returns false if the item has not been removed.  A value of false does not indicate
         /// an item has been approved.
-        /// 
+        ///
         /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
         /// </summary>
         [JsonProperty("removed")]

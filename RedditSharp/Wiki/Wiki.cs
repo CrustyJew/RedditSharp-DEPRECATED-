@@ -9,9 +9,9 @@ namespace RedditSharp
 
     public class Wiki
     {
-        private Reddit Reddit { get; set; }
         private Subreddit Subreddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
+        private Reddit Reddit => Subreddit?.Reddit;
+        private IWebAgent WebAgent => Reddit?.WebAgent;
         #region constants
         private const string GetWikiPageUrl = "/r/{0}/wiki/{1}.json?v={2}";
         private const string GetWikiPagesUrl = "/r/{0}/wiki/pages.json";
@@ -44,16 +44,13 @@ namespace RedditSharp
         {
             get
             {
-                return new Listing<WikiPageRevision>(Reddit, string.Format(WikiRevisionsUrl, Subreddit.Name), WebAgent);
+                return new Listing<WikiPageRevision>(Reddit, string.Format(WikiRevisionsUrl, Subreddit.Name));
             }
         }
 
-
-        protected internal Wiki(Reddit reddit, Subreddit subreddit, IWebAgent webAgent)
+        protected internal Wiki(Subreddit subreddit)
         {
-            Reddit = reddit;
             Subreddit = subreddit;
-            WebAgent = webAgent;
         }
 
         /// <summary>
@@ -67,7 +64,7 @@ namespace RedditSharp
             var request = WebAgent.CreateGet(string.Format(GetWikiPageUrl, Subreddit.Name, page, version));
             var response = await WebAgent.GetResponseAsync(request);
             var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-            var result = new WikiPage(Reddit, json["data"], WebAgent);
+            var result = new WikiPage(Reddit, json["data"]);
             return result;
         }
 
@@ -83,7 +80,7 @@ namespace RedditSharp
             var request = WebAgent.CreateGet(string.Format(WikiPageSettingsUrl, Subreddit.Name, name));
             var response = await WebAgent.GetResponseAsync(request);
             var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-            var result = new WikiPageSettings(Reddit, json["data"], WebAgent);
+            var result = new WikiPageSettings(Reddit, json["data"]);
             return result;
         }
 
@@ -115,12 +112,12 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<WikiPageRevision> GetPageRevisions(string page)
         {
-            return new Listing<WikiPageRevision>(Reddit, string.Format(WikiPageRevisionsUrl, Subreddit.Name, page), WebAgent);
+            return new Listing<WikiPageRevision>(Reddit, string.Format(WikiPageRevisionsUrl, Subreddit.Name, page));
         }
         #endregion
 
         #region Discussions
-        
+
         /// <summary>
         /// Get a list of discussions about this wiki page.
         /// </summary>
@@ -128,7 +125,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<Post> GetPageDiscussions(string page)
         {
-            return new Listing<Post>(Reddit, string.Format(WikiPageDiscussionsUrl, Subreddit.Name, page), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(WikiPageDiscussionsUrl, Subreddit.Name, page));
         }
         #endregion
 

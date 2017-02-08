@@ -7,6 +7,9 @@ namespace RedditSharp.Things
 {
     public class BannedUser : Thing
     {
+        public BannedUser(Reddit reddit, JToken json) : base(reddit, json) {
+        }
+
         /// <summary>
         /// Date the user was banned.
         /// </summary>
@@ -25,38 +28,5 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public BannedUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(json);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public async Task<BannedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(json);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        private void CommonInit(JToken json)
-        {
-            base.Init(json);
-        }
     }
 }

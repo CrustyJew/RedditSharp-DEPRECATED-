@@ -18,34 +18,21 @@ namespace RedditSharp.Things
         private const string EditUserTextUrl = "/api/editusertext";
         private const string SetAsReadUrl = "/api/read_message";
 
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public async Task<Comment> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
-        {
-            var data = await CommonInitAsync(reddit, json, webAgent, sender);
-            await ParseCommentsAsync(reddit, json, webAgent, sender);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings));
-            return this;
+        public Comment(Reddit reddit, JToken json, Thing sender) : base(reddit, json) {
+            var data = json["data"];
+            Parent = sender;
+
+            // Handle Reddit's API being horrible
+            if (data["context"] != null)
+            {
+                var context = data["context"].Value<string>();
+                LinkId = context.Split('/')[4];
+            }
+            ParseComments(json, sender);
         }
 
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public Comment Init(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
-        {
-            var data = CommonInit(reddit, json, webAgent, sender);
-            ParseComments(reddit, json, webAgent, sender);
-            JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
+        protected override JToken GetJsonData(JToken json) {
+            return json;
         }
 
         /// <summary>
@@ -102,42 +89,7 @@ namespace RedditSharp.Things
             return this;
         }
 
-        private JToken CommonInit(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
-        {
-            Init(reddit, webAgent, json);
-            var data = json["data"];
-            Reddit = reddit;
-            WebAgent = webAgent;
-            Parent = sender;
-
-            // Handle Reddit's API being horrible
-            if (data["context"] != null)
-            {
-                var context = data["context"].Value<string>();
-                LinkId = context.Split('/')[4];
-            }
-
-            return data;
-        }
-        private async Task<JToken> CommonInitAsync(Reddit reddit, JToken json, IWebAgent webAgent, Thing sender)
-        {
-            await InitAsync(reddit, webAgent, json);
-            var data = json["data"];
-            Reddit = reddit;
-            WebAgent = webAgent;
-            Parent = sender;
-
-            // Handle Reddit's API being horrible
-            if (data["context"] != null)
-            {
-                var context = data["context"].Value<string>();
-                LinkId = context.Split('/')[4];
-            }
-
-            return data;
-        }
-
-        private void ParseComments(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
+        private void ParseComments(JToken data, Thing sender)
         {
             // Parse sub comments
             var replies = data["data"]["replies"];
@@ -145,20 +97,7 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add(new Comment().Init(reddit, comment, webAgent, sender));
-            }
-            Comments = subComments.ToArray();
-        }
-
-        private async Task ParseCommentsAsync(Reddit reddit, JToken data, IWebAgent webAgent, Thing sender)
-        {
-            // Parse sub comments
-            var replies = data["data"]["replies"];
-            var subComments = new List<Comment>();
-            if (replies != null && replies.Count() > 0)
-            {
-                foreach (var comment in replies["data"]["children"])
-                    subComments.Add(await new Comment().InitAsync(reddit, comment, webAgent, sender));
+                    subComments.Add(new Comment(Reddit, comment, sender));
             }
             Comments = subComments.ToArray();
         }
@@ -269,7 +208,7 @@ namespace RedditSharp.Things
                 var json = JObject.Parse(data);
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-                return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
+                return new Comment(Reddit, json["json"]["data"]["things"][0], this);
             //}
             //catch (HttpRequestException ex)
             //{
@@ -281,7 +220,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Replaces the text in this comment with the input text.
         /// </summary>
-        /// <param name="newText">The text to replace the comment's contents</param>        
+        /// <param name="newText">The text to replace the comment's contents</param>
         public async Task EditTextAsync(string newText)
         {
             if (Reddit.User == null)
@@ -304,7 +243,7 @@ namespace RedditSharp.Things
                 throw new Exception("Error editing text.");
         }
 
-        private async Task<string> SimpleActionAsync(string endpoint)
+        protected override async Task<string> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");

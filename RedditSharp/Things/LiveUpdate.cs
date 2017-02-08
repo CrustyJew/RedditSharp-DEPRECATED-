@@ -7,6 +7,9 @@ namespace RedditSharp.Things
 {
     public class LiveUpdate : CreatedThing
     {
+        public LiveUpdate(Reddit reddit, JToken json) : base(reddit, json) {
+        }
+
         private const string StrikeUpdateUrl = "/api/live/{0}/strike_update";
         private const string DeleteUpdateUrl = "/api/live/{0}/delete_update";
 
@@ -31,43 +34,9 @@ namespace RedditSharp.Things
         [JsonProperty("stricken")]
         public bool IsStricken { get; set; }
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
+        public Task StrikeAsync() => SimpleActionAsync(StrikeUpdateUrl);
 
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
-        public Task StrikeAsync()
-        {
-            return SimpleActionAsync(StrikeUpdateUrl);
-        }
-
-        public Task DeleteAsync()
-        {
-            return SimpleActionAsync(DeleteUpdateUrl);
-        }
-
-        public async Task<LiveUpdate> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        // todo make these async methods
-        public LiveUpdate Init(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
-        }
+        public Task DeleteAsync() => SimpleActionAsync(DeleteUpdateUrl);
 
         public class MobileEmbed
         {

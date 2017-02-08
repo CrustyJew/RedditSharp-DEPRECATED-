@@ -32,8 +32,8 @@ namespace RedditSharp
         /// </summary>
         internal const int DefaultListingPerRequest = 25;
 
-        private IWebAgent WebAgent { get; set; }
         private Reddit Reddit { get; set; }
+        private IWebAgent WebAgent => Reddit?.WebAgent;
         private string Url { get; set; }
 
         /// <summary>
@@ -42,9 +42,8 @@ namespace RedditSharp
         /// <param name="reddit"></param>
         /// <param name="url"></param>
         /// <param name="webAgent"></param>
-        internal Listing(Reddit reddit, string url, IWebAgent webAgent)
+        internal Listing(Reddit reddit, string url)
         {
-            WebAgent = webAgent;
             Reddit = reddit;
             Url = url;
         }
@@ -106,7 +105,7 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Returns an IEnumerable instance which will infinitely yield new <see cref="Thing"/> 
+        /// Returns an IEnumerable instance which will infinitely yield new <see cref="Thing"/>
         /// </summary>
         /// <param name="limitPerRequest">
         ///   Number of records to return in each request to the reddit api.  Defaults to using the reddit
@@ -167,7 +166,7 @@ namespace RedditSharp
                 this.stream = stream;
 
                 // Set the listings per page (if not specified, use the Reddit default of 25) and the maximum listings
-                LimitPerRequest = (limitPerRequest <= 0 ? DefaultListingPerRequest : limitPerRequest); 
+                LimitPerRequest = (limitPerRequest <= 0 ? DefaultListingPerRequest : limitPerRequest);
                 MaximumLimit = maximumLimit;
             }
 
@@ -215,7 +214,7 @@ namespace RedditSharp
                             limit = MaximumLimit - Count;
                         }
                     }
-                    
+
                     if (limit > 0)
                     {
                         // Add the limit, the maximum number of items to be returned per page
@@ -226,7 +225,7 @@ namespace RedditSharp
                 if (Count > 0)
                 {
                     // Add the count, the number of items already seen in this listing
-                    // The Reddit API uses this to determine when to give values for before and after fields                
+                    // The Reddit API uses this to determine when to give values for before and after fields
                     url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
                 }
 
@@ -277,7 +276,7 @@ namespace RedditSharp
                 if (Count > 0)
                 {
                     // Add the count, the number of items already seen in this listingStream
-                    // The Reddit API uses this to determine when to give values for before and after fields                
+                    // The Reddit API uses this to determine when to give values for before and after fields
                     url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
                 }
 
@@ -298,7 +297,7 @@ namespace RedditSharp
                 for (int i = 0; i < children.Count; i++)
                 {
                     if (!stream)
-                        things.Add(Thing.Parse<T>(Listing.Reddit, children[i], Listing.WebAgent));
+                        things.Add(Thing.Parse<T>(Listing.Reddit, children[i]));
                     else
                     {
                         var kind = children[i]["kind"].ValueOrDefault<string>();
@@ -314,7 +313,7 @@ namespace RedditSharp
                                 if (done.Contains(replyId))
                                     continue;
 
-                                things.Add(Thing.Parse<T>(Listing.Reddit, reply, Listing.WebAgent));
+                                things.Add(Thing.Parse<T>(Listing.Reddit, reply));
                                 done.Add(replyId);
                             }
                         }
@@ -322,7 +321,7 @@ namespace RedditSharp
                         if (String.IsNullOrEmpty(id) || done.Contains(id))
                             continue;
 
-                        things.Add(Thing.Parse<T>(Listing.Reddit, children[i], Listing.WebAgent));
+                        things.Add(Thing.Parse<T>(Listing.Reddit, children[i]));
                         done.Add(id);
                     }
                 }
@@ -414,7 +413,7 @@ namespace RedditSharp
                             // sleep for a while to see if we can recover
                             Sleep(tries,ex);
                         }
-                        
+
                         CurrentPageIndex = 0;
 
                         if (CurrentPage.Length == 0)

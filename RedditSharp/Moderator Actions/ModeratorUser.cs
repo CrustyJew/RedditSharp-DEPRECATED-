@@ -7,7 +7,7 @@ namespace RedditSharp
     {
         public ModeratorUser(Reddit reddit, JToken json)
         {
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            reddit.PopulateObject(json, this);
         }
 
         /// <summary>

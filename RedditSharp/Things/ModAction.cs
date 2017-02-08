@@ -10,6 +10,9 @@ namespace RedditSharp.Things
 {
     public class ModAction : Thing
     {
+        public ModAction(Reddit reddit, JToken json) : base(reddit, json) {
+        }
+
         /// <summary>
         /// Type of action.
         /// </summary>
@@ -116,37 +119,8 @@ namespace RedditSharp.Things
             }
         }
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        public async Task<ModAction> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        public ModAction Init(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
+        protected override JToken GetJsonData(JToken json) {
+            return json["data"];
         }
 
     }

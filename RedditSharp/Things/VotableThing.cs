@@ -237,16 +237,12 @@ namespace RedditSharp.Things
         {
             if (this.Vote == type) return;
 
-            var request = WebAgent.CreatePost(VoteUrl);
-            WebAgent.WritePostBody(request, new
+            var data = await WebAgent.Post(VoteUrl, new
             {
                 dir = (int)type,
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
 
             if (Liked == true) Upvotes--;
             if (Liked == false) Downvotes--;
@@ -264,14 +260,11 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task SaveAsync()
         {
-            var request = WebAgent.CreatePost(SaveUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(SaveUrl, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
             Saved = true;
         }
 
@@ -280,14 +273,11 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task UnsaveAsync()
         {
-            var request = WebAgent.CreatePost(UnsaveUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(UnsaveUrl, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
             Saved = false;
         }
 
@@ -297,16 +287,12 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task ClearVote()
         {
-            var request = WebAgent.CreatePost(VoteUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(VoteUrl, new
             {
                 dir = 0,
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -316,7 +302,6 @@ namespace RedditSharp.Things
         /// <param name="otherReason">If your reason is "Other", say why you're reporting them</param>
         public async Task ReportAsync(ReportType reportType, string otherReason = null)
         {
-            var request = WebAgent.CreatePost(ReportUrl);
 
             string reportReason;
             switch (reportType)
@@ -335,7 +320,7 @@ namespace RedditSharp.Things
                     reportReason = "other"; break;
             }
 
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(ReportUrl, new
             {
                 api_type = "json",
                 reason = reportReason,
@@ -343,8 +328,6 @@ namespace RedditSharp.Things
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -355,7 +338,6 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
-            var request = WebAgent.CreatePost(DistinguishUrl);
 
             string how;
             switch (distinguishType)
@@ -373,15 +355,12 @@ namespace RedditSharp.Things
                     how = "special";
                     break;
             }
-            WebAgent.WritePostBody(request, new
+            var json = await WebAgent.Post(DistinguishUrl, new
             {
                 how,
                 id = Id,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            var json = JObject.Parse(data);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");
         }
@@ -403,15 +382,12 @@ namespace RedditSharp.Things
 
         protected async Task RemoveImplAsync(bool spam)
         {
-            var request = WebAgent.CreatePost(RemoveUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(RemoveUrl, new
             {
                 id = FullName,
                 spam = spam,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
 
         public Task DelAsync()

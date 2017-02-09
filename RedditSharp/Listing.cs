@@ -220,10 +220,7 @@ namespace RedditSharp
                     url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
                 }
 
-                var request = Listing.WebAgent.CreateGet(url);
-                var response = await Listing.WebAgent.GetResponseAsync(request);
-                var data = await response.Content.ReadAsStringAsync();
-                var json = JToken.Parse(data);
+                var json = await Listing.WebAgent.Get(url);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listing.");
                 Parse(json);
@@ -271,10 +268,7 @@ namespace RedditSharp
                     url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
                 }
 
-                var request = Listing.WebAgent.CreateGet(url);
-                var response = await Listing.WebAgent.GetResponseAsync(request);
-                var data = await response.Content.ReadAsStringAsync();
-                var json = JToken.Parse(data);
+                var json = await Listing.WebAgent.Get(url);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
                 Parse(json);

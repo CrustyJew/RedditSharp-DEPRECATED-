@@ -49,7 +49,7 @@ namespace RedditSharp
         /// <param name="reddit"></param>
         /// <param name="json"></param>
         /// <param name="webAgent"></param>
-        public SubredditSettings(Subreddit subreddit, JObject json) : this(subreddit)
+        public SubredditSettings(Subreddit subreddit, JToken json) : this(subreddit)
         {
             var data = json["data"];
             AllowAsDefault = data["default_set"].ValueOrDefault<bool>();
@@ -217,7 +217,6 @@ namespace RedditSharp
         /// </summary>
         public async Task UpdateSettings()
         {
-            var request = WebAgent.CreatePost(SiteAdminUrl);
             string link_type;
             string type;
             string wikimode;
@@ -257,7 +256,7 @@ namespace RedditSharp
                     wikimode = "disabled";
                     break;
             }
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(SiteAdminUrl, new
             {
                 allow_top = AllowAsDefault,
                 allow_images = AllowImages,
@@ -280,8 +279,6 @@ namespace RedditSharp
                 spam_comments = SpamFilter == null ? null : SpamFilter.CommentStrength.ToString().ToLowerInvariant(),
                 api_type = "json"
             }, "header-title", HeaderHoverText);
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -289,14 +286,11 @@ namespace RedditSharp
         /// </summary>
         public async Task ResetHeaderImage()
         {
-            var request = WebAgent.CreatePost(DeleteHeaderImageUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(DeleteHeaderImageUrl, new
             {
                 uh = Reddit.User.Modhash,
                 r = Subreddit.Name
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
 
         private SpamFilterStrength GetSpamFilterStrength(string rawValue)

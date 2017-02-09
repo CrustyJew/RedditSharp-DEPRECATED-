@@ -151,15 +151,12 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task SetAsReadAsync()
         {
-            var request = WebAgent.CreatePost(SetAsReadUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(SetAsReadUrl, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -170,15 +167,12 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(CommentUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(CommentUrl, new
             {
                 text = message,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
     }
 }

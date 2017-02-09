@@ -32,9 +32,9 @@ namespace RedditSharp.Multi
         /// <param name="json">Json Token containing the information for the Multi</param>
         /// <param name="webAgent">Web Agent to use</param>
         /// <param name="subs">Whether there are subs</param>
-        protected internal MultiData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs = true)
+        protected internal MultiData(Reddit reddit, JToken json, bool subs = true)
         {
-            Data = new MData(reddit, json["data"], webAgent, subs);
+            Data = new MData(reddit, json["data"], subs);
             reddit.PopulateObject(json, this);
         }
     }

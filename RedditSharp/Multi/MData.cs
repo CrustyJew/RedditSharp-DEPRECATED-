@@ -11,7 +11,7 @@ namespace RedditSharp.Multi
     /// <summary>
     /// Contains the innner information of the Multi
     /// </summary>
-    public class MData
+    public class MData : RedditObject
     {
         /// <summary>
         /// Can the Multi be edited
@@ -110,9 +110,8 @@ namespace RedditSharp.Multi
         /// </summary>
         /// <param name="reddit">Reddit object to use</param>
         /// <param name="json">Token to use with parameters for the different members</param>
-        /// <param name="webAgent">Web Agent to use</param>
         /// <param name="subs">Whether or not subs exist</param>
-        protected internal MData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs)
+        protected internal MData(Reddit reddit, JToken json, bool subs) : base(reddit)
         {
             Subreddits = new List<MultiSubs>();
             if (subs)
@@ -120,18 +119,11 @@ namespace RedditSharp.Multi
                 //Get Subreddit List
                 for (int i = 0; i < json["subreddits"].Count(); i++)
                 {
-                    Subreddits.Add(new MultiSubs(reddit, json["subreddits"][i], webAgent));
+                    Subreddits.Add(new MultiSubs(reddit, json["subreddits"][i]));
                 }
             }
             reddit.PopulateObject(json, this);
         }
 
-        /// <summary>
-        /// Generic Constructor
-        /// </summary>
-        public MData()
-        {
-
-        }
     }
 }

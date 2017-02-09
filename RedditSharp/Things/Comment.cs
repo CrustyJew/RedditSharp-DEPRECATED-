@@ -189,21 +189,17 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(CommentUrl);
-            WebAgent.WritePostBody(request, new
-            {
-                text = message,
-                thing_id = FullName,
-                uh = Reddit.User.Modhash,
-                api_type = "json"
-                //r = Subreddit
-            });
             // TODO actual error handling. This just hides the error and returns null
             //try
             //{
-                var response = await WebAgent.GetResponseAsync(request);
-                var data = await response.Content.ReadAsStringAsync();
-                var json = JObject.Parse(data);
+                var json = await WebAgent.Post(CommentUrl, new
+                {
+                    text = message,
+                    thing_id = FullName,
+                    uh = Reddit.User.Modhash,
+                    api_type = "json"
+                    //r = Subreddit
+                });
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
                 return new Comment(Reddit, json["json"]["data"]["things"][0], this);
@@ -223,37 +219,28 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
-
-            var request = WebAgent.CreatePost(EditUserTextUrl);
-            WebAgent.WritePostBody(request, new
+            var json = await WebAgent.Post(EditUserTextUrl, new
             {
                 api_type = "json",
                 text = newText,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var result = await response.Content.ReadAsStringAsync();
-            JToken json = JToken.Parse(result);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
             else
                 throw new Exception("Error editing text.");
         }
 
-        protected override async Task<string> SimpleActionAsync(string endpoint)
+        protected override async Task<JToken> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(endpoint);
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            return data;
         }
 
         /// <summary>
@@ -261,15 +248,12 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task SetAsReadAsync()
         {
-            var request = WebAgent.CreatePost(SetAsReadUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(SetAsReadUrl, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
         }
     }
 }

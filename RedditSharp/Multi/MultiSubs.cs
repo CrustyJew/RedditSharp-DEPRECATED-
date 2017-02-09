@@ -11,7 +11,7 @@ namespace RedditSharp.Multi
     /// <summary>
     /// Class to contain the information for a single subreddit in a multi
     /// </summary>
-    public class MultiSubs
+    public class MultiSubs : RedditObject
     {
         /// <summary>
         /// Name of the subreddit
@@ -25,17 +25,9 @@ namespace RedditSharp.Multi
         /// <param name="reddit">Reddit object to use</param>
         /// <param name="json">Token to use for the name</param>
         /// <param name="webAgent">Web Agent to implement the creation</param>
-        protected internal MultiSubs(Reddit reddit, JToken json, IWebAgent webAgent)
+        protected internal MultiSubs(Reddit reddit, JToken json) : base(reddit)
         {
             reddit.PopulateObject(json, this);
-        }
-
-        /// <summary>
-        /// Generic Constructor
-        /// </summary>
-        public MultiSubs(string name)
-        {
-            Name = name;
         }
 
     }

@@ -26,22 +26,11 @@ namespace RedditSharp.Things
     public async Task<List<Thing>> GetThingsAsync()
     {
       var url = string.Format(MoreUrl, ParentId, string.Join(",", Children));
-      var request = WebAgent.CreateGet(url);
-      var response = await WebAgent.GetResponseAsync(request);
-      var data = await request.Content.ReadAsStringAsync();
-      List<Thing> toReturn = new List<Things.Thing>();
-
-      var json = JObject.Parse(data)["json"];
+      var json = await WebAgent.Get(url);
       if (json["errors"].Count() != 0)
         throw new AuthenticationException("Incorrect login.");
       var moreJson = json["data"]["things"];
-
-      foreach (JToken token in moreJson)
-      {
-        Thing parsed = Thing.Parse(Reddit, token);
-        toReturn.Add(parsed);
-      }
-      return toReturn;
+      return moreJson.Select(t => Thing.Parse(Reddit, t)).ToList();
     }
 
   }

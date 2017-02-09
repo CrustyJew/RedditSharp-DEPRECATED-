@@ -98,11 +98,8 @@ namespace RedditSharp
             //if (Type.GetType("Mono.Runtime") != null)
             //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
 
-            var request = _webAgent.CreatePost(AccessUrl);
-
+            var request = _webAgent.CreateRequest(AccessUrl, "POST");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-
-
             if (isRefresh)
             {
                 _webAgent.WritePostBody(request, new
@@ -145,10 +142,8 @@ namespace RedditSharp
             //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
             //_webAgent.Cookies = new CookieContainer();
 
-            var request = _webAgent.CreatePost(AccessUrl);
-
+            var request = _webAgent.CreateRequest(AccessUrl, "POST");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-
             _webAgent.WritePostBody(request, new
             {
                 grant_type = "password",
@@ -177,7 +172,7 @@ namespace RedditSharp
         public async Task RevokeTokenAsync(string token, bool isRefresh)
         {
             string tokenType = isRefresh ? "refresh_token" : "access_token";
-            var request = _webAgent.CreatePost(RevokeUrl);
+            var request = _webAgent.CreateRequest(RevokeUrl, "POST");
 
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
 
@@ -200,7 +195,7 @@ namespace RedditSharp
         [Obsolete("Reddit.InitOrUpdateUser is preferred")]
         public async Task<AuthenticatedUser> GetUserAsync(string accessToken)
         {
-            var request = _webAgent.CreateGet(OauthGetMeUrl);
+            var request = _webAgent.CreateRequest(OauthGetMeUrl, "GET");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", accessToken);
             var response = await _webAgent.GetResponseAsync(request);
             var result = await response.Content.ReadAsStringAsync();

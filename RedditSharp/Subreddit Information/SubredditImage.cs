@@ -59,15 +59,12 @@ namespace RedditSharp
         /// </summary>
         public async Task Delete()
         {
-            var request = WebAgent.CreatePost(DeleteImageUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
                 uh = Reddit.User.Modhash,
                 r = SubredditStyle.Subreddit.Name
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
             SubredditStyle.Images.Remove(this);
         }
 
@@ -77,15 +74,12 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task DeleteAsync()
         {
-            var request = WebAgent.CreatePost(DeleteImageUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
                 uh = Reddit.User.Modhash,
                 r = SubredditStyle.Subreddit.Name
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
             SubredditStyle.Images.Remove(this);
         }
     }

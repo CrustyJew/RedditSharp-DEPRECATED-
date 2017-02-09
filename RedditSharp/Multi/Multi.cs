@@ -31,15 +31,8 @@ namespace RedditSharp.Multi
         /// <returns>A List of MultiData containing the authenticated user's Multis</returns>
         public async Task<IList<MultiData>> GetCurrentUsersMultisAsync()
         {
-            var request = WebAgent.CreateGet(GetCurrentUserMultiUrl);
-            var json = await WebAgent.ExecuteRequestAsync(request);
-
-            List<MultiData> results = new List<MultiData>();
-            foreach (var r in json)
-            {
-                results.Add(new MultiData(Reddit,r,WebAgent));
-            }
-            return results;
+            var json = await WebAgent.Get(GetCurrentUserMultiUrl);
+            return json.Select(m => new MultiData(Reddit, m)).ToList();
         }
 
         /// <summary>
@@ -49,15 +42,8 @@ namespace RedditSharp.Multi
         /// <returns>A list of MultiData containing the public Multis of the searched user</returns>
         public async Task<IList<MultiData>> GetPublicUserMultisAsync(string username)
         {
-            var request = WebAgent.CreateGet(GetPublicUserMultiUrl(username));
-            var json = await WebAgent.ExecuteRequestAsync(request);
-
-            List<MultiData> results = new List<MultiData>();
-            foreach (var r in json)
-            {
-                results.Add(new MultiData(Reddit, r, WebAgent));
-            }
-            return results;
+            var json = await WebAgent.Get(GetPublicUserMultiUrl(username));
+            return json.Select(m => new MultiData(Reddit, m)).ToList();
         }
 
         /// <summary>
@@ -67,10 +53,8 @@ namespace RedditSharp.Multi
         /// <returns>A MultiData containing the information for the found Multi</returns>
         public async Task<MultiData> GetMultiByPathAsync(string path)
         {
-            var request = WebAgent.CreateGet(GetMultiPathUrl(path));
-            var json = await WebAgent.ExecuteRequestAsync(request);
-            var result = new MultiData(Reddit, json, WebAgent);
-            return result;
+            var json = await WebAgent.Get(GetMultiPathUrl(path));
+            return new MultiData(Reddit, json);
         }
 
         /// <summary>
@@ -80,10 +64,8 @@ namespace RedditSharp.Multi
         /// <returns>A MultiData containing the description for the found Multi</returns>
         public async Task<MultiData> GetMultiDescriptionAsync(string path)
         {
-            var request = WebAgent.CreateGet(GetMultiDescriptionPathUrl(path));
-            var json = await WebAgent.ExecuteRequestAsync(request);
-            var result = new MultiData(Reddit, json, WebAgent, false);
-            return result;
+            var json = await WebAgent.Get(GetMultiDescriptionPathUrl(path));
+            return new MultiData(Reddit, json, false);
         }
 
         /// <summary>
@@ -94,10 +76,8 @@ namespace RedditSharp.Multi
         /// <returns>A MultiSubs element containing the information for the searched subreddit</returns>
         public async Task<MultiSubs> GetSubInformationAsync(string path, string subreddit)
         {
-            var request = WebAgent.CreateGet(GetMultiSubUrl(path, subreddit));
-            var json = await WebAgent.ExecuteRequestAsync(request);
-            var result = new MultiSubs(Reddit, json, WebAgent);
-            return result;
+            var json = await WebAgent.Get(GetMultiSubUrl(path, subreddit));
+            return new MultiSubs(Reddit, json);
         }
 
         /// <summary>
@@ -107,23 +87,19 @@ namespace RedditSharp.Multi
         /// <param name="pathFrom">Original URL path of the Multi</param>
         /// <param name="pathTo">New URL path of the Multi</param>
         /// <returns>A String containing the new Multi information</returns>
-        public async Task<string> RenameMultiAsync(string displayName, string pathFrom, string pathTo)
+        public async Task<JToken> RenameMultiAsync(string displayName, string pathFrom, string pathTo)
         {
             if (Reddit.User == null)
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreatePost(PostMultiRenameUrl);
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(PostMultiRenameUrl, new
             {
                 display_name = displayName,
                 from = pathFrom,
                 to = pathTo,
                 uh = Reddit.User.Modhash
             });
-
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -142,8 +118,6 @@ namespace RedditSharp.Multi
             var request = WebAgent.CreateRequest(PutSubMultiUrl(path ,subName),"PUT");
             JObject modelData = new JObject();
             modelData.Add("name", subName);
-
-
             WebAgent.WritePostBody(request, new
             {
                 model = modelData,
@@ -189,23 +163,19 @@ namespace RedditSharp.Multi
         /// <param name="pathFrom">URL path to copy from</param>
         /// <param name="pathTo">URL path to copy to</param>
         /// <returns>A string containing the information of the new Multi</returns>
-        public async Task<string> CopyMultiAsync(string displayName, string pathFrom, string pathTo)
+        public async Task<JToken> CopyMultiAsync(string displayName, string pathFrom, string pathTo)
         {
             if (Reddit.User == null)
             {
                 throw new AuthenticationException("No user logged in.");
             }
-            var request = WebAgent.CreatePost(CopyMultiUrl);
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(CopyMultiUrl, new
             {
                 display_name = displayName,
                 from = pathFrom,
                 to = pathTo,
                 uh = Reddit.User.Modhash
             });
-
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -266,13 +236,12 @@ namespace RedditSharp.Multi
         /// <param name="weightingscheme">Weighting Scheme for the Multi</param>
         /// <param name="path">Desired URL path for the Multi</param>
         /// <returns>A string containing the information for the newly created Multi or a status of (409) if the Multi already exists</returns>
-        public async Task<string> PostMultiAsync(MData m, string path)
+        public async Task<JToken> PostMultiAsync(MData m, string path)
         {
             if(Reddit.User == null)
             {
                 throw new AuthenticationException("No user logged in");
             }
-            var request = WebAgent.CreatePost(GetMultiPathUrl(path));
             JObject modelData = new JObject();
             modelData.Add("description_md",m.DescriptionMD);
             modelData.Add("display_name",m.DisplayName);
@@ -288,15 +257,12 @@ namespace RedditSharp.Multi
             modelData.Add("subreddits",subData);
             modelData.Add("visibility",m.Visibility);
             modelData.Add("weighting_scheme",m.WeightingScheme);
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(GetMultiPathUrl(path), new
                 {
                     model = modelData,
                     multipath = path,
                     uh = Reddit.User.Modhash
                 });
-
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>

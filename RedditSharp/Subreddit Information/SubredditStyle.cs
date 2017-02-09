@@ -48,8 +48,7 @@ namespace RedditSharp
         /// </summary>
         public async Task UpdateCssAsync()
         {
-            var request = WebAgent.CreatePost(UpdateCssUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(UpdateCssUrl, new
             {
                 op = "save",
                 stylesheet_contents = CSS,
@@ -57,9 +56,6 @@ namespace RedditSharp
                 api_type = "json",
                 r = Subreddit.Name
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            var json = JToken.Parse(data);
         }
 
         /// <summary>
@@ -70,7 +66,7 @@ namespace RedditSharp
         /// <param name="file">image buffer</param>
         public async Task UploadImageAsync(string name, ImageType imageType, byte[] file)
         {
-            var request = WebAgent.CreatePost(UploadImageUrl);
+            var request = WebAgent.CreateRequest(UploadImageUrl, "POST");
             var formData = new MultipartFormBuilder(request);
             formData.AddDynamic(new
                 {

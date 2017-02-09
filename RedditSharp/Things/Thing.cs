@@ -145,20 +145,15 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="endpoint"></param>
         /// <returns></returns>
-        protected virtual async Task<string> SimpleActionAsync(string endpoint)
+        protected virtual async Task<JToken> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(endpoint);
-
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            return data;
         }
     }
 }

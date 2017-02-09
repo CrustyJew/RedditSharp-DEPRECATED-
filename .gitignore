@@ -10,6 +10,8 @@ TestResults/
 *.psess
 *.vsp
 
+/**/project.lock.json
+
 # StyleCop files
 StyleCop.Cache
 .vs/config/applicationhost.config

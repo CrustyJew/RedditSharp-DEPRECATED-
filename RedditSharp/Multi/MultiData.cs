@@ -17,13 +17,13 @@ namespace RedditSharp.Multi
         /// Kind of Multi
         /// </summary>
         [JsonProperty("kind")]
-        public string Kind { get; set; }
+        public string Kind { get; }
 
         /// <summary>
         /// Internal Model Data of the Multi Class
         /// </summary>
         [JsonIgnore]
-        public MData Data { get; set; }
+        public MData Data { get; private set; }
 
         /// <summary>
         /// Creates an implementation of MultiData
@@ -32,14 +32,14 @@ namespace RedditSharp.Multi
         /// <param name="json">Json Token containing the information for the Multi</param>
         /// <param name="webAgent">Web Agent to use</param>
         /// <param name="subs">Whether there are subs</param>
-        protected internal MultiData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs = true)
+        protected internal MultiData(Reddit reddit, JToken json, bool subs = true)
         {
-            Data = new MData(reddit, json["data"], webAgent, subs);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            Data = new MData(reddit, json["data"], subs);
+            reddit.PopulateObject(json, this);
         }
     }
 
-    
 
-   
+
+
 }

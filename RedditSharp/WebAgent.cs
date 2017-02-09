@@ -93,7 +93,7 @@ namespace RedditSharp
             get { return _burstStart; }
         }
         /// <summary>
-        /// Number of requests made during the current burst 
+        /// Number of requests made during the current burst
         /// </summary>
         public int RequestsThisBurst
         {
@@ -122,35 +122,6 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Execute a request and return a <see cref="JToken"/>
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public virtual async Task<JToken> CreateAndExecuteRequestAsync(string url)
-        {
-            Uri uri;
-            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-            {
-                if (!Uri.TryCreate(string.Format("{0}://{1}{2}", Protocol, RootDomain, url), UriKind.Absolute, out uri))
-                    throw new Exception("Could not parse Uri");
-            }
-            var request = CreateGet(uri);
-            try { return await ExecuteRequestAsync(request); }
-            //What the hell is going on here?! Why is this a thing? -Meepster23
-            catch (Exception)
-            {
-                var tempProtocol = Protocol;
-                var tempRootDomain = RootDomain;
-                Protocol = "http";
-                RootDomain = "www.reddit.com";
-                var retval = await CreateAndExecuteRequestAsync(url);
-                Protocol = tempProtocol;
-                RootDomain = tempRootDomain;
-                return retval;
-            }
-        }
-        
-        /// <summary>
         /// Executes the web request and handles errors in the response
         /// </summary>
         /// <param name="request"></param>
@@ -158,8 +129,8 @@ namespace RedditSharp
         public virtual async Task<JToken> ExecuteRequestAsync(HttpRequestMessage request)
         {
             EnforceRateLimit();
-            var response = await _httpClient.SendAsync(request);
-            var result = await response.Content.ReadAsStringAsync();
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             JToken json;
             if (!string.IsNullOrEmpty(result))
@@ -308,36 +279,21 @@ namespace RedditSharp
             return request;
         }
 
-        /// <summary>
-        /// Create a http GET <see cref="HttpRequestMessage"/>
-        /// </summary>
-        /// <param name="url">target url</param>
-        /// <returns></returns>
-        public virtual HttpRequestMessage CreateGet(string url)
-
-        {
-            return CreateRequest(url, "GET");
+        public async Task<JToken> Get(string url) {
+            var request = CreateRequest(url, "GET");
+            return await ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Create a http GET <see cref="HttpRequestMessage"/>
-        /// </summary>
-        /// <param name="url">target uri</param>
-        /// <returns></returns>
-        private HttpRequestMessage CreateGet(Uri url)
-        {
-            return CreateRequest(url, "GET");
-        }
-
-        /// <summary>
-        /// Create a http POST <see cref="HttpRequestMessage"/>
-        /// </summary>
-        /// <param name="url">target url</param>
-        /// <returns></returns>
-        public virtual HttpRequestMessage CreatePost(string url)
-        {
+        public async Task<JToken> Post(string url, object data, params string[] additionalFields) {
             var request = CreateRequest(url, "POST");
-            return request;
+            WritePostBody(request, data, additionalFields);
+            return await ExecuteRequestAsync(request).ConfigureAwait(false);
+        }
+
+        public async Task<JToken> Put(string url, object data) {
+            var request = CreateRequest(url, "POST");
+            WritePostBody(request, data);
+            return await ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
         public virtual void WritePostBody(HttpRequestMessage request, object data, params string[] additionalFields)
@@ -361,14 +317,10 @@ namespace RedditSharp
             request.Content = new FormUrlEncodedContent(content);
         }
 
-        public virtual Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request)
-        {
-            return _httpClient.SendAsync(request);
+        public Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage message) {
+          return _httpClient.SendAsync(message);
         }
 
-        private static bool IsOAuth()
-        {
-            return RootDomain == "oauth.reddit.com";
-        }
+        private static bool IsOAuth() => RootDomain == "oauth.reddit.com";
     }
 }

@@ -75,7 +75,7 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Creates the reddit OAuth2 Url to redirect the user to for authorization. 
+        /// Creates the reddit OAuth2 Url to redirect the user to for authorization.
         /// </summary>
         /// <param name="state">Used to verify that the user received is the user that was sent</param>
         /// <param name="scope">Determines what actions can be performed against the user.</param>
@@ -97,12 +97,9 @@ namespace RedditSharp
             //TODO test mono and make sure this works without security issues. Shouldn't be handled by library, should require install of cert or at least explicit calls to ingore certs
             //if (Type.GetType("Mono.Runtime") != null)
             //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
-            
-            var request = _webAgent.CreatePost(AccessUrl);
 
+            var request = _webAgent.CreateRequest(AccessUrl, "POST");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-            
-
             if (isRefresh)
             {
                 _webAgent.WritePostBody(request, new
@@ -120,8 +117,8 @@ namespace RedditSharp
                     redirect_uri = _redirectUri
                 });
             }
-            
-            var json = await _webAgent.ExecuteRequestAsync(request);
+
+            var json = await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
                 if (json["refresh_token"] != null)
@@ -145,10 +142,8 @@ namespace RedditSharp
             //    ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, ssl) => true;
             //_webAgent.Cookies = new CookieContainer();
 
-            var request = _webAgent.CreatePost(AccessUrl);
-
+            var request = _webAgent.CreateRequest(AccessUrl, "POST");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
-
             _webAgent.WritePostBody(request, new
             {
                 grant_type = "password",
@@ -156,8 +151,8 @@ namespace RedditSharp
                 password,
                 redirect_uri = _redirectUri
             });
-            
-            var json = await _webAgent.ExecuteRequestAsync(request);
+
+            var json = await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
                 if (json["refresh_token"] != null)
@@ -177,7 +172,7 @@ namespace RedditSharp
         public async Task RevokeTokenAsync(string token, bool isRefresh)
         {
             string tokenType = isRefresh ? "refresh_token" : "access_token";
-            var request = _webAgent.CreatePost(RevokeUrl);
+            var request = _webAgent.CreateRequest(RevokeUrl, "POST");
 
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(_clientId + ":" + _clientSecret)));
 
@@ -186,10 +181,7 @@ namespace RedditSharp
                 token = token,
                 token_type = tokenType
             });
-            
-
-            var data = await _webAgent.ExecuteRequestAsync(request);
-
+            await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -200,13 +192,13 @@ namespace RedditSharp
         [Obsolete("Reddit.InitOrUpdateUser is preferred")]
         public async Task<AuthenticatedUser> GetUserAsync(string accessToken)
         {
-            var request = _webAgent.CreateGet(OauthGetMeUrl);
+            var request = _webAgent.CreateRequest(OauthGetMeUrl, "GET");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", accessToken);
             var response = await _webAgent.GetResponseAsync(request);
             var result = await response.Content.ReadAsStringAsync();
             var thingjson = "{\"kind\": \"t2\", \"data\": " + result + "}";
             var json = JObject.Parse(thingjson);
-            return new AuthenticatedUser().Init(new Reddit(), json, _webAgent);
+            return new AuthenticatedUser(new Reddit(_webAgent), json);
         }
     }
 }

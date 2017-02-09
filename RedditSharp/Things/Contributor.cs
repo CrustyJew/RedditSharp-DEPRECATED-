@@ -3,54 +3,24 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
-namespace RedditSharp.Things 
+namespace RedditSharp.Things
 {
-    public class Contributor : Thing 
+    public class Contributor : Thing
     {
+        public Contributor(Reddit reddit, JToken json) : base(reddit, json) {
+        }
+
         /// <summary>
         /// Contributor name.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Date contributor was added.
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime DateAdded { get; set; }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public Contributor Init(Reddit reddit, JToken json, IWebAgent webAgent) 
-        {
-            CommonInit(json);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public async Task<Contributor> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(json);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        private void CommonInit(JToken json) 
-        {
-            Init(json);
-        }
+        public DateTime DateAdded { get; }
     }
 }

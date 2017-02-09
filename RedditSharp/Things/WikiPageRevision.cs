@@ -7,6 +7,10 @@ namespace RedditSharp.Things
 {
     public class WikiPageRevision : Thing
     {
+        protected internal WikiPageRevision(Reddit reddit, JToken json) : base(reddit, json) {
+            Author = new RedditUser(Reddit, json["author"]);
+        }
+
         /// <summary>
         /// Revision id.
         /// </summary>
@@ -18,44 +22,25 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("timestamp")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; set; }
+        public DateTime? TimeStamp { get; }
 
         /// <summary>
         /// Reason for the revision.
         /// </summary>
         [JsonProperty("reason")]
-        public string Reason { get; private set; }
+        public string Reason { get; }
 
         /// <summary>
         /// Page
         /// </summary>
         [JsonProperty("page")]
-        public string Page { get; private set; }
+        public string Page { get; }
 
         /// <summary>
         /// User who made the revision.
         /// </summary>
         [JsonIgnore]
-        public RedditUser Author { get; set; }
+        public RedditUser Author { get; private set; }
 
-        protected internal WikiPageRevision() { }
-
-        internal async Task<WikiPageRevision> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            await Task.Factory.StartNew(()=>JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-        internal WikiPageRevision Init(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            CommonInit(reddit, json, webAgent);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Author = new RedditUser().Init(reddit, json["author"], webAgent);
-        }
     }
 }

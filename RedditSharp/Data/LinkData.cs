@@ -7,7 +7,7 @@
         /// </summary>
         [RedditAPIName("extension")]
         internal string Extension { get; set; }
-        
+
         /// <summary>
         /// Url of the link.
         /// </summary>

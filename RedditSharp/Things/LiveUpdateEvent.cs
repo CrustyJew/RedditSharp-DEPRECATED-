@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Security.Authentication;
@@ -26,85 +27,80 @@ namespace RedditSharp.Things
             All = Update | Manage | Settings | Edit | Close
         }
 
-        public class LiveUpdateEventUser
-        {
-            [JsonConverter(typeof(PermissionsConverter))]
-            public LiveUpdateEventPermission Permissions { get; set; }
-
-            [JsonProperty("name")]
-            public string Name { get; set; }
-
-            [JsonProperty("id")]
-            public string Id { get; set; }
+        public LiveUpdateEvent(Reddit reddit, JToken json) : base(reddit, json) {
+            FullName = Name;
+            Name = Name.Replace("LiveUpdateEvent_", "");
         }
 
-        private const string AcceptContributorInviteUrl = "/api/live/{0}/accept_contribtor_invite";
-        private const string CloseThreadUrl = "/api/live/{0}/close_thread";
-        private const string EditUrl = "/api/live/{0}/edit";
-        private const string InviteContributorUrl = "/api/live/{0}/invite_contributor";
-        private const string LeaveContributorUrl = "/api/live/{0}/leave_contributor";
-        private const string RemoveContributorUrl = "/api/live/{0}/rm_contributor";
-        private const string RevokeContributorInviteUrl = "/api/live/{0}/rm_contributor_invite";
-        private const string SetContributorPermissionUrl = "/api/live/{0}/set_contributor_permissions";
-        private const string UpdateUrl = "/api/live/{0}/update";
-        private const string StrikeUpdateUrl = "/api/live/{0}/strike_update";
-        private const string DeleteUpdateUrl = "/api/live/{0}/delete_update";
-        private const string GetUrl = "/live/{0}";
-        private const string ContributorsUrl = "/live/{0}/contributors.json";
-        private const string DiscussionsUrl = "/live/{0}/discussions";
-        private const string ReportUrl = "/api/live/{0}/report";
+        public class LiveUpdateEventUser
+        {
+            [JsonProperty]
+            [JsonConverter(typeof(PermissionsConverter))]
+            public LiveUpdateEventPermission Permissions { get; }
+
+            [JsonProperty("name")]
+            public string Name { get; }
+
+            [JsonProperty("id")]
+            public string Id { get; }
+        }
+
+        private string AcceptContributorInviteUrl => $"/api/live/{Name}/accept_contribtor_invite";
+        private string CloseThreadUrl => $"/api/live/{Name}/close_thread";
+        private string EditUrl => $"/api/live/{Id}/edit";
+        private string InviteContributorUrl => $"/api/live/{Name}/invite_contributor";
+        private string LeaveContributorUrl => $"/api/live/{Name}/leave_contributor";
+        private string RemoveContributorUrl => $"/api/live/{Name}/rm_contributor";
+        private string RevokeContributorInviteUrl => $"/api/live/{Name}/rm_contributor_invite";
+        private string SetContributorPermissionUrl => $"/api/live/{Name}/set_contributor_permissions";
+        private string UpdateUrl => $"/api/live/{Name}/update";
+        private string StrikeUpdateUrl => $"/api/live/{Name}/strike_update";
+        private string DeleteUpdateUrl => $"/api/live/{Name}/delete_update";
+        private string GetUrl => $"/live/{Name}";
+        private string ContributorsUrl => $"/live/{Name}/contributors.json";
+        private string DiscussionsUrl => $"/live/{Name}/discussions";
+        private string ReportUrl => $"/api/live/{Name}/report";
 
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; private set; }
 
         [JsonProperty("description_html")]
-        public string DescriptionHtml { get; set; }
+        public string DescriptionHtml { get; }
 
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title { get; private set; }
 
         [JsonProperty("websocket_uri")]
-        public Uri WebsocketUri { get; set; }
+        public Uri WebsocketUri { get; }
 
         [JsonProperty("state")]
-        public string State { get; set; }
+        public string State { get; }
 
         [JsonProperty("nsfw")]
-        public bool NSFW { get; set; }
+        public bool NSFW { get; private set; }
 
         [JsonProperty("viewer_count")]
-        public int? ViewerCount { get; set; }
+        public int? ViewerCount { get; }
 
         [JsonProperty("viewer_count_fuzzed")]
-        public bool ViewerCountFuzzed { get; set; }
+        public bool ViewerCountFuzzed { get; }
 
         [JsonProperty("resources")]
-        public string Resources { get; set; }
+        public string Resources { get; private set; }
 
         [JsonProperty]
-        public string Name { get; set; }
-
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Accept an invite to be a live thread contributor.
         /// </summary>
-        public Task AcceptContributorInviteAsync()
-        {
-            return SimpleActionAsync(String.Format(AcceptContributorInviteUrl, Name));
-        }
+        public Task AcceptContributorInviteAsync() =>
+            SimpleActionAsync(AcceptContributorInviteUrl);
 
         /// <summary>
         /// Close the live thread.
         /// </summary>
-        public Task CloseAsync()
-        {
-            return SimpleActionAsync(CloseThreadUrl);
-        }
+        public Task CloseAsync() => SimpleActionAsync(CloseThreadUrl);
 
         /// <summary>
         /// Delete an update
@@ -114,18 +110,17 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(DeleteUpdateUrl, Name));
+            var request = WebAgent.CreateRequest(DeleteUpdateUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 id = update.FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
-
-                return false;
+            return false;
         }
 
         /// <summary>
@@ -151,16 +146,16 @@ namespace RedditSharp.Things
             if (nsfw.HasValue)
                 expando.Add(new KeyValuePair<string, object>("nsfw", nsfw.Value));
 
-            var request = WebAgent.CreatePost(String.Format(EditUrl, Id));
+            var request = WebAgent.CreateRequest(EditUrl, "POST");
             WebAgent.WritePostBody(request, expando);
 
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
                 return false;
 
-            var result = await response.Content.ReadAsStringAsync();
-            JToken json = JToken.Parse(result);
+            var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            JToken json = JToken.Parse(data);
             if (json["json"].ToString().Contains("\"errors\": []"))
             {
                 Title = title ?? "";
@@ -180,11 +175,10 @@ namespace RedditSharp.Things
         /// Get a list of contributors.
         /// </summary>
         /// <returns></returns>
-        public async  Task<ICollection<LiveUpdateEvent.LiveUpdateEventUser>> GetContributorsAsync()
+        public async Task<IEnumerable<LiveUpdateEvent.LiveUpdateEventUser>> GetContributorsAsync()
         {
             var result = new List<LiveUpdateEvent.LiveUpdateEventUser>();
-            var request = WebAgent.CreateGet(String.Format(ContributorsUrl, Name));
-            var json = await WebAgent.ExecuteRequestAsync(request);
+            var json = await WebAgent.Get(ContributorsUrl);
 
             JToken users;
             if (json.Type == JTokenType.Array)
@@ -195,51 +189,32 @@ namespace RedditSharp.Things
             {
                 users = json["data"]["children"];
             }
-
-            foreach (var user in users)
-            {
-                result.Add(user.ToObject<LiveUpdateEventUser>());
-            }
-
-            return result;
+            return users.Select(u => u.ToObject<LiveUpdateEventUser>());
         }
 
         /// <summary>
         /// Get a list of reddit submissions linking to this thread.
         /// </summary>
         /// <returns></returns>
-        public Listing<Post> GetDiscussions()
-        {
-            return new Listing<Post>(Reddit, String.Format(DiscussionsUrl, Name), WebAgent);
-        }
+        public Listing<Post> GetDiscussions() =>
+            new Listing<Post>(Reddit, DiscussionsUrl);
 
         /// <summary>
         /// Get a list of updates to this live event.
         /// </summary>
         /// <returns></returns>
-        public Listing<LiveUpdate> GetThread()
-        {
-            return new Listing<LiveUpdate>(Reddit, string.Format(GetUrl, Name), WebAgent);
-        }
+        public Listing<LiveUpdate> GetThread() =>
+            new Listing<LiveUpdate>(Reddit, GetUrl);
 
         /// <summary>
         /// Get invited contributors.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<LiveUpdateEventUser>> GetInvitedContributorsAsync()
+        public async Task<IEnumerable<LiveUpdateEventUser>> GetInvitedContributorsAsync()
         {
-            var result = new List<LiveUpdateEventUser>();
-            var request = WebAgent.CreateGet(String.Format(ContributorsUrl, Name));
-            var json = await WebAgent.ExecuteRequestAsync(request);
-
+            var json = await WebAgent.Get(ContributorsUrl).ConfigureAwait(false);
             var users = json[1]["data"]["children"];
-
-            foreach (var user in users)
-            {
-                result.Add((LiveUpdateEventUser)JsonConvert.DeserializeObject(user.ToString()));
-            }
-
-            return result;
+            return users.Select(u => JsonConvert.DeserializeObject(u.ToString())).Cast<LiveUpdateEventUser>();
         }
 
         /// <summary>
@@ -251,9 +226,8 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(InviteContributorUrl, Name));
             var perms = GetPermissionsString(permissions);
-
+            var request = WebAgent.CreateRequest(InviteContributorUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -261,9 +235,8 @@ namespace RedditSharp.Things
                 permissions = perms,
                 type = "liveupdate_contributor_invite",
                 uh = Reddit.User.Modhash,
-
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -273,10 +246,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Abdicate contributorship of a thread.
         /// </summary>
-        public Task LeaveContributorAsync()
-        {
-            return SimpleActionAsync(LeaveContributorUrl);
-        }
+        public Task LeaveContributorAsync() => SimpleActionAsync(LeaveContributorUrl);
 
         /// <summary>
         /// Remove a contributor from the live thread.
@@ -287,14 +257,14 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var request = WebAgent.CreatePost(String.Format(RemoveContributorUrl, Name));
+            var request = WebAgent.CreateRequest(RemoveContributorUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 id = user.Kind + "_" + user.Id,
                 uh = Reddit.User.Modhash
             });
-            var response  = await WebAgent.GetResponseAsync(request);
+            var response  = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
                 return true;
@@ -308,8 +278,8 @@ namespace RedditSharp.Things
         /// <param name="name">reddit username.</param>
         public async Task<bool> RemoveContributorAsync(string userName)
         {
-            var user = await Reddit.GetUserAsync(userName);
-            return await RemoveContributorAsync(userName);
+            var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
+            return await RemoveContributorAsync(userName).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -340,7 +310,7 @@ namespace RedditSharp.Things
 
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(ReportUrl, Name));
+            var request = WebAgent.CreateRequest(ReportUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -348,7 +318,7 @@ namespace RedditSharp.Things
                 uh = Reddit.User.Modhash
             });
 
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -364,14 +334,14 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var request = WebAgent.CreatePost(String.Format(RevokeContributorInviteUrl, Name));
+            var request = WebAgent.CreateRequest(RevokeContributorInviteUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 id = user.Kind + "_" + user.Id,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -384,8 +354,8 @@ namespace RedditSharp.Things
         /// <param name="name">reddit username</param>
         public async Task<bool> RevokeContributorInviteAsync(string userName)
         {
-            var user = await Reddit.GetUserAsync(userName);
-            return await RevokeContributorInviteAsync(user);
+            var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
+            return await RevokeContributorInviteAsync(user).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -395,7 +365,7 @@ namespace RedditSharp.Things
         /// <param name="permissions">Reddit user</param>
         public async Task<bool> SetContributorPermissionsAsync(RedditUser user, LiveUpdateEventPermission permissions)
         {
-            return await SetContributorPermissions(user.Name, permissions);
+            return await SetContributorPermissions(user.Name, permissions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -407,7 +377,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(SetContributorPermissionUrl, Name));
+            var request = WebAgent.CreateRequest(SetContributorPermissionUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -416,7 +386,7 @@ namespace RedditSharp.Things
                 permissions = GetPermissionsString(permissions),
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -430,7 +400,7 @@ namespace RedditSharp.Things
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetInvitedContributorPermissionsAsync(RedditUser user, LiveUpdateEventPermission permissions)
         {
-            return await SetInvitedContributorPermissionsAsync(user.Name, permissions);
+            return await SetInvitedContributorPermissionsAsync(user.Name, permissions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -442,7 +412,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(SetContributorPermissionUrl, Name));
+            var request = WebAgent.CreateRequest(SetContributorPermissionUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -451,7 +421,7 @@ namespace RedditSharp.Things
                 permissions = GetPermissionsString(permissions),
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -464,7 +434,7 @@ namespace RedditSharp.Things
         /// <param name="update">Update to strike</param>
         public async Task<bool> StrikeUpdateAsync(LiveUpdate update)
         {
-            return await StrikeUpdateAsync(update.FullName);
+            return await StrikeUpdateAsync(update.FullName).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -475,14 +445,14 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(StrikeUpdateUrl, Name));
+            var request = WebAgent.CreateRequest(StrikeUpdateUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 id = fullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -497,43 +467,18 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(UpdateUrl, Name));
+            var request = WebAgent.CreateRequest(UpdateUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 body = markdown,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
             return false;
-        }
-
-        public async Task<LiveUpdateEvent> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            FullName = Name;
-            Name = Name.Replace("LiveUpdateEvent_", "");
-            return this;
-        }
-
-        public LiveUpdateEvent Init(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            FullName = Name;
-            Name = Name.Replace("LiveUpdateEvent_", "");
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            base.Init(json);
-            Reddit = reddit;
-            WebAgent = webAgent;
         }
 
         private string GetPermissionsString(LiveUpdateEventPermission input)
@@ -661,10 +606,7 @@ namespace RedditSharp.Things
                 return result;
             }
 
-            public override bool CanConvert(Type objectType)
-            {
-                return true;
-            }
+            public override bool CanConvert(Type objectType) => true;
         }
     }
 }

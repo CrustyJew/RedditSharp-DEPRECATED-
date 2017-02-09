@@ -4,18 +4,12 @@ using System;
 
 namespace RedditSharp
 {
-    public class Domain
+    public class Domain : RedditObject
     {
-        private const string DomainPostUrl = "/domain/{0}.json";
-        private const string DomainNewUrl = "/domain/{0}/new.json?sort=new";
-        private const string DomainHotUrl = "/domain/{0}/hot.json";
+        private string DomainPostUrl => $"/domain/{Name}.json";
+        private string DomainNewUrl => $"/domain/{Name}/new.json?sort=new";
+        private string DomainHotUrl => $"/domain/{Name}/hot.json";
         private const string FrontPageUrl = "/.json";
-
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Domain name
@@ -26,48 +20,25 @@ namespace RedditSharp
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of posts made for this domain.
         /// </summary>
-        public Listing<Post> Posts
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(DomainPostUrl, Name), WebAgent);
-            }
-        }
+        public Listing<Post> Posts => new Listing<Post>(Reddit, DomainPostUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of posts made for this domain that are in the new queue.
         /// </summary>
-        public Listing<Post> New
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(DomainNewUrl, Name), WebAgent);
-            }
-        }
+        public Listing<Post> New => new Listing<Post>(Reddit, DomainNewUrl);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of posts made for this domain that are in the hot queue.
         /// </summary>
-        public Listing<Post> Hot
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(DomainHotUrl, Name), WebAgent);
-            }
-        }
+        public Listing<Post> Hot => new Listing<Post>(Reddit, DomainHotUrl);
 
-        protected internal Domain(Reddit reddit, Uri domain, IWebAgent webAgent)
+        protected internal Domain(Reddit reddit, Uri domain) : base(reddit)
         {
-            Reddit = reddit;
-            WebAgent = webAgent;
             Name = domain.Host;
         }
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return "/domain/" + Name;
-        }
+        public override string ToString() => "/domain/" + Name;
     }
 }
 

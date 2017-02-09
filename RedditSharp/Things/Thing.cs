@@ -1,50 +1,52 @@
 using System;
 using System.Security.Authentication;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using RedditSharp.Extensions;
 
 namespace RedditSharp.Things
 {
-    public class Thing
+    public class Thing : RedditObject
     {
-        protected Reddit Reddit { get; set; }
+        public Thing(Reddit reddit, JToken json) : base(reddit) {
+          Populate(json);
+        }
 
-        protected IWebAgent WebAgent { get; set; }
-
-        internal void Init(JToken json)
-        {
+        protected void Populate(JToken json) {
             if (json == null)
-                return;
+              return;
             var data = json["name"] == null ? json["data"] : json;
             FullName = data["name"].ValueOrDefault<string>();
             Id = data["id"].ValueOrDefault<string>();
             Kind = json["kind"].ValueOrDefault<string>();
             FetchedAt = DateTime.Now;
+            Reddit.PopulateObject(GetJsonData(json), this);
+        }
+
+        protected virtual JToken GetJsonData(JToken json) {
+          return json.ToString();
         }
 
         /// <summary>
         /// Shortlink to the item
         /// </summary>
-        public virtual string Shortlink
-        {
-            get { return "http://redd.it/" + Id; }
-        }
+        public virtual string Shortlink =>  "http://redd.it/" + Id;
 
         /// <summary>
         /// Base36 id.
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// reddit full name.  Kind_Base36 id.  Example.  t1_a1b2c3
         /// </summary>
-        public string FullName { get; set; }
+        public string FullName { get; internal set; }
 
         /// <summary>
         /// Thing kind.  t1, t2, t3 etc
         /// </summary>
-        public string Kind { get; set; }
+        public string Kind { get; private set; }
 
         /// <summary>
         /// The time at which this object was fetched from reddit servers.
@@ -54,13 +56,8 @@ namespace RedditSharp.Things
         /// <summary>
         /// Gets the time since last fetch from reddit servers.
         /// </summary>
-        public TimeSpan TimeSinceFetch
-        {
-            get
-            {
-                return DateTime.Now - FetchedAt;
-            }
-        }
+        public TimeSpan TimeSinceFetch => DateTime.Now - FetchedAt;
+
         // Awaitables don't have to be called asyncronously
 
         /// <summary>
@@ -68,66 +65,30 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="reddit">Reddit you're using</param>
         /// <param name="json">Json Token</param>
-        /// <param name="webAgent">WebAgent</param>
         /// <returns>A "Thing", such as a comment, user, post, etc.</returns>
-        public static async Task<Thing> ParseAsync(Reddit reddit, JToken json, IWebAgent webAgent)
+        public static Thing Parse(Reddit reddit, JToken json)
         {
             var kind = json["kind"].ValueOrDefault<string>();
             switch (kind)
             {
                 case "t1":
-                    return await new Comment().InitAsync(reddit, json, webAgent, null);
+                    return new Comment(reddit, json, null);
                 case "t2":
-                    return await new RedditUser().InitAsync(reddit, json, webAgent);
+                    return new RedditUser(reddit, json);
                 case "t3":
-                    return await new Post().InitAsync(reddit, json, webAgent);
+                    return new Post(reddit, json);
                 case "t4":
-                    return await new PrivateMessage().InitAsync(reddit, json, webAgent);
+                    return new PrivateMessage(reddit, json);
                 case "t5":
-                    return await new Subreddit().InitAsync(reddit, json, webAgent);
+                    return new Subreddit(reddit, json);
                 case "modaction":
-                    return await new ModAction().InitAsync(reddit, json, webAgent);
+                    return new ModAction(reddit, json);
                 case "more":
-                    return await new More().InitAsync(reddit, json, webAgent);
+                    return new More(reddit, json);
                 case "LiveUpdate":
-                    return await new LiveUpdate().InitAsync(reddit, json, webAgent);
+                    return new LiveUpdate(reddit, json);
                 case "LiveUpdateEvent":
-                    return await new LiveUpdateEvent().InitAsync(reddit, json, webAgent);
-                default:
-                    return null;
-            }
-        }
-
-        /// <summary>
-        /// Parses what it is, based on the t(number) attribute
-        /// </summary>
-        /// <param name="reddit">Reddit you're using</param>
-        /// <param name="json">Json Token</param>
-        /// <param name="webAgent">WebAgent</param>
-        /// <returns>A "Thing", such as a comment, user, post, etc.</returns>
-        public static Thing Parse(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            var kind = json["kind"].ValueOrDefault<string>();
-            switch (kind)
-            {
-                case "t1":
-                    return new Comment().Init(reddit, json, webAgent, null);
-                case "t2":
-                    return new RedditUser().Init(reddit, json, webAgent);
-                case "t3":
-                    return new Post().Init(reddit, json, webAgent);
-                case "t4":
-                    return new PrivateMessage().Init(reddit, json, webAgent);
-                case "t5":
-                    return new Subreddit().Init(reddit, json, webAgent);
-                case "modaction":
-                    return new ModAction().Init(reddit, json, webAgent);
-                case "more":
-                    return new More().Init(reddit, json, webAgent);
-                case "LiveUpdate":
-                    return new LiveUpdate().Init(reddit, json, webAgent);
-                case "LiveUpdateEvent":
-                    return new LiveUpdateEvent().Init(reddit, json, webAgent);
+                    return new LiveUpdateEvent(reddit, json);
                 default:
                     return null;
             }
@@ -139,111 +100,60 @@ namespace RedditSharp.Things
         /// <typeparam name="T"></typeparam>
         /// <param name="reddit"></param>
         /// <param name="json"></param>
-        /// <param name="webAgent"></param>
         /// <returns>The "Thing"</returns>
-        public static async Task<Thing> ParseAsync<T>(Reddit reddit, JToken json, IWebAgent webAgent) where T : Thing
+        public static Thing Parse<T>(Reddit reddit, JToken json) where T : Thing
         {
-            Thing result = await ParseAsync(reddit, json, webAgent);
+            Thing result = Parse(reddit, json);
             if (result == null)
             {
                 if (typeof(T) == typeof(WikiPageRevision))
                 {
-                    return await new WikiPageRevision().InitAsync(reddit, json, webAgent);
+                    return new WikiPageRevision(reddit, json);
                 }
                 else if (typeof(T) == typeof(ModAction))
                 {
-                    return await new ModAction().InitAsync(reddit, json, webAgent);
+                    return new ModAction(reddit, json);
                 }
                 else if (typeof(T) == typeof(Contributor))
                 {
-                    return await new Contributor().InitAsync(reddit, json, webAgent);
+                    return new Contributor(reddit, json);
                 }
                 else if (typeof(T) == typeof(BannedUser))
                 {
-                    return await new BannedUser().InitAsync(reddit, json, webAgent);
+                    return new BannedUser(reddit, json);
                 }
                 else if (typeof(T) == typeof(More))
                 {
-                    return await new More().InitAsync(reddit, json, webAgent);
+                    return new More(reddit, json);
                 }
                 else if (typeof(T) == typeof(LiveUpdate))
                 {
-                    return await new LiveUpdate().InitAsync(reddit, json, webAgent);
+                    return new LiveUpdate(reddit, json);
                 }
                 else if (typeof(T) == typeof(LiveUpdateEvent))
                 {
-                    return await new LiveUpdateEvent().InitAsync(reddit, json, webAgent);
+                    return new LiveUpdateEvent(reddit, json);
                 }
             }
             return result;
         }
 
         /// <summary>
-        /// Tries to find the "Thing" you are looking for
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="reddit"></param>
-        /// <param name="json"></param>
-        /// <param name="webAgent"></param>
-        /// <returns>The "Thing"</returns>
-        public static Thing Parse<T>(Reddit reddit, JToken json, IWebAgent webAgent) where T : Thing
-        {
-            Thing result = Parse(reddit, json, webAgent);
-            if (result == null)
-            {
-                if (typeof(T) == typeof(WikiPageRevision))
-                {
-                    return new WikiPageRevision().Init(reddit, json, webAgent);
-                }
-                else if (typeof(T) == typeof(ModAction))
-                {
-                    return new ModAction().Init(reddit, json, webAgent);
-                }
-                else if (typeof(T) == typeof(Contributor))
-                {
-                    return new Contributor().Init(reddit, json, webAgent);
-                }
-                else if (typeof(T) == typeof(BannedUser))
-                {
-                    return new BannedUser().Init(reddit, json, webAgent);
-                }
-                else if (typeof(T) == typeof(More))
-                {
-                    return new More().Init(reddit, json, webAgent);
-                }
-                else if (typeof(T) == typeof(LiveUpdate))
-                {
-                    return new LiveUpdate().Init(reddit, json, webAgent);
-                }
-                else if (typeof(T) == typeof(LiveUpdateEvent))
-                {
-                    return new LiveUpdateEvent().Init(reddit, json, webAgent);
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Execute a simple POST request against the reddit api.  
+        /// Execute a simple POST request against the reddit api.
         /// Supports endpoints that require only id and modhash as
         /// parameters.
         /// </summary>
         /// <param name="endpoint"></param>
         /// <returns></returns>
-        protected virtual async Task<string> SimpleActionAsync(string endpoint)
+        protected virtual async Task<JToken> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(endpoint);
-
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            return data;
+            }).ConfigureAwait(false);
         }
     }
 }

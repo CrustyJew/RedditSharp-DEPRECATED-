@@ -3,26 +3,21 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
-    public class SubredditImage
+    public class SubredditImage : RedditObject
     {
         private const string DeleteImageUrl = "/api/delete_sr_img";
 
-        private Reddit Reddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
-
-        public SubredditImage(Reddit reddit, SubredditStyle subredditStyle,
-            string cssLink, string name, IWebAgent webAgent)
+        public SubredditImage(SubredditStyle subredditStyle,
+            string cssLink, string name) : base(subredditStyle?.Reddit)
         {
-            Reddit = reddit;
-            WebAgent = webAgent;
             SubredditStyle = subredditStyle;
             Name = name;
             CssLink = cssLink;
         }
 
-        public SubredditImage(Reddit reddit, SubredditStyle subreddit,
-            string cssLink, string name, string url, IWebAgent webAgent)
-            : this(reddit, subreddit, cssLink, name, webAgent)
+        public SubredditImage(SubredditStyle subreddit,
+            string cssLink, string name, string url)
+            : this(subreddit, cssLink, name)
         {
 
             int discarded;
@@ -36,43 +31,40 @@ namespace RedditSharp
             }
             // Handle legacy image urls
             // http://thumbs.reddit.com/FULLNAME_NUMBER.png
-            
+
         }
 
         /// <summary>
         /// css link.
         /// </summary>
-        public string CssLink { get; set; }
+        public string CssLink { get; }
 
         /// <summary>
         /// Name.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Url.
         /// </summary>
-        public Uri Url { get; set; }
+        public Uri Url { get; }
 
         /// <summary>
         /// Subreddit style.
         /// </summary>
-        public SubredditStyle SubredditStyle { get; set; }
+        public SubredditStyle SubredditStyle { get; }
 
         /// <summary>
         /// Delete this subreddit image.
         /// </summary>
         public async Task Delete()
         {
-            var request = WebAgent.CreatePost(DeleteImageUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
                 uh = Reddit.User.Modhash,
                 r = SubredditStyle.Subreddit.Name
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
+            }).ConfigureAwait(false);
             SubredditStyle.Images.Remove(this);
         }
 
@@ -82,15 +74,12 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task DeleteAsync()
         {
-            var request = WebAgent.CreatePost(DeleteImageUrl);
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
                 uh = Reddit.User.Modhash,
                 r = SubredditStyle.Subreddit.Name
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
+            }).ConfigureAwait(false);
             SubredditStyle.Images.Remove(this);
         }
     }

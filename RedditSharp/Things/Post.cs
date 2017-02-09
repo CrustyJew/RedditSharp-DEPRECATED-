@@ -14,167 +14,117 @@ namespace RedditSharp.Things
     public class Post : VotableThing
     {
         private const string CommentUrl = "/api/comment";
-        private const string GetCommentsUrl = "/comments/{0}.json";
+        private const string GetCommentsUrl = "/comments/{Id}.json";
         private const string EditUserTextUrl = "/api/editusertext";
         private const string HideUrl = "/api/hide";
         private const string UnhideUrl = "/api/unhide";
-        private const string SetFlairUrl = "/r/{0}/api/flair";
+        private string SetFlairUrl => $"/r/{SubredditName}/api/flair";
         private const string MarkNSFWUrl = "/api/marknsfw";
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="post"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            await CommonInitAsync(reddit, post, webAgent);
-            await Task.Factory.StartNew(() => JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings));
-            return this;
-        }
-
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="reddit"></param>
-        /// <param name="post"></param>
-        /// <param name="webAgent"></param>
-        /// <returns></returns>
-        public Post Init(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            CommonInit(reddit, post, webAgent);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
-            return this;
-        }
-
-        private void CommonInit(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            base.Init(reddit, webAgent, post);
-            Reddit = reddit;
-            WebAgent = webAgent;
-        }
-
-        private async Task CommonInitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
-        {
-            await base.InitAsync(reddit, webAgent, post);
-            Reddit = reddit;
-            WebAgent = webAgent;
+        public Post(Reddit reddit, JToken json) : base(reddit, json) {
         }
 
         /// <summary>
         /// Author of this post.
         /// </summary>
         [JsonProperty("author")]
-        public string AuthorName { get; set; }
+        public new string AuthorName { get; }
 
-        
         //TODO Discuss
-        public IObservable<Comment> Comments
-        {
-            get
-            {
-                return GetComments();
-            }
-        }
+        public IObservable<Comment> Comments => GetComments();
 
         /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]
-        public string Domain { get; set; }
+        public string Domain { get; }
 
         /// <summary>
         /// Returns true if this is a self post.
         /// </summary>
         [JsonProperty("is_self")]
-        public bool IsSelfPost { get; set; }
+        public bool IsSelfPost { get; }
 
         /// <summary>
         /// Css class of the link flair.
         /// </summary>
         [JsonProperty("link_flair_css_class")]
-        public string LinkFlairCssClass { get; set; }
+        public string LinkFlairCssClass { get; }
 
         /// <summary>
         /// Text of the link flair.
         /// </summary>
         [JsonProperty("link_flair_text")]
-        public string LinkFlairText { get; set; }
+        public string LinkFlairText { get; private set; }
 
         /// <summary>
         /// Number of comments on this post.
         /// </summary>
         [JsonProperty("num_comments")]
-        public int CommentCount { get; set; }
-        
+        public int CommentCount { get; }
+
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
         [JsonProperty("over_18")]
-        public bool NSFW { get; set; }
+        public bool NSFW { get; }
 
         /// <summary>
         /// Post permalink.
         /// </summary>
         [JsonProperty("permalink")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Permalink { get; set; }
+        public Uri Permalink { get; }
 
         /// <summary>
         /// Post self text markdown.
         /// </summary>
         [JsonProperty("selftext")]
-        public string SelfText { get; set; }
+        public string SelfText { get; private set; }
 
         /// <summary>
         /// Post self text html.
         /// </summary>
         [JsonProperty("selftext_html")]
-        public string SelfTextHtml { get; set; }
+        public string SelfTextHtml { get; }
 
         /// <summary>
         /// Uri to the thumbnail image of this post.
         /// </summary>
         [JsonProperty("thumbnail")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Thumbnail { get; set; }
+        public Uri Thumbnail { get; }
 
         /// <summary>
         /// Post title.
         /// </summary>
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title { get; }
 
         /// <summary>
         /// Parent subreddit name.
         /// </summary>
         [JsonProperty("subreddit")]
-        public string SubredditName { get; set; }
+        public string SubredditName { get; }
 
         /// <summary>
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
-        public Subreddit Subreddit
-        {
-            get
-            {
-                return Task.Run(async () => { return await Reddit.GetSubredditAsync("/r/" + SubredditName); }).Result;
-            }
-        }
+        public Subreddit Subreddit =>
+          Task.Run(async () => {
+              return await Reddit.GetSubredditAsync("/r/" + SubredditName).ConfigureAwait(false);
+            }).Result;
 
         /// <summary>
         /// Post uri.
         /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Url { get; set; }
-
+        public Uri Url { get; }
 
         /// <summary>
         /// Comment on this post.
@@ -185,28 +135,25 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(CommentUrl);
-            WebAgent.WritePostBody(request, new
+            var json = await WebAgent.Post(CommentUrl, new
             {
                 text = message,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            var json = JObject.Parse(data);
+            }).ConfigureAwait(false);
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-            return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
+            return new Comment(Reddit, json["json"]["data"]["things"][0], this);
         }
 
-        private async Task<string> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
+        private async Task<JToken> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var modNameList = (await this.Subreddit.GetModeratorsAsync()).Select(b => b.Name).ToList();
+            var mods = await Subreddit.GetModeratorsAsync().ConfigureAwait(false);
+            var modNameList = mods.Select(b => b.Name).ToList();
 
             if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
                 throw new AuthenticationException(
@@ -215,67 +162,45 @@ namespace RedditSharp.Things
                         Reddit.User.Name,
                         this.Subreddit.Name));
 
-            var request = WebAgent.CreatePost(endpoint);
-            WebAgent.WritePostBody(request, new
+            return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
                 state = value,
                 uh = Reddit.User.Modhash
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            return data;
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Hide this post.
         /// </summary>
-        public Task HideAsync()
-        {
-            return SimpleActionAsync(HideUrl);
-        }
+        public Task HideAsync() => SimpleActionAsync(HideUrl);
 
         /// <summary>
         /// Unhide this post.
         /// </summary>
-        public Task UnhideAsync()
-        {
-            return SimpleActionAsync(UnhideUrl);
-        }
+        public Task UnhideAsync() => SimpleActionAsync(UnhideUrl);
 
         /// <summary>
         /// Mark this post not safe for work.
         /// </summary>
-        public Task MarkNSFWAsync()
-        {
-            return SimpleActionAsync(MarkNSFWUrl);
-        }
+        public Task MarkNSFWAsync() => SimpleActionAsync(MarkNSFWUrl);
 
         /// <summary>
         /// Mark this post as safe for work.
         /// </summary>
-        public Task UnmarkNSFWAsync()
-        {
-            return SimpleActionAsync(UnmarkNSFWUrl);
-        }
+        public Task UnmarkNSFWAsync() => SimpleActionAsync(UnmarkNSFWUrl);
 
         /// <summary>
         /// Set contest mode state.  Logged in user must be a moderator of parent subreddit.
         /// </summary>
         /// <param name="state"></param>
-        public Task ContestModeAsync(bool state)
-        {
-            return SimpleActionAsync(ContestModeUrl);
-        }
+        public Task ContestModeAsync(bool state) => SimpleActionAsync(ContestModeUrl);
 
         /// <summary>
         /// Set sticky state.  Logged in user must be a moderator of parent subreddit.
         /// </summary>
         /// <param name="state"></param>
-        public Task StickyModeAsync(bool state)
-        {
-            return SimpleActionToggleAsync(StickyModeUrl, state, true);
-        }
+        public Task StickyModeAsync(bool state) => SimpleActionToggleAsync(StickyModeUrl, state, true);
 
         /// <summary>
         /// Replaces the text in this post with the input text.
@@ -288,17 +213,13 @@ namespace RedditSharp.Things
             if (!IsSelfPost)
                 throw new Exception("Submission to edit is not a self-post.");
 
-            var request = WebAgent.CreatePost(EditUserTextUrl);
-            WebAgent.WritePostBody(request, new
+            var json = await WebAgent.Post(EditUserTextUrl, new
             {
                 api_type = "json",
                 text = newText,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var result = await response.Content.ReadAsStringAsync();
-            JToken json = JToken.Parse(result);
+            }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
             else
@@ -308,11 +229,8 @@ namespace RedditSharp.Things
         /// <summary>
         /// Update this post.
         /// </summary>
-        public async Task UpdateAsync()
-        {
-            JToken post = await Reddit.GetTokenAsync(this.Url);
-            JsonConvert.PopulateObject(post["data"].ToString(), this, Reddit.JsonSerializerSettings);
-        }
+        public async Task UpdateAsync() => Reddit.PopulateObject(GetJsonData(await Reddit.GetTokenAsync(Url)), this);
+
         /// <summary>
         /// Sets your claim
         /// </summary>
@@ -323,8 +241,7 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
 
-            var request = WebAgent.CreatePost(string.Format(SetFlairUrl, SubredditName));
-            WebAgent.WritePostBody(request, new
+            await WebAgent.Post(SetFlairUrl, new
             {
                 api_type = "json",
                 css_class = flairClass,
@@ -332,10 +249,7 @@ namespace RedditSharp.Things
                 name = Reddit.User.Name,
                 text = flairText,
                 uh = Reddit.User.Modhash
-            });
-            var response = await WebAgent.GetResponseAsync(request);
-            var result = await response.Content.ReadAsStringAsync();
-            var json = JToken.Parse(result);
+            }).ConfigureAwait(false);
             LinkFlairText = flairText;
         }
 
@@ -347,40 +261,27 @@ namespace RedditSharp.Things
         public async Task<List<Comment>> ListCommentsAsync(int? limit = null)
         {
             var url = string.Format(GetCommentsUrl, Id);
-            var request = WebAgent.CreateGet(url);
-
             if (limit.HasValue)
             {
                 var query = WebUtility.UrlEncode("limit="+limit.Value.ToString());
                 url = string.Format("{0}?{1}", url, query);
             }
-
-
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
-            var json = JArray.Parse(data);
+            var json = await WebAgent.Get(url).ConfigureAwait(false);
             var postJson = json.Last()["data"]["children"];
 
             var comments = new List<Comment>();
             foreach (var comment in postJson)
             {
-                Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
-                if (newComment.Kind == "more")
-                {
-                }
-                else
-                {
+                Comment newComment = new Comment(Reddit, comment, this);
+                if (newComment.Kind != "more")
                     comments.Add(newComment);
-                }
             }
 
             return comments;
         }
 
         //TODO discuss this
-        public IEnumerable<Comment> EnumerateCommentsAsync() {
-            return GetComments().ToEnumerable();
-        }
+        public IEnumerable<Comment> EnumerateCommentsAsync() => GetComments().ToEnumerable();
 
         /// <summary>
         /// Enumerate more comments.
@@ -390,21 +291,15 @@ namespace RedditSharp.Things
         {
             return Observable.Create<Comment>(async obs =>
             {
-
-
-                var url = string.Format(GetCommentsUrl, Id);
-                var request = WebAgent.CreateGet(url);
-                var response = await WebAgent.GetResponseAsync(request);
-                var data = await response.Content.ReadAsStringAsync();
-                var json = JArray.Parse(data);
+                var json = await WebAgent.Get(GetCommentsUrl).ConfigureAwait(false);
                 var postJson = json.Last()["data"]["children"];
                 More moreComments = null;
                 foreach (var comment in postJson)
                 {
-                    Comment newComment = new Comment().Init(Reddit, comment, WebAgent, this);
+                    Comment newComment = new Comment(Reddit, comment, this);
                     if (newComment.Kind == "more")
                     {
-                        moreComments = new More().Init(Reddit, comment, WebAgent);
+                        moreComments = new More(Reddit, comment);
                     }
                     else
                     {
@@ -415,22 +310,24 @@ namespace RedditSharp.Things
 
                 if (moreComments != null)
                 {
-                    IEnumerator<Thing> things = (await moreComments.GetThingsAsync()).GetEnumerator();
+                    var baseThings = await moreComments.GetThingsAsync().ConfigureAwait(false);
+                    IEnumerator<Thing> things = baseThings.GetEnumerator();
                     things.MoveNext();
                     Thing currentThing = null;
                     while (currentThing != things.Current)
                     {
-                        currentThing = things.Current;
-                        if (things.Current is Comment)
+                        var comment = things.Current as Comment;
+                        var more = things.Current as More;
+                        if (comment != null)
                         {
-                            Comment next = ((Comment)things.Current).PopulateComments(things);
+                            Comment next = comment.PopulateComments(things);
                             obs.OnNext(next);
                         }
-                        if (things.Current is More)
+                        if (more != null)
                         {
-                            More more = (More)things.Current;
                             if (more.ParentId != FullName) break;
-                            things = (await more.GetThingsAsync()).GetEnumerator();
+                            var moreThings = await more.GetThingsAsync().ConfigureAwait(false);
+                            things = moreThings.GetEnumerator();
                             things.MoveNext();
                         }
                     }

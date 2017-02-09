@@ -12,37 +12,37 @@ namespace RedditSharp
         /// May revise.
         /// </summary>
         [JsonProperty("may_revise")]
-        public string MayRevise { get; set; }
+        public string MayRevise { get; }
 
         /// <summary>
         /// Revision date.
         /// </summary>
         [JsonProperty("revision_date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? RevisionDate { get; set; }
+        public DateTime? RevisionDate { get; }
 
         /// <summary>
         /// Content of the page.
         /// </summary>
         [JsonProperty("content_html")]
-        public string HtmlContent { get; set; }
+        public string HtmlContent { get; }
 
         /// <summary>
         /// Markdown content of the page.
         /// </summary>
         [JsonProperty("content_md")]
-        public string MarkdownContent { get; set; }
+        public string MarkdownContent { get; }
 
         /// <summary>
         /// Lst revision by this user.
         /// </summary>
         [JsonIgnore]
-        public RedditUser RevisionBy { get; set; }
+        public RedditUser RevisionBy { get; }
 
-        protected internal WikiPage(Reddit reddit, JToken json, IWebAgent webAgent)
+        protected internal WikiPage(Reddit reddit, JToken json)
         {
-            RevisionBy = new RedditUser().Init(reddit, json["revision_by"], webAgent);
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            RevisionBy = new RedditUser(reddit, json["revision_by"]);
+            reddit.PopulateObject(json, this);
         }
     }
 }

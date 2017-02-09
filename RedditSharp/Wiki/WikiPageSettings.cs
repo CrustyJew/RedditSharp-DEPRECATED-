@@ -9,23 +9,18 @@ namespace RedditSharp
     public class WikiPageSettings
     {
         [JsonProperty("listed")]
-        public bool Listed { get; set; }
+        public bool Listed { get; }
 
         [JsonProperty("permlevel")]
-        public int PermLevel { get; set; }
+        public int PermLevel { get; }
 
         [JsonIgnore]
-        public IEnumerable<RedditUser> Editors { get; set; }
+        public IEnumerable<RedditUser> Editors { get; private set; }
 
-        public WikiPageSettings()
+        protected internal WikiPageSettings(Reddit reddit, JToken json)
         {
-        }
-
-        protected internal WikiPageSettings(Reddit reddit, JToken json, IWebAgent webAgent)
-        {
-            var editors = json["editors"].ToArray();
-            Editors = editors.Select(x => new RedditUser().Init(reddit, x, webAgent));
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            Editors = json["editors"].Select(x => new RedditUser(reddit, x)).ToArray();
+            reddit.PopulateObject(json, this);
         }
     }
 }

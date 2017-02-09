@@ -11,108 +11,107 @@ namespace RedditSharp.Multi
     /// <summary>
     /// Contains the innner information of the Multi
     /// </summary>
-    public class MData
+    public class MData : RedditObject
     {
         /// <summary>
         /// Can the Multi be edited
         /// </summary>
         [JsonProperty("can_edit")]
-        public bool CanEdit { get; set; }
+        public bool CanEdit { get; }
 
         /// <summary>
         /// Display name for the Multi
         /// </summary>
         [JsonProperty("display_name")]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; }
 
         /// <summary>
         /// Actual name of the Multi
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Description of the Multi in HTML format
         /// </summary>
         [JsonProperty("description_html")]
-        public string DescriptionHTML { get; set; }
+        public string DescriptionHTML { get; }
 
         /// <summary>
         /// When the multi was created
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; set; }
+        public DateTime? Created { get; }
 
         /// <summary>
         /// Where the multi was copied from if it was copied
         /// </summary>
         [JsonProperty("copied_from")]
-        public string CopiedFrom { get; set; }
+        public string CopiedFrom { get; }
 
         /// <summary>
-        /// URL of the icon to use. 
+        /// URL of the icon to use.
         /// </summary>
         [JsonProperty("icon_url")]
-        public string IconUrl { get; set; }
+        public string IconUrl { get; }
 
         /// <summary>
         /// List of the Subreddits in the multi
         /// </summary>
         [JsonIgnore]
-        public List<MultiSubs> Subreddits { get; set; }
+        public List<MultiSubs> Subreddits { get; private set; }
 
         /// <summary>
         /// When the multi was created in UTC
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? CreatedUTC { get; set; }
+        public DateTime? CreatedUTC { get; }
 
         /// <summary>
         /// Hex Code of the color for the multi
         /// </summary>
         [JsonProperty("key_color")]
-        public string KeyColor { get; set; }
+        public string KeyColor { get; }
 
         /// <summary>
         /// Visiblity property for the Multi
         /// </summary>
         [JsonProperty("visibility")]
-        public string Visibility { get; set; }
+        public string Visibility { get; }
 
         /// <summary>
         /// Name of the icon corresponding to the URL
         /// </summary>
         [JsonProperty("icon_name")]
-        public string IconName { get; set; }
+        public string IconName { get; }
 
         /// <summary>
         /// Weighting scheme of the Multi
         /// </summary>
         [JsonProperty("weighting_scheme")]
-        public string WeightingScheme { get; set; }
+        public string WeightingScheme { get; }
 
         /// <summary>
         /// Path to navigate to the multi
         /// </summary>
         [JsonProperty("path")]
-        public string Path { get; set; }
+        public string Path { get; }
 
         /// <summary>
         /// Description of the multi in text format.
         /// </summary>
         [JsonProperty("description_md")]
-        public string DescriptionMD { get; set; }
+        public string DescriptionMD { get; }
 
         /// <summary>
         /// Creates a new mData implementation
         /// </summary>
         /// <param name="reddit">Reddit object to use</param>
         /// <param name="json">Token to use with parameters for the different members</param>
-        /// <param name="webAgent">Web Agent to use</param>
         /// <param name="subs">Whether or not subs exist</param>
-        protected internal MData(Reddit reddit, JToken json, IWebAgent webAgent, bool subs)
+        protected internal MData(Reddit reddit, JToken json, bool subs) : base(reddit)
         {
             Subreddits = new List<MultiSubs>();
             if (subs)
@@ -120,18 +119,11 @@ namespace RedditSharp.Multi
                 //Get Subreddit List
                 for (int i = 0; i < json["subreddits"].Count(); i++)
                 {
-                    Subreddits.Add(new MultiSubs(reddit, json["subreddits"][i], webAgent));
+                    Subreddits.Add(new MultiSubs(reddit, json["subreddits"][i]));
                 }
             }
-            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
+            reddit.PopulateObject(json, this);
         }
 
-        /// <summary>
-        /// Generic Constructor
-        /// </summary>
-        public MData()
-        {
-
-        }
     }
 }

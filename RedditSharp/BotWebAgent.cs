@@ -42,7 +42,7 @@ namespace RedditSharp
         /// <inheritdoc/>
         public override HttpRequestMessage CreateRequest(string url, string method)
         {
-            //add 5 minutes for clock skew to ensure requests succeed 
+            //add 5 minutes for clock skew to ensure requests succeed
             if (url != AuthProvider.AccessUrl && DateTime.UtcNow.AddMinutes(5) > TokenValidTo)
             {
                 Task.Run(GetNewTokenAsync).Wait();
@@ -63,7 +63,7 @@ namespace RedditSharp
 
         private async Task GetNewTokenAsync()
         {
-            AccessToken = await TokenProvider.GetOAuthTokenAsync(Username, Password);
+            AccessToken = await TokenProvider.GetOAuthTokenAsync(Username, Password).ConfigureAwait(false);
             TokenValidTo = DateTime.UtcNow.AddHours(1);
         }
     }

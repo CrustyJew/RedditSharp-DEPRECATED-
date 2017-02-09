@@ -13,7 +13,7 @@ namespace RedditSharp
         private const string ToolBoxUserNotesWiki = "/r/{0}/wiki/usernotes";
         public static async Task<IEnumerable<TBUserNote>> GetUserNotesAsync(IWebAgent webAgent, string subName)
         {
-            var response = await webAgent.Get(string.Format(ToolBoxUserNotesWiki, subName));
+            var response = await webAgent.Get(string.Format(ToolBoxUserNotesWiki, subName)).ConfigureAwait(false);
             int version = response["ver"].Value<int>();
 
             string[] mods = response["constants"]["users"].Values<string>().ToArray();

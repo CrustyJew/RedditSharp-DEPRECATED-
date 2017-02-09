@@ -278,7 +278,7 @@ namespace RedditSharp
                 spam_selfposts = SpamFilter == null ? null : SpamFilter.SelfPostStrength.ToString().ToLowerInvariant(),
                 spam_comments = SpamFilter == null ? null : SpamFilter.CommentStrength.ToString().ToLowerInvariant(),
                 api_type = "json"
-            }, "header-title", HeaderHoverText);
+            }, "header-title", HeaderHoverText).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace RedditSharp
             {
                 uh = Reddit.User.Modhash,
                 r = Subreddit.Name
-            });
+            }).ConfigureAwait(false);
         }
 
         private SpamFilterStrength GetSpamFilterStrength(string rawValue)

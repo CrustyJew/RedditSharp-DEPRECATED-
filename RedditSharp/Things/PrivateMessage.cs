@@ -156,7 +156,7 @@ namespace RedditSharp.Things
                 id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace RedditSharp.Things
                 text = message,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

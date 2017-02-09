@@ -305,13 +305,13 @@ namespace RedditSharp.Things
                 throw new Exception("No user logged in.");
             try
             {
-                var json = await WebAgent.Get(GetSettingsUrl);
+                var json = await WebAgent.Get(GetSettingsUrl).ConfigureAwait(false);
                 return new SubredditSettings(this, json);
             }
             catch // TODO: More specific catch
             {
                 // Do it unauthed
-                var json = await WebAgent.Get(GetReducedSettingsUrl);
+                var json = await WebAgent.Get(GetReducedSettingsUrl).ConfigureAwait(false);
                 return new SubredditSettings(this, json);
             }
         }
@@ -326,7 +326,7 @@ namespace RedditSharp.Things
                 name = Reddit.User.Name,
                 r = Name,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             var choices = json["choices"];
             var list = new List<UserFlairTemplate>();
             foreach (var choice in choices)
@@ -471,7 +471,7 @@ namespace RedditSharp.Things
                 action = "unsub",
                 sr = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             //Dispose and discard
         }
 
@@ -486,7 +486,7 @@ namespace RedditSharp.Things
                 flair_type = flairType == FlairType.Link ? "LINK_FLAIR" : "USER_FLAIR",
                 uh = Reddit.User.Modhash,
                 r = Name
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -507,7 +507,7 @@ namespace RedditSharp.Things
                 uh = Reddit.User.Modhash,
                 r = Name,
                 api_type = "json"
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -519,7 +519,7 @@ namespace RedditSharp.Things
         /// <param name="userEditable">set flair user editable</param>
         public async Task<string> GetFlairTextAsync(string user)
         {
-            var json= await WebAgent.Get(FlairListUrl + "?name=" + user);
+            var json= await WebAgent.Get(FlairListUrl + "?name=" + user).ConfigureAwait(false);
             return (string)json["users"][0]["flair_text"];
         }
 
@@ -530,7 +530,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public async Task<string> GetFlairCssClassAsync(string user)
         {
-            var json = await WebAgent.Get(FlairListUrl + "?name=" + user);
+            var json = await WebAgent.Get(FlairListUrl + "?name=" + user).ConfigureAwait(false);
             return (string)json["users"][0]["flair_css_class"];
         }
 
@@ -549,7 +549,7 @@ namespace RedditSharp.Things
                 uh = Reddit.User.Modhash,
                 r = Name,
                 name = user
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -574,8 +574,8 @@ namespace RedditSharp.Things
             });
             formData.AddFile("file", "foo.png", file, imageType == ImageType.PNG ? "image/png" : "image/jpeg");
             formData.Finish();
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             // TODO: Detect errors
         }
 
@@ -592,7 +592,7 @@ namespace RedditSharp.Things
                 r = Name,
                 type = "moderator",
                 name = user
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -608,7 +608,7 @@ namespace RedditSharp.Things
                 r = Name,
                 type = "moderator",
                 name = user.Name
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -621,7 +621,7 @@ namespace RedditSharp.Things
                 api_type = "json",
                 uh = Reddit.User.Modhash,
                 r = Name
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -637,7 +637,7 @@ namespace RedditSharp.Things
                 r = Name,
                 type = "moderator",
                 id
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -656,7 +656,7 @@ namespace RedditSharp.Things
                 r = Name,
                 type = "contributor",
                 name = user
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -671,7 +671,7 @@ namespace RedditSharp.Things
                 r = Name,
                 type = "contributor",
                 id
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -696,7 +696,7 @@ namespace RedditSharp.Things
                 note = note,
                 duration = duration <= 0 ? "" : duration.ToString(),
                 ban_message = message
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -721,14 +721,14 @@ namespace RedditSharp.Things
                 container = FullName,
                 executed = "removed",
                 name = user,
-            });
+            }).ConfigureAwait(false);
         }
 
         private async Task<Post> SubmitAsync(SubmitData data)
         {
             if (Reddit.User == null)
                 throw new RedditException("No user logged in.");
-            var json = await WebAgent.Post(SubmitLinkUrl, data);
+            var json = await WebAgent.Post(SubmitLinkUrl, data).ConfigureAwait(false);
 
             ICaptchaSolver solver = Reddit.CaptchaSolver;
             if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "BAD_CAPTCHA"
@@ -743,7 +743,7 @@ namespace RedditSharp.Things
                     throw new CaptchaFailedException("Captcha verification failed when submitting " + data.Kind + " post");
 
                 data.Captcha = captchaResponse.Answer;
-                return await SubmitAsync(data);
+                return await SubmitAsync(data).ConfigureAwait(false);
             }
             else if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "ALREADY_SUB")
             {
@@ -768,7 +768,7 @@ namespace RedditSharp.Things
                         Resubmit = resubmit,
                         Iden = captchaId,
                         Captcha = captchaAnswer
-                    });
+                    }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -786,7 +786,7 @@ namespace RedditSharp.Things
                         Text = text,
                         Iden = captchaId,
                         Captcha = captchaAnswer
-                    });
+                    }).ConfigureAwait(false);
         }
 
         /// <summary>

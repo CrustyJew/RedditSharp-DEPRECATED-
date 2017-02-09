@@ -26,7 +26,7 @@ namespace RedditSharp.Things
     public async Task<List<Thing>> GetThingsAsync()
     {
       var url = string.Format(MoreUrl, ParentId, string.Join(",", Children));
-      var json = await WebAgent.Get(url);
+      var json = await WebAgent.Get(url).ConfigureAwait(false);
       if (json["errors"].Count() != 0)
         throw new AuthenticationException("Incorrect login.");
       var moreJson = json["data"]["things"];

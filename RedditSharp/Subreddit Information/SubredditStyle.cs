@@ -55,7 +55,7 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash,
                 api_type = "json",
                 r = Subreddit.Name
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -79,8 +79,8 @@ namespace RedditSharp
                 });
             formData.AddFile("file", "foo.png", file, imageType == ImageType.PNG ? "image/png" : "image/jpeg");
             formData.Finish();
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             // TODO: Detect errors
         }
     }

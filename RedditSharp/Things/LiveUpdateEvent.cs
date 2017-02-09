@@ -117,11 +117,10 @@ namespace RedditSharp.Things
                 id = update.FullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
-
-                return false;
+            return false;
         }
 
         /// <summary>
@@ -150,12 +149,12 @@ namespace RedditSharp.Things
             var request = WebAgent.CreateRequest(EditUrl, "POST");
             WebAgent.WritePostBody(request, expando);
 
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
                 return false;
 
-            var data = await response.Content.ReadAsStringAsync();
+            var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             JToken json = JToken.Parse(data);
             if (json["json"].ToString().Contains("\"errors\": []"))
             {
@@ -213,7 +212,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public async Task<IEnumerable<LiveUpdateEventUser>> GetInvitedContributorsAsync()
         {
-            var json = await WebAgent.Get(ContributorsUrl);
+            var json = await WebAgent.Get(ContributorsUrl).ConfigureAwait(false);
             var users = json[1]["data"]["children"];
             return users.Select(u => JsonConvert.DeserializeObject(u.ToString())).Cast<LiveUpdateEventUser>();
         }
@@ -237,7 +236,7 @@ namespace RedditSharp.Things
                 type = "liveupdate_contributor_invite",
                 uh = Reddit.User.Modhash,
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -265,7 +264,7 @@ namespace RedditSharp.Things
                 id = user.Kind + "_" + user.Id,
                 uh = Reddit.User.Modhash
             });
-            var response  = await WebAgent.GetResponseAsync(request);
+            var response  = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
                 return true;
@@ -279,8 +278,8 @@ namespace RedditSharp.Things
         /// <param name="name">reddit username.</param>
         public async Task<bool> RemoveContributorAsync(string userName)
         {
-            var user = await Reddit.GetUserAsync(userName);
-            return await RemoveContributorAsync(userName);
+            var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
+            return await RemoveContributorAsync(userName).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -319,7 +318,7 @@ namespace RedditSharp.Things
                 uh = Reddit.User.Modhash
             });
 
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -342,7 +341,7 @@ namespace RedditSharp.Things
                 id = user.Kind + "_" + user.Id,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -355,8 +354,8 @@ namespace RedditSharp.Things
         /// <param name="name">reddit username</param>
         public async Task<bool> RevokeContributorInviteAsync(string userName)
         {
-            var user = await Reddit.GetUserAsync(userName);
-            return await RevokeContributorInviteAsync(user);
+            var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
+            return await RevokeContributorInviteAsync(user).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -366,7 +365,7 @@ namespace RedditSharp.Things
         /// <param name="permissions">Reddit user</param>
         public async Task<bool> SetContributorPermissionsAsync(RedditUser user, LiveUpdateEventPermission permissions)
         {
-            return await SetContributorPermissions(user.Name, permissions);
+            return await SetContributorPermissions(user.Name, permissions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -387,7 +386,7 @@ namespace RedditSharp.Things
                 permissions = GetPermissionsString(permissions),
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -401,7 +400,7 @@ namespace RedditSharp.Things
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetInvitedContributorPermissionsAsync(RedditUser user, LiveUpdateEventPermission permissions)
         {
-            return await SetInvitedContributorPermissionsAsync(user.Name, permissions);
+            return await SetInvitedContributorPermissionsAsync(user.Name, permissions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -422,7 +421,7 @@ namespace RedditSharp.Things
                 permissions = GetPermissionsString(permissions),
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -435,7 +434,7 @@ namespace RedditSharp.Things
         /// <param name="update">Update to strike</param>
         public async Task<bool> StrikeUpdateAsync(LiveUpdate update)
         {
-            return await StrikeUpdateAsync(update.FullName);
+            return await StrikeUpdateAsync(update.FullName).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -453,7 +452,7 @@ namespace RedditSharp.Things
                 id = fullName,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 
@@ -475,7 +474,7 @@ namespace RedditSharp.Things
                 body = markdown,
                 uh = Reddit.User.Modhash
             });
-            var response = await WebAgent.GetResponseAsync(request);
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
                 return true;
 

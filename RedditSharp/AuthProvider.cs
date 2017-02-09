@@ -118,7 +118,7 @@ namespace RedditSharp
                 });
             }
 
-            var json = await _webAgent.ExecuteRequestAsync(request);
+            var json = await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
                 if (json["refresh_token"] != null)
@@ -152,7 +152,7 @@ namespace RedditSharp
                 redirect_uri = _redirectUri
             });
 
-            var json = await _webAgent.ExecuteRequestAsync(request);
+            var json = await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
                 if (json["refresh_token"] != null)
@@ -181,10 +181,7 @@ namespace RedditSharp
                 token = token,
                 token_type = tokenType
             });
-
-
-            var data = await _webAgent.ExecuteRequestAsync(request);
-
+            await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>

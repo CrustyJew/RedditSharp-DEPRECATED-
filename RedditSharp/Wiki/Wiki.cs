@@ -32,7 +32,7 @@ namespace RedditSharp
         /// </summary>
         public async Task<IEnumerable<string>> GetPageNamesAsync()
         {
-            var json = await WebAgent.Get(GetWikiPagesUrl);
+            var json = await WebAgent.Get(GetWikiPagesUrl).ConfigureAwait(false);
             return json["data"].Values<string>();
         }
 
@@ -54,7 +54,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<WikiPage> GetPageAsync(string page, string version = null)
         {
-            var json = await WebAgent.Get(GetWikiPageUrl(page, version));
+            var json = await WebAgent.Get(GetWikiPageUrl(page, version)).ConfigureAwait(false);
             return new WikiPage(Reddit, json["data"]);
         }
 
@@ -67,7 +67,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<WikiPageSettings> GetPageSettingsAsync(string name)
         {
-            var json = await WebAgent.Get(WikiPageSettingsUrl(name));
+            var json = await WebAgent.Get(WikiPageSettingsUrl(name)).ConfigureAwait(false);
             return new WikiPageSettings(Reddit, json["data"]);
         }
 
@@ -84,7 +84,7 @@ namespace RedditSharp
                 permlevel = settings.PermLevel,
                 listed = settings.Listed,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
         #endregion
 
@@ -135,7 +135,7 @@ namespace RedditSharp
                 addParams.Add("reason");
                 addParams.Add(reason);
             }
-            await WebAgent.Post(WikiPageEditUrl, param, addParams.ToArray());
+            await WebAgent.Post(WikiPageEditUrl, param, addParams.ToArray()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace RedditSharp
                 page = page,
                 revision = revision,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace RedditSharp
                 page = page,
                 revision = revision,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace RedditSharp
                 page = page,
                 username = username,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
     }

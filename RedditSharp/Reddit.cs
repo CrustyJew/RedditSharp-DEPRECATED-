@@ -164,7 +164,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<RedditUser> GetUserAsync(string name)
         {
-            var json = await WebAgent.Get(string.Format(UserInfoUrl, name));
+            var json = await WebAgent.Get(string.Format(UserInfoUrl, name)).ConfigureAwait(false);
             return new RedditUser(this, json);
         }
 
@@ -175,7 +175,7 @@ namespace RedditSharp
         /// </summary>
         public async Task InitOrUpdateUserAsync()
         {
-            var json = await WebAgent.Get(string.IsNullOrEmpty(WebAgent.AccessToken) ? MeUrl : OAuthMeUrl);
+            var json = await WebAgent.Get(string.IsNullOrEmpty(WebAgent.AccessToken) ? MeUrl : OAuthMeUrl).ConfigureAwait(false);
             User = new AuthenticatedUser(this, json);
         }
 
@@ -187,7 +187,7 @@ namespace RedditSharp
         public async Task<Subreddit> GetSubredditAsync(string name)
         {
             name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
-            return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
+            return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace RedditSharp
         {
             if (!String.IsNullOrEmpty(WebAgent.AccessToken) && uri.AbsoluteUri.StartsWith("https://www.reddit.com"))
                 uri = new Uri(uri.AbsoluteUri.Replace("https://www.reddit.com", "https://oauth.reddit.com"));
-            return new Post(this, await GetTokenAsync(uri));
+            return new Post(this, await GetTokenAsync(uri).ConfigureAwait(false));
         }
 
         /// <summary>
@@ -259,14 +259,14 @@ namespace RedditSharp
                 description = description,
                 resources = resources,
                 nsfw = nsfw
-            });
+            }).ConfigureAwait(false);
 
             if (json["json"]["errors"].Any())
                 throw new Exception(json["json"]["errors"][0][0].ToString());
 
             var id = json["json"]["data"]["id"].ToString();
 
-            return await GetLiveEvent(new Uri(String.Format(GetLiveEventUrl, id)));
+            return await GetLiveEvent(new Uri(String.Format(GetLiveEventUrl, id))).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace RedditSharp
             if (!uri.AbsoluteUri.EndsWith("about"))
                 uri = new Uri(uri.AbsoluteUri + "/about");
 
-            var token = await GetTokenAsync(uri);
+            var token = await GetTokenAsync(uri).ConfigureAwait(false);
             return new LiveUpdateEvent(this, token);
         }
 
@@ -302,8 +302,8 @@ namespace RedditSharp
 
             if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
-                var subReddit =await GetSubredditAsync(fromSubReddit);
-                var modNameList = (await subReddit.GetModeratorsAsync()).Select(b => b.Name).ToList();
+                var subReddit =await GetSubredditAsync(fromSubReddit).ConfigureAwait(false);
+                var modNameList = (await subReddit.GetModeratorsAsync().ConfigureAwait(false)).Select(b => b.Name).ToList();
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(
@@ -323,7 +323,7 @@ namespace RedditSharp
                 uh = User.Modhash,
                 iden = captchaId,
                 captcha = captchaAnswer
-            });
+            }).ConfigureAwait(false);
 
             ICaptchaSolver solver = CaptchaSolver; // Prevent race condition
 
@@ -333,7 +333,7 @@ namespace RedditSharp
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(captchaId));
 
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel
-                    await ComposePrivateMessageAsync(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer);
+                    await ComposePrivateMessageAsync(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer).ConfigureAwait(false);
             }
         }
 
@@ -353,7 +353,7 @@ namespace RedditSharp
                 passwd = passwd,
                 passwd2 = passwd,
                 user = userName
-            });
+            }).ConfigureAwait(false);
             return new AuthenticatedUser(this, json);
             // TODO: Error
         }
@@ -365,7 +365,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<Thing> GetThingByFullnameAsync(string fullname)
         {
-            var json = await WebAgent.Get(string.Format(GetThingUrl, fullname));
+            var json = await WebAgent.Get(string.Format(GetThingUrl, fullname)).ConfigureAwait(false);
             return Thing.Parse(this, json["data"]["children"][0]);
         }
 
@@ -395,7 +395,7 @@ namespace RedditSharp
         public async Task<Comment> GetCommentAsync(Uri uri)
         {
             var url = string.Format(GetPostUrl, uri.AbsoluteUri);
-            var json = await WebAgent.Get(url);
+            var json = await WebAgent.Get(url).ConfigureAwait(false);
             var sender = new Post(this, json[0]["data"]["children"][0]);
             return new Comment(this, json[1]["data"]["children"][0], sender);
         }
@@ -489,7 +489,7 @@ namespace RedditSharp
 
         protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
-            var json = await WebAgent.Get(url);
+            var json = await WebAgent.Get(url).ConfigureAwait(false);
             var ret = Thing.Parse(this, json);
             return (T)ret;
         }

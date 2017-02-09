@@ -220,7 +220,7 @@ namespace RedditSharp
                     url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
                 }
 
-                var json = await Listing.WebAgent.Get(url);
+                var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listing.");
                 Parse(json);
@@ -268,7 +268,7 @@ namespace RedditSharp
                     url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
                 }
 
-                var json = await Listing.WebAgent.Get(url);
+                var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
                 Parse(json);
@@ -364,7 +364,7 @@ namespace RedditSharp
                     }
 
                     // Get the next page
-                    await FetchNextPageAsync();
+                    await FetchNextPageAsync().ConfigureAwait(false);
                     CurrentPageIndex = 0;
 
                     if (CurrentPage.Length == 0)
@@ -391,7 +391,7 @@ namespace RedditSharp
                         // Get the next page
                         try
                         {
-                            await FetchNextPageAsync();
+                            await FetchNextPageAsync().ConfigureAwait(false);
                         }
                         catch (Exception ex)
                         {

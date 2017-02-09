@@ -153,7 +153,7 @@ namespace RedditSharp.Things
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

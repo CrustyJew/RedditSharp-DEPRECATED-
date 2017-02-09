@@ -99,7 +99,9 @@ namespace RedditSharp.Things
         [JsonIgnore]
         //TODO discuss
         public RedditUser TargetAuthor =>
-          Task.Run(async () => { return await Reddit.GetUserAsync(TargetAuthorName); }).Result;
+          Task.Run(async () => {
+              return await Reddit.GetUserAsync(TargetAuthorName).ConfigureAwait(false);
+            }).Result;
 
         /// <summary>
         /// Item against which this moderation action was performed.
@@ -107,7 +109,9 @@ namespace RedditSharp.Things
         [JsonIgnore]
         //TODO discuss
         public Thing TargetThing =>
-          Task.Run(async () => { return await Reddit.GetThingByFullnameAsync(TargetThingFullname); }).Result ;
+          Task.Run(async () => {
+              return await Reddit.GetThingByFullnameAsync(TargetThingFullname).ConfigureAwait(false);
+            }).Result ;
 
         protected override JToken GetJsonData(JToken json) => json["data"];
    }

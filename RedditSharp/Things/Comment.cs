@@ -199,7 +199,7 @@ namespace RedditSharp.Things
                     uh = Reddit.User.Modhash,
                     api_type = "json"
                     //r = Subreddit
-                });
+                }).ConfigureAwait(false);
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
                 return new Comment(Reddit, json["json"]["data"]["things"][0], this);
@@ -225,7 +225,7 @@ namespace RedditSharp.Things
                 text = newText,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
             else
@@ -240,7 +240,7 @@ namespace RedditSharp.Things
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace RedditSharp.Things
                 id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

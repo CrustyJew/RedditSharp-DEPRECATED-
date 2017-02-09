@@ -31,7 +31,7 @@ namespace RedditSharp.Multi
         /// <returns>A List of MultiData containing the authenticated user's Multis</returns>
         public async Task<IList<MultiData>> GetCurrentUsersMultisAsync()
         {
-            var json = await WebAgent.Get(GetCurrentUserMultiUrl);
+            var json = await WebAgent.Get(GetCurrentUserMultiUrl).ConfigureAwait(false);
             return json.Select(m => new MultiData(Reddit, m)).ToList();
         }
 
@@ -42,7 +42,7 @@ namespace RedditSharp.Multi
         /// <returns>A list of MultiData containing the public Multis of the searched user</returns>
         public async Task<IList<MultiData>> GetPublicUserMultisAsync(string username)
         {
-            var json = await WebAgent.Get(GetPublicUserMultiUrl(username));
+            var json = await WebAgent.Get(GetPublicUserMultiUrl(username)).ConfigureAwait(false);
             return json.Select(m => new MultiData(Reddit, m)).ToList();
         }
 
@@ -53,7 +53,7 @@ namespace RedditSharp.Multi
         /// <returns>A MultiData containing the information for the found Multi</returns>
         public async Task<MultiData> GetMultiByPathAsync(string path)
         {
-            var json = await WebAgent.Get(GetMultiPathUrl(path));
+            var json = await WebAgent.Get(GetMultiPathUrl(path)).ConfigureAwait(false);
             return new MultiData(Reddit, json);
         }
 
@@ -64,7 +64,7 @@ namespace RedditSharp.Multi
         /// <returns>A MultiData containing the description for the found Multi</returns>
         public async Task<MultiData> GetMultiDescriptionAsync(string path)
         {
-            var json = await WebAgent.Get(GetMultiDescriptionPathUrl(path));
+            var json = await WebAgent.Get(GetMultiDescriptionPathUrl(path)).ConfigureAwait(false);
             return new MultiData(Reddit, json, false);
         }
 
@@ -76,7 +76,7 @@ namespace RedditSharp.Multi
         /// <returns>A MultiSubs element containing the information for the searched subreddit</returns>
         public async Task<MultiSubs> GetSubInformationAsync(string path, string subreddit)
         {
-            var json = await WebAgent.Get(GetMultiSubUrl(path, subreddit));
+            var json = await WebAgent.Get(GetMultiSubUrl(path, subreddit)).ConfigureAwait(false);
             return new MultiSubs(Reddit, json);
         }
 
@@ -99,7 +99,7 @@ namespace RedditSharp.Multi
                 from = pathFrom,
                 to = pathTo,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -126,8 +126,8 @@ namespace RedditSharp.Multi
                 uh = Reddit.User.Modhash
             });
 
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -152,8 +152,8 @@ namespace RedditSharp.Multi
                     uh = Reddit.User.Modhash
                 });
 
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace RedditSharp.Multi
                 from = pathFrom,
                 to = pathTo,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -198,8 +198,8 @@ namespace RedditSharp.Multi
                     uh = Reddit.User.Modhash
                 });
 
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -220,8 +220,8 @@ namespace RedditSharp.Multi
                 uh = Reddit.User.Modhash
             });
 
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace RedditSharp.Multi
                     model = modelData,
                     multipath = path,
                     uh = Reddit.User.Modhash
-                });
+                }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -306,8 +306,8 @@ namespace RedditSharp.Multi
                 uh = Reddit.User.Modhash
             });
 
-            var response = await WebAgent.GetResponseAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
     }
 }

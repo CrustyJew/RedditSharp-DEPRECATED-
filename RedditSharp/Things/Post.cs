@@ -115,7 +115,9 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonIgnore]
         public Subreddit Subreddit =>
-          Task.Run(async () => { return await Reddit.GetSubredditAsync("/r/" + SubredditName); }).Result;
+          Task.Run(async () => {
+              return await Reddit.GetSubredditAsync("/r/" + SubredditName).ConfigureAwait(false);
+            }).Result;
 
         /// <summary>
         /// Post uri.
@@ -139,7 +141,7 @@ namespace RedditSharp.Things
                 thing_id = FullName,
                 uh = Reddit.User.Modhash,
                 api_type = "json"
-            });
+            }).ConfigureAwait(false);
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
             return new Comment(Reddit, json["json"]["data"]["things"][0], this);
@@ -150,7 +152,8 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var modNameList = (await this.Subreddit.GetModeratorsAsync()).Select(b => b.Name).ToList();
+            var mods = await Subreddit.GetModeratorsAsync().ConfigureAwait(false);
+            var modNameList = mods.Select(b => b.Name).ToList();
 
             if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
                 throw new AuthenticationException(
@@ -164,7 +167,7 @@ namespace RedditSharp.Things
                 id = FullName,
                 state = value,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -216,7 +219,7 @@ namespace RedditSharp.Things
                 text = newText,
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
             else
@@ -246,7 +249,7 @@ namespace RedditSharp.Things
                 name = Reddit.User.Name,
                 text = flairText,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             LinkFlairText = flairText;
         }
 
@@ -263,7 +266,7 @@ namespace RedditSharp.Things
                 var query = WebUtility.UrlEncode("limit="+limit.Value.ToString());
                 url = string.Format("{0}?{1}", url, query);
             }
-            var json = await WebAgent.Get(url);
+            var json = await WebAgent.Get(url).ConfigureAwait(false);
             var postJson = json.Last()["data"]["children"];
 
             var comments = new List<Comment>();
@@ -288,7 +291,7 @@ namespace RedditSharp.Things
         {
             return Observable.Create<Comment>(async obs =>
             {
-                var json = await WebAgent.Get(GetCommentsUrl);
+                var json = await WebAgent.Get(GetCommentsUrl).ConfigureAwait(false);
                 var postJson = json.Last()["data"]["children"];
                 More moreComments = null;
                 foreach (var comment in postJson)
@@ -307,22 +310,24 @@ namespace RedditSharp.Things
 
                 if (moreComments != null)
                 {
-                    IEnumerator<Thing> things = (await moreComments.GetThingsAsync()).GetEnumerator();
+                    var baseThings = await moreComments.GetThingsAsync().ConfigureAwait(false);
+                    IEnumerator<Thing> things = baseThings.GetEnumerator();
                     things.MoveNext();
                     Thing currentThing = null;
                     while (currentThing != things.Current)
                     {
-                        currentThing = things.Current;
-                        if (things.Current is Comment)
+                        var comment = things.Current as Comment;
+                        var more = things.Current as More;
+                        if (comment != null)
                         {
-                            Comment next = ((Comment)things.Current).PopulateComments(things);
+                            Comment next = comment.PopulateComments(things);
                             obs.OnNext(next);
                         }
-                        if (things.Current is More)
+                        if (more != null)
                         {
-                            More more = (More)things.Current;
                             if (more.ParentId != FullName) break;
-                            things = (await more.GetThingsAsync()).GetEnumerator();
+                            var moreThings = await more.GetThingsAsync().ConfigureAwait(false);
+                            things = moreThings.GetEnumerator();
                             things.MoveNext();
                         }
                     }

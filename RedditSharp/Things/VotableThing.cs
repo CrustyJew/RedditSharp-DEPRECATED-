@@ -209,7 +209,7 @@ namespace RedditSharp.Things
             }
             set
             {
-                Task.Run(async () => { await SetVoteAsync(value); });
+                Task.Run(async () => { await SetVoteAsync(value).ConfigureAwait(false); });
             }
         }
         /// <summary>
@@ -242,7 +242,7 @@ namespace RedditSharp.Things
                 dir = (int)type,
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
 
             if (Liked == true) Upvotes--;
             if (Liked == false) Downvotes--;
@@ -264,7 +264,7 @@ namespace RedditSharp.Things
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             Saved = true;
         }
 
@@ -277,7 +277,7 @@ namespace RedditSharp.Things
             {
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             Saved = false;
         }
 
@@ -292,7 +292,7 @@ namespace RedditSharp.Things
                 dir = 0,
                 id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace RedditSharp.Things
                 other_reason = otherReason ?? "",
                 thing_id = FullName,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -360,7 +360,7 @@ namespace RedditSharp.Things
                 how,
                 id = Id,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");
         }
@@ -387,7 +387,7 @@ namespace RedditSharp.Things
                 id = FullName,
                 spam = spam,
                 uh = Reddit.User.Modhash
-            });
+            }).ConfigureAwait(false);
         }
 
         public Task DelAsync()

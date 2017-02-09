@@ -12,7 +12,6 @@ namespace RedditSharp
         Task<JToken> Put(string url, object data);
         HttpRequestMessage CreateRequest(string url, string method);
         Task<JToken> ExecuteRequestAsync(HttpRequestMessage request);
-        Task<JToken> CreateAndExecuteRequestAsync(string url);
         Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request);
         void WritePostBody(HttpRequestMessage request, object data, params string[] additionalFields);
     }

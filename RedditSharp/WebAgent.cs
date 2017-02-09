@@ -167,7 +167,7 @@ namespace RedditSharp
             lock (rateLimitLock) {
                 // Note: Do not use ConfigureAwait here, it must be in the same
                 // thread context for the lock to release properly
-                rateLimitTask = Task.Delay(250);
+                rateLimitTask = Task.Delay(msec);
             }
             await rateLimitTask;
             lock (rateLimitLock) {

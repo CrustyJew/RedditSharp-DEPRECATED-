@@ -101,41 +101,41 @@ namespace RedditSharp.Things
         /// <param name="reddit"></param>
         /// <param name="json"></param>
         /// <returns>The "Thing"</returns>
-        public static Thing Parse<T>(Reddit reddit, JToken json) where T : Thing
+        public static T Parse<T>(Reddit reddit, JToken json) where T : Thing
         {
             Thing result = Parse(reddit, json);
             if (result == null)
             {
                 if (typeof(T) == typeof(WikiPageRevision))
                 {
-                    return new WikiPageRevision(reddit, json);
+                    return new WikiPageRevision(reddit, json) as T;
                 }
                 else if (typeof(T) == typeof(ModAction))
                 {
-                    return new ModAction(reddit, json);
+                    return new ModAction(reddit, json) as T;
                 }
                 else if (typeof(T) == typeof(Contributor))
                 {
-                    return new Contributor(reddit, json);
+                    return new Contributor(reddit, json) as T;
                 }
                 else if (typeof(T) == typeof(BannedUser))
                 {
-                    return new BannedUser(reddit, json);
+                    return new BannedUser(reddit, json) as T;
                 }
                 else if (typeof(T) == typeof(More))
                 {
-                    return new More(reddit, json);
+                    return new More(reddit, json) as T;
                 }
                 else if (typeof(T) == typeof(LiveUpdate))
                 {
-                    return new LiveUpdate(reddit, json);
+                    return new LiveUpdate(reddit, json) as T;
                 }
                 else if (typeof(T) == typeof(LiveUpdateEvent))
                 {
-                    return new LiveUpdateEvent(reddit, json);
+                    return new LiveUpdateEvent(reddit, json) as T;
                 }
             }
-            return result;
+            return result as T;
         }
 
         /// <summary>

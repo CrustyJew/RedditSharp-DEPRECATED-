@@ -25,12 +25,6 @@ namespace RedditSharp
         public static string UserAgent { get; set; }
 
         /// <summary>
-        /// It is strongly advised that you leave this enabled. Reddit bans excessive
-        /// requests with extreme predjudice.
-        /// </summary>
-        public static bool EnableRateLimit { get; set; }
-
-        /// <summary>
         /// web protocol "http", "https"
         /// </summary>
         public static string Protocol { get; set; }
@@ -100,18 +94,17 @@ namespace RedditSharp
             get { return _requestsThisBurst; }
         }
 
-
-        static WebAgent()
-        {
+        static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
             UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
             _httpClient = new HttpClient();
         }
-        public WebAgent() {
 
+        public WebAgent() {
         }
+
         /// <summary>
         /// Intializes a WebAgent with a specified access token and sets the default url to the oauth api address
         /// </summary>
@@ -167,7 +160,6 @@ namespace RedditSharp
                 json = JToken.Parse("{'method':'" + response.RequestMessage.Method + "','uri':'" + response.RequestMessage.RequestUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
             }
             return json;
-
         }
 
         /// <summary>
@@ -229,7 +221,6 @@ namespace RedditSharp
         /// <returns></returns>
         public virtual HttpRequestMessage CreateRequest(string url, string method)
         {
-            EnforceRateLimit();
             bool prependDomain;
             // IsWellFormedUristring returns true on Mono for some reason when using a string like "/api/me"
             if (Type.GetType("Mono.Runtime") != null)
@@ -265,7 +256,6 @@ namespace RedditSharp
         /// <returns></returns>
         protected virtual HttpRequestMessage CreateRequest(Uri uri, string method)
         {
-            EnforceRateLimit();
             var request = new HttpRequestMessage();
             request.RequestUri = uri;
             if (IsOAuth())// use OAuth

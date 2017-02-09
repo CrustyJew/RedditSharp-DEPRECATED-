@@ -16,7 +16,7 @@ namespace RedditSharp.Multi
         private string GetPublicUserMultiUrl(string user) => $"/api/multi/user/{user}";
         private string GetMultiPathUrl(string path) => $"/api/multi/{path}";
         private string GetMultiDescriptionPathUrl(string path) => $"/api/multi/{path}/description";
-        private string GetMultiSubUrl(string path, string subredddit) => "/api/multi/{path}/r/{1}";
+        private string GetMultiSubUrl(string path, string subredddit) => $"/api/multi/{path}/r/{1}";
         private const string PostMultiRenameUrl = "/api/multi/rename";
         private string PutSubMultiUrl(string path, string subreddit) => $"/api/multi/{path}/r/{subreddit}";
         private const string CopyMultiUrl = "/api/multi/copy";

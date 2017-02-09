@@ -10,9 +10,7 @@ namespace RedditSharp.Things
         public CreatedThing(Reddit reddit, JToken json) : base(reddit, json) {
         }
 
-        protected override JToken GetJsonData(JToken json) {
-            return json["data"];
-        }
+        protected override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>
         /// DateTime when the item was created.

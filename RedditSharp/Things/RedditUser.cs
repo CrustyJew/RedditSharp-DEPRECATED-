@@ -15,14 +15,12 @@ namespace RedditSharp.Things
         private string LinksUrl => $"/user/{Name}/submitted.json";
         private const string SubscribedSubredditsUrl = "/subreddits/mine.json";
         private string LikedUrl => $"/user/{Name}/liked.json";
-        private string DislikedUrl => "/user/{Name}/disliked.json";
+        private string DislikedUrl => $"/user/{Name}/disliked.json";
         private string SavedUrl => $"/user/{Name}/saved.json";
 
         private const int MAX_LIMIT = 100;
 
-        protected override JToken GetJsonData(JToken json) {
-            return json["name"] == null ? json["data"] : json;
-        }
+        protected override JToken GetJsonData(JToken json) => json["name"] == null ? json["data"] : json;
 
         /// <summary>
         /// Reddit username.
@@ -91,6 +89,14 @@ namespace RedditSharp.Things
         /// </summary>
         public Listing<Subreddit> SubscribedSubreddits => new Listing<Subreddit>(Reddit, SubscribedSubredditsUrl);
 
+        static string QueryString(Sort sort, int limit, FromTime time) =>
+          $"?sort={sort.ToString("g")}&limit={limit}&t={time.ToString("g")}";
+
+        static void CheckRange(int limit, int max_limit) {
+            if ((limit < 1) || (limit > max_limit))
+                throw new ArgumentOutOfRangeException(nameof(limit), $"Valid range: [1, {max_limit}]");
+        }
+
         /// <summary>
         /// Get a listing of comments and posts from the user sorted by <paramref name="sorting"/>, from time <paramref name="fromTime"/>
         /// and limited to <paramref name="limit"/>.
@@ -101,11 +107,8 @@ namespace RedditSharp.Things
         /// <returns>The listing of comments requested.</returns>
         public Listing<VotableThing> GetOverview(Sort sorting = Sort.New, int limit = 25, FromTime fromTime = FromTime.All)
         {
-            if ((limit < 1) || (limit > MAX_LIMIT))
-                throw new ArgumentOutOfRangeException("limit", "Valid range: [1," + MAX_LIMIT + "]");
-            string overviewUrl = string.Format(OverviewUrl, Name);
-            overviewUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
-
+            CheckRange(limit, MAX_LIMIT);
+            string overviewUrl = OverviewUrl + QueryString(sorting, limit, fromTime);
             return new Listing<VotableThing>(Reddit, overviewUrl);
         }
 
@@ -119,11 +122,8 @@ namespace RedditSharp.Things
         /// <returns>The listing of comments requested.</returns>
         public Listing<Comment> GetComments(Sort sorting = Sort.New, int limit = 25, FromTime fromTime = FromTime.All)
         {
-            if ((limit < 1) || (limit > MAX_LIMIT))
-                throw new ArgumentOutOfRangeException("limit", "Valid range: [1," + MAX_LIMIT + "]");
-            string commentsUrl = string.Format(CommentsUrl, Name);
-            commentsUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
-
+            CheckRange(limit, MAX_LIMIT);
+            string commentsUrl = CommentsUrl + QueryString(sorting, limit, fromTime);
             return new Listing<Comment>(Reddit, commentsUrl);
         }
 
@@ -137,11 +137,8 @@ namespace RedditSharp.Things
         /// <returns>The listing of posts requested.</returns>
         public Listing<Post> GetPosts(Sort sorting = Sort.New, int limit = 25, FromTime fromTime = FromTime.All)
         {
-            if ((limit < 1) || (limit > 100))
-                throw new ArgumentOutOfRangeException("limit", "Valid range: [1,100]");
-            string linksUrl = string.Format(LinksUrl, Name);
-            linksUrl += string.Format("?sort={0}&limit={1}&t={2}", Enum.GetName(typeof(Sort), sorting), limit, Enum.GetName(typeof(FromTime), fromTime));
-
+            CheckRange(limit, 100);
+            string linksUrl = LinksUrl + QueryString(sorting, limit, fromTime);
             return new Listing<Post>(Reddit, linksUrl);
         }
 
@@ -155,11 +152,8 @@ namespace RedditSharp.Things
         /// <returns>The listing of posts and/or comments requested that the user saved.</returns>
         public Listing<VotableThing> GetSaved(Sort sorting = Sort.New, int limit = 25, FromTime fromTime = FromTime.All)
         {
-            if ((limit < 1) || (limit > MAX_LIMIT))
-                throw new ArgumentOutOfRangeException("limit", "Valid range: [1, {MAX_LIMIT}]");
-            string savedUrl = string.Format(SavedUrl, Name);
-            savedUrl += $"?sort={Enum.GetName(typeof(Sort), sorting)}&limit={limit}&t={Enum.GetName(typeof(FromTime), fromTime)}";
-
+            CheckRange(limit, 100);
+            string savedUrl = SavedUrl + QueryString(sorting, limit, fromTime);
             return new Listing<VotableThing>(Reddit, savedUrl);
         }
 

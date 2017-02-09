@@ -44,21 +44,21 @@ namespace RedditSharp.Things
             public string Id { get; }
         }
 
-        private const string AcceptContributorInviteUrl = "/api/live/{0}/accept_contribtor_invite";
-        private const string CloseThreadUrl = "/api/live/{0}/close_thread";
-        private const string EditUrl = "/api/live/{0}/edit";
-        private const string InviteContributorUrl = "/api/live/{0}/invite_contributor";
-        private const string LeaveContributorUrl = "/api/live/{0}/leave_contributor";
-        private const string RemoveContributorUrl = "/api/live/{0}/rm_contributor";
-        private const string RevokeContributorInviteUrl = "/api/live/{0}/rm_contributor_invite";
-        private const string SetContributorPermissionUrl = "/api/live/{0}/set_contributor_permissions";
-        private const string UpdateUrl = "/api/live/{0}/update";
-        private const string StrikeUpdateUrl = "/api/live/{0}/strike_update";
-        private const string DeleteUpdateUrl = "/api/live/{0}/delete_update";
-        private const string GetUrl = "/live/{0}";
-        private const string ContributorsUrl = "/live/{0}/contributors.json";
-        private const string DiscussionsUrl = "/live/{0}/discussions";
-        private const string ReportUrl = "/api/live/{0}/report";
+        private string AcceptContributorInviteUrl => $"/api/live/{Name}/accept_contribtor_invite";
+        private string CloseThreadUrl => $"/api/live/{Name}/close_thread";
+        private string EditUrl => $"/api/live/{Id}/edit";
+        private string InviteContributorUrl => $"/api/live/{Name}/invite_contributor";
+        private string LeaveContributorUrl => $"/api/live/{Name}/leave_contributor";
+        private string RemoveContributorUrl => $"/api/live/{Name}/rm_contributor";
+        private string RevokeContributorInviteUrl => $"/api/live/{Name}/rm_contributor_invite";
+        private string SetContributorPermissionUrl => $"/api/live/{Name}/set_contributor_permissions";
+        private string UpdateUrl => $"/api/live/{Name}/update";
+        private string StrikeUpdateUrl => $"/api/live/{Name}/strike_update";
+        private string DeleteUpdateUrl => $"/api/live/{Name}/delete_update";
+        private string GetUrl => $"/live/{Name}";
+        private string ContributorsUrl => $"/live/{Name}/contributors.json";
+        private string DiscussionsUrl => $"/live/{Name}/discussions";
+        private string ReportUrl => $"/api/live/{Name}/report";
 
         [JsonProperty("description")]
         public string Description { get; private set; }
@@ -93,18 +93,13 @@ namespace RedditSharp.Things
         /// <summary>
         /// Accept an invite to be a live thread contributor.
         /// </summary>
-        public Task AcceptContributorInviteAsync()
-        {
-            return SimpleActionAsync(String.Format(AcceptContributorInviteUrl, Name));
-        }
+        public Task AcceptContributorInviteAsync() =>
+            SimpleActionAsync(AcceptContributorInviteUrl);
 
         /// <summary>
         /// Close the live thread.
         /// </summary>
-        public Task CloseAsync()
-        {
-            return SimpleActionAsync(CloseThreadUrl);
-        }
+        public Task CloseAsync() => SimpleActionAsync(CloseThreadUrl);
 
         /// <summary>
         /// Delete an update
@@ -114,7 +109,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(DeleteUpdateUrl, Name));
+            var request = WebAgent.CreatePost(DeleteUpdateUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -151,7 +146,7 @@ namespace RedditSharp.Things
             if (nsfw.HasValue)
                 expando.Add(new KeyValuePair<string, object>("nsfw", nsfw.Value));
 
-            var request = WebAgent.CreatePost(String.Format(EditUrl, Id));
+            var request = WebAgent.CreatePost(EditUrl);
             WebAgent.WritePostBody(request, expando);
 
             var response = await WebAgent.GetResponseAsync(request);
@@ -183,7 +178,7 @@ namespace RedditSharp.Things
         public async  Task<ICollection<LiveUpdateEvent.LiveUpdateEventUser>> GetContributorsAsync()
         {
             var result = new List<LiveUpdateEvent.LiveUpdateEventUser>();
-            var request = WebAgent.CreateGet(String.Format(ContributorsUrl, Name));
+            var request = WebAgent.CreateGet(ContributorsUrl);
             var json = await WebAgent.ExecuteRequestAsync(request);
 
             JToken users;
@@ -208,19 +203,15 @@ namespace RedditSharp.Things
         /// Get a list of reddit submissions linking to this thread.
         /// </summary>
         /// <returns></returns>
-        public Listing<Post> GetDiscussions()
-        {
-            return new Listing<Post>(Reddit, String.Format(DiscussionsUrl, Name));
-        }
+        public Listing<Post> GetDiscussions() =>
+            new Listing<Post>(Reddit, DiscussionsUrl);
 
         /// <summary>
         /// Get a list of updates to this live event.
         /// </summary>
         /// <returns></returns>
-        public Listing<LiveUpdate> GetThread()
-        {
-            return new Listing<LiveUpdate>(Reddit, string.Format(GetUrl, Name));
-        }
+        public Listing<LiveUpdate> GetThread() =>
+            new Listing<LiveUpdate>(Reddit, GetUrl);
 
         /// <summary>
         /// Get invited contributors.
@@ -229,7 +220,7 @@ namespace RedditSharp.Things
         public async Task<ICollection<LiveUpdateEventUser>> GetInvitedContributorsAsync()
         {
             var result = new List<LiveUpdateEventUser>();
-            var request = WebAgent.CreateGet(String.Format(ContributorsUrl, Name));
+            var request = WebAgent.CreateGet(ContributorsUrl);
             var json = await WebAgent.ExecuteRequestAsync(request);
 
             var users = json[1]["data"]["children"];
@@ -251,7 +242,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(InviteContributorUrl, Name));
+            var request = WebAgent.CreatePost(InviteContributorUrl);
             var perms = GetPermissionsString(permissions);
 
             WebAgent.WritePostBody(request, new
@@ -287,7 +278,7 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var request = WebAgent.CreatePost(String.Format(RemoveContributorUrl, Name));
+            var request = WebAgent.CreatePost(RemoveContributorUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -340,7 +331,7 @@ namespace RedditSharp.Things
 
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(ReportUrl, Name));
+            var request = WebAgent.CreatePost(ReportUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -364,7 +355,7 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var request = WebAgent.CreatePost(String.Format(RevokeContributorInviteUrl, Name));
+            var request = WebAgent.CreatePost(RevokeContributorInviteUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -407,7 +398,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(SetContributorPermissionUrl, Name));
+            var request = WebAgent.CreatePost(SetContributorPermissionUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -442,7 +433,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(SetContributorPermissionUrl, Name));
+            var request = WebAgent.CreatePost(SetContributorPermissionUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -475,7 +466,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(StrikeUpdateUrl, Name));
+            var request = WebAgent.CreatePost(StrikeUpdateUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -497,7 +488,7 @@ namespace RedditSharp.Things
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
-            var request = WebAgent.CreatePost(String.Format(UpdateUrl, Name));
+            var request = WebAgent.CreatePost(UpdateUrl);
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
@@ -636,10 +627,7 @@ namespace RedditSharp.Things
                 return result;
             }
 
-            public override bool CanConvert(Type objectType)
-            {
-                return true;
-            }
+            public override bool CanConvert(Type objectType) => true;
         }
     }
 }

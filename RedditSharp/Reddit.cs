@@ -400,15 +400,13 @@ namespace RedditSharp
         /// <returns></returns>
         public Task<Comment> GetCommentAsync(string subreddit, string name, string linkName)
         {
+            if (linkName.StartsWith("t3_"))
+                linkName = linkName.Substring(3);
+            if (name.StartsWith("t1_"))
+                name = name.Substring(3);
 
-                if (linkName.StartsWith("t3_"))
-                    linkName = linkName.Substring(3);
-                if (name.StartsWith("t1_"))
-                    name = name.Substring(3);
-
-                var url = string.Format(GetCommentUrl, subreddit, linkName, name);
-                return GetCommentAsync(new Uri(url));
-
+            var url = string.Format(GetCommentUrl, subreddit, linkName, name);
+            return GetCommentAsync(new Uri(url));
         }
 
         /// <summary>
@@ -485,46 +483,31 @@ namespace RedditSharp
         /// Returns a Listing of newly created subreddits.
         /// </summary>
         /// <returns></returns>
-        public Listing<Subreddit> GetNewSubreddits()
-        {
-            return new Listing<Subreddit>(this, NewSubredditsUrl);
-        }
+        public Listing<Subreddit> GetNewSubreddits() => new Listing<Subreddit>(this, NewSubredditsUrl);
 
         /// <summary>
         /// Returns a Listing of the most popular subreddits.
         /// </summary>
         /// <returns></returns>
-        public Listing<Subreddit> GetPopularSubreddits()
-        {
-            return new Listing<Subreddit>(this, PopularSubredditsUrl);
-        }
+        public Listing<Subreddit> GetPopularSubreddits() => new Listing<Subreddit>(this, PopularSubredditsUrl);
 
         /// <summary>
         /// Returns a Listing of Gold-only subreddits. This endpoint will not return anything if the authenticated Reddit account does not currently have gold.
         /// </summary>
         /// <returns></returns>
-        public Listing<Subreddit> GetGoldSubreddits()
-        {
-            return new Listing<Subreddit>(this, GoldSubredditsUrl);
-        }
+        public Listing<Subreddit> GetGoldSubreddits() => new Listing<Subreddit>(this, GoldSubredditsUrl);
 
         /// <summary>
         /// Returns the Listing of default subreddits.
         /// </summary>
         /// <returns></returns>
-        public Listing<Subreddit> GetDefaultSubreddits()
-        {
-            return new Listing<Subreddit>(this, DefaultSubredditsUrl);
-        }
+        public Listing<Subreddit> GetDefaultSubreddits() => new Listing<Subreddit>(this, DefaultSubredditsUrl);
 
         /// <summary>
         /// Returns the Listing of subreddits related to a query.
         /// </summary>
         /// <returns></returns>
-        public Listing<Subreddit> SearchSubreddits(string query)
-        {
-            return new Listing<Subreddit>(this, string.Format(SearchSubredditsUrl, query));
-        }
+        public Listing<Subreddit> SearchSubreddits(string query) => new Listing<Subreddit>(this, string.Format(SearchSubredditsUrl, query));
 
         #endregion SubredditSearching
 

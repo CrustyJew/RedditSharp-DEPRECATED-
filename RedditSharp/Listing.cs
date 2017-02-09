@@ -25,15 +25,13 @@ namespace RedditSharp
         Year
     }
 
-    public class Listing<T> : IEnumerable<T> where T : Thing
+    public class Listing<T> : RedditObject, IEnumerable<T> where T : Thing
     {
         /// <summary>
         /// Gets the default number of listings returned per request
         /// </summary>
         internal const int DefaultListingPerRequest = 25;
 
-        private Reddit Reddit { get; }
-        private IWebAgent WebAgent => Reddit?.WebAgent;
         private string Url { get; }
 
         /// <summary>
@@ -42,9 +40,8 @@ namespace RedditSharp
         /// <param name="reddit"></param>
         /// <param name="url"></param>
         /// <param name="webAgent"></param>
-        internal Listing(Reddit reddit, string url)
+        internal Listing(Reddit reddit, string url) : base(reddit)
         {
-            Reddit = reddit;
             Url = url;
         }
 

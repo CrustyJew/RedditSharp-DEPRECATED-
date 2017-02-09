@@ -118,10 +118,9 @@ namespace RedditSharp.Things
         {
             get
             {
-                if (string.IsNullOrEmpty(ParentID))
-                    return null;
-                var id = ParentID.Remove(0, 3);
-                var listing = new Listing<PrivateMessage>(Reddit, "/message/messages/" + id + ".json");
+                var listing = Thread;
+                if (listing == null)
+                  return null;
                 var firstMessage = listing.First();
                 if (firstMessage.FullName == ParentID)
                     return listing.First();
@@ -140,7 +139,7 @@ namespace RedditSharp.Things
                 if (string.IsNullOrEmpty(ParentID))
                     return null;
                 var id = ParentID.Remove(0, 3);
-                return new Listing<PrivateMessage>(Reddit, "/message/messages/" + id + ".json");
+                return new Listing<PrivateMessage>(Reddit, $"/message/messages/{id}.json");
             }
         }
         // Awaitables don't have to be called asynchronously

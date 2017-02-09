@@ -6,9 +6,9 @@ namespace RedditSharp
 {
     public class Domain : RedditObject
     {
-        private string DomainPostUrl => "/domain/{Name}.json";
-        private string DomainNewUrl => "/domain/{Name}/new.json?sort=new";
-        private string DomainHotUrl => "/domain/{Name}/hot.json";
+        private string DomainPostUrl => $"/domain/{Name}.json";
+        private string DomainNewUrl => $"/domain/{Name}/new.json?sort=new";
+        private string DomainHotUrl => $"/domain/{Name}/hot.json";
         private const string FrontPageUrl = "/.json";
 
         /// <summary>

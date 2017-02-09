@@ -105,7 +105,7 @@ namespace RedditSharp.Things
         public string Title { get; }
 
         /// <summary>
-        /// Parent subkkeddit name.
+        /// Parent subreddit name.
         /// </summary>
         [JsonProperty("subreddit")]
         public string SubredditName { get; }

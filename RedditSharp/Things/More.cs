@@ -27,9 +27,9 @@ namespace RedditSharp.Things
     {
       var url = string.Format(MoreUrl, ParentId, string.Join(",", Children));
       var request = WebAgent.CreateGet(url);
-            var response = await WebAgent.GetResponseAsync(request);
-            var data = await request.Content.ReadAsStringAsync();
-            List<Thing> toReturn = new List<Things.Thing>();
+      var response = await WebAgent.GetResponseAsync(request);
+      var data = await request.Content.ReadAsStringAsync();
+      List<Thing> toReturn = new List<Things.Thing>();
 
       var json = JObject.Parse(data)["json"];
       if (json["errors"].Count() != 0)

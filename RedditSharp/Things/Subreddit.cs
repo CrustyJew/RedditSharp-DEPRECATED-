@@ -20,7 +20,7 @@ namespace RedditSharp.Things
         private string SubredditNewUrl => $"/r/{Name}/new.json?sort=new";
         private string SubredditHotUrl => $"/r/{Name}/hot.json";
         private string SubredditRisingUrl => $"/r/{Name}/rising.json";
-        private string SubredditTopUrl => $"/r/{Name}/top.json?t={1}";
+        private string SubredditTopUrl(string from) => $"/r/{Name}/top.json?t={from}";
         private string SubredditControversialUrl => $"/r/{Name}/controversial.json";
         private string SubredditGildedUrl => $"/r/{Name}/gilded.json";
         private const string SubscribeUrl = "/api/subscribe";
@@ -45,8 +45,10 @@ namespace RedditSharp.Things
         private const string SubmitLinkUrl = "/api/submit";
         private string FlairListUrl => $"/r/{Name}/api/flairlist.json";
         private string CommentsUrl => $"/r/{Name}/comments.json";
-        private string SearchUrl => $"/r/{Name}/search.json?q={1}&restrict_sr=on&sort={2}&t={3}";
-        private string SearchUrlDate => $"/r/{Name}/search.json?q=timestamp:{1}..{2}&restrict_sr=on&sort={3}&syntax=cloudsearch";
+        private string SearchUrl(string query, string sort, string time) =>
+          $"/r/{Name}/search.json?q={query}&restrict_sr=on&sort={sort}&t={time}";
+        private string SearchUrlDate(double from, double to, string sort)=>
+            $"/r/{Name}/search.json?q=timestamp:{from}..{to}&restrict_sr=on&sort={sort}&syntax=cloudsearch";
         private string ModLogUrl => $"/r/{Name}/about/log.json";
         private string ContributorsUrl => $"/r/{Name}/about/contributors.json";
         private string BannedUsersUrl => $"/r/{Name}/about/banned.json";
@@ -161,11 +163,12 @@ namespace RedditSharp.Things
         /// <returns>The top of the subreddit from a specific time</returns>
         public Listing<Post> GetTop(FromTime timePeriod)
         {
+            var period = timePeriod.ToString("g").ToLower();
             if (Name == "/")
             {
-                return new Listing<Post>(Reddit, "/top.json?t=" + Enum.GetName(typeof(FromTime), timePeriod).ToLower());
+                return new Listing<Post>(Reddit, "/top.json?t=" + period);
             }
-            return new Listing<Post>(Reddit, string.Format(SubredditTopUrl, Name, Enum.GetName(typeof(FromTime), timePeriod)).ToLower());
+            return new Listing<Post>(Reddit, SubredditTopUrl(period));
         }
         /// <summary>
         /// All posts on a subredit
@@ -176,7 +179,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, string.Format(SubredditPostUrl, Name));
+                return new Listing<Post>(Reddit, SubredditPostUrl);
             }
         }
         /// <summary>
@@ -188,7 +191,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Comment>(Reddit, "/comments.json");
-                return new Listing<Comment>(Reddit, string.Format(CommentsUrl, Name));
+                return new Listing<Comment>(Reddit, CommentsUrl);
             }
         }
         /// <summary>
@@ -200,7 +203,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Post>(Reddit, "/new.json");
-                return new Listing<Post>(Reddit, string.Format(SubredditNewUrl, Name));
+                return new Listing<Post>(Reddit, SubredditNewUrl);
             }
         }
         /// <summary>
@@ -212,7 +215,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, string.Format(SubredditHotUrl, Name));
+                return new Listing<Post>(Reddit, SubredditHotUrl);
             }
         }
         /// <summary>
@@ -224,7 +227,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, string.Format(SubredditRisingUrl, Name));
+                return new Listing<Post>(Reddit, SubredditRisingUrl);
             }
         }
         /// <summary>
@@ -236,7 +239,7 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, string.Format(SubredditControversialUrl, Name));
+                return new Listing<Post>(Reddit, SubredditControversialUrl);
             }
         }
         /// <summary>
@@ -248,30 +251,20 @@ namespace RedditSharp.Things
             {
                 if (Name == "/")
                     return new Listing<VotableThing>(Reddit, "/.json");
-                return new Listing<VotableThing>(Reddit, string.Format(SubredditGildedUrl, Name));
+                return new Listing<VotableThing>(Reddit, SubredditGildedUrl);
             }
         }
 
         /// <summary>
         /// List of items in the mod queue
         /// </summary>
-        public Listing<VotableThing> ModQueue
-        {
-            get
-            {
-                return new Listing<VotableThing>(Reddit, string.Format(ModqueueUrl, Name));
-            }
-        }
+        public Listing<VotableThing> ModQueue => new Listing<VotableThing>(Reddit, ModqueueUrl);
+
         /// <summary>
         /// Links a moderator hasn't checked
         /// </summary>
-        public Listing<Post> UnmoderatedLinks
-        {
-            get
-            {
-                return new Listing<Post>(Reddit, string.Format(UnmoderatedUrl, Name));
-            }
-        }
+        public Listing<Post> UnmoderatedLinks => new Listing<Post>(Reddit, UnmoderatedUrl);
+
         /// <summary>
         /// Search using specific terms from a specified time to now
         /// </summary>
@@ -284,8 +277,9 @@ namespace RedditSharp.Things
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrl, Name, Uri.EscapeUriString(terms), sort, time));
+            return new Listing<Post>(Reddit, SearchUrl(Uri.EscapeUriString(terms), sort, time));
         }
+
         /// <summary>
         /// Search for a list of posts from a specific time to another time
         /// </summary>
@@ -297,19 +291,21 @@ namespace RedditSharp.Things
         {
             string sort = sortE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, from.DateTimeToUnixTimestamp(), to.DateTimeToUnixTimestamp(), sort));
+            return new Listing<Post>(Reddit,
+                SearchUrlDate(from.DateTimeToUnixTimestamp(),
+                  to.DateTimeToUnixTimestamp(), sort));
         }
+
         /// <summary>
         /// Settings of the subreddit, as best as possible
         /// </summary>
         public async Task<SubredditSettings> GetSettingsAsync()
         {
-
             if (Reddit.User == null)
                 throw new Exception("No user logged in.");
             try
             {
-                var request = WebAgent.CreateGet(string.Format(GetSettingsUrl, Name));
+                var request = WebAgent.CreateGet(GetSettingsUrl);
                 var response = await WebAgent.GetResponseAsync(request);
                 var data = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(data);
@@ -318,20 +314,19 @@ namespace RedditSharp.Things
             catch // TODO: More specific catch
             {
                 // Do it unauthed
-                var request = WebAgent.CreateGet(string.Format(GetReducedSettingsUrl, Name));
+                var request = WebAgent.CreateGet(GetReducedSettingsUrl);
                 var response = await WebAgent.GetResponseAsync(request);
                 var data = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(data);
                 return new SubredditSettings(this, json);
             }
-
         }
+
         /// <summary>
         /// Get an array of the available user flair templates for the subreddit
         /// </summary>
         public async Task<IEnumerable<UserFlairTemplate>> GetUserFlairTemplatesAsync()
         {
-
             var request = WebAgent.CreatePost(FlairSelectorUrl);
             WebAgent.WritePostBody(request, new
             {
@@ -350,7 +345,6 @@ namespace RedditSharp.Things
                 list.Add(template);
             }
             return list.ToArray();
-
         }
 
         /// <summary>
@@ -391,10 +385,8 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get an <see cref="IEnumerable{T}"/> of toolbox user notes.
         /// </summary>
-        public Task<IEnumerable<TBUserNote>> GetUserNotesAsync()
-        {
-            return ToolBoxUserNotes.GetUserNotesAsync(WebAgent, Name);
-        }
+        public Task<IEnumerable<TBUserNote>> GetUserNotesAsync() =>
+            ToolBoxUserNotes.GetUserNotesAsync(WebAgent, Name);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of contributors.
@@ -889,13 +881,15 @@ namespace RedditSharp.Things
         /// Gets the moderation log of the current subreddit filtered by the action taken
         /// </summary>
         /// <param name="action">ModActionType of action performed</param>
-        public Listing<ModAction> GetModerationLog(ModActionType action) => new Listing<ModAction>(Reddit, ModLogUrl + $"?type={ModActionTypeConverter.GetRedditParamName(action)}");
+        public Listing<ModAction> GetModerationLog(ModActionType action) => new Listing<ModAction>(Reddit, ModLogUrl
+            + $"?type={ModActionTypeConverter.GetRedditParamName(action)}");
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by moderator(s) who performed the action
         /// </summary>
         /// <param name="mods">String array of mods to filter by</param>
-        public Listing<ModAction> GetModerationLog(string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl + $"?mod={string.Join(",", mods)}");
+        public Listing<ModAction> GetModerationLog(string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl +
+            $"?mod={string.Join(",", mods)}");
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken and moderator(s) who performed the action
@@ -903,7 +897,8 @@ namespace RedditSharp.Things
         /// <param name="action">ModActionType of action performed</param>
         /// <param name="mods">String array of mods to filter by</param>
         /// <returns></returns>
-        public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl + $"?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}");
+        public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl +
+            $"?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}");
 
         /// <summary>
         /// Infinitely yields new <see cref="Comment"/> posted to the subreddit.

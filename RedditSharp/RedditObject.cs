@@ -11,7 +11,7 @@ namespace RedditSharp {
       public IWebAgent WebAgent => Reddit?.WebAgent;
 
       public RedditObject(Reddit reddit) {
-          if (Reddit == null)
+          if (reddit == null)
             throw new ArgumentNullException(nameof(reddit));
           Reddit = reddit;
       }

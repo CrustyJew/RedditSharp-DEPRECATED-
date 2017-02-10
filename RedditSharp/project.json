@@ -7,12 +7,12 @@
   },
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
-    "System.Reactive.Linq": "3.1.1",
-    "System.Net.Http": "4.0.0"
+    "System.Reactive.Linq": "3.1.1"
   },
   "frameworks": {
     "net462": {
       "dependencies": {
+        "System.Net.Http": "4.0.0"
       },
       "imports": "dnx462"
     },
@@ -20,13 +20,28 @@
       "dependencies": {
         "System.Net.Security": "4.0.0",
         "System.Threading.Thread": "4.0.0",
-        "System.Reflection.TypeExtensions": "4.1.0"
+        "System.Reflection.TypeExtensions": "4.1.0",
+        "System.Net.Http": "4.1.0"
+      },
+      "imports": "dnxcore50"
+    },
+    "netstandard1.6": {
+      "dependencies": {
+        "System.Net.Security": "4.0.0",
+        "System.Threading.Thread": "4.0.0",
+        "System.Reflection.TypeExtensions": "4.1.0",
+        "System.Net.Http": "4.1.0"
       },
       "imports": "dnxcore50"
     }
-  }, 
+  },
   "buildOptions": {
-    "xmlDoc": true,
+    "xmlDoc": false,
     "define": [ "DEBUG", "TRACE" ]
+  },
+  "scripts": {
+    "postcompile": [
+      "dotnet pack --no-build --configuration %compile:Configuration%"
+    ]
   }
 }

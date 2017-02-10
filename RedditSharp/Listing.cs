@@ -30,11 +30,46 @@ namespace RedditSharp
 
     public class ListingStream<T> : IObservable<T> where T : Thing {
 
-        public ListingStream(Listing<T> listing) {
+        Listing<T> Listing { get; set; }
+        List<IObserver<T>> _observers;
+
+        internal ListingStream(Listing<T> listing) {
+            Listing = listing;
+            _observers = new List<IObserver<T>>();
         }
 
         public IDisposable Subscribe(IObserver<T> observer) {
-            throw new NotImplementedException();
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
+            return new Unsubscriber(_observers, observer);
+        }
+
+        public async Task Enumerate() {
+            await Listing.ForEachAsync(page => {
+                  foreach(var thing in page) {
+                      foreach(var observer in _observers) {
+                          observer.OnNext(thing);
+                      }
+                  }
+                });
+        }
+
+        private class Unsubscriber : IDisposable {
+
+          private ICollection<IObserver<T>> _observers;
+          private IObserver<T> _observer;
+
+          public Unsubscriber(ICollection<IObserver<T>> observers,
+                              IObserver<T> observer) {
+              _observers = observers;
+              _observer = observer;
+          }
+
+          public void Dispose() {
+            if (_observer != null && _observers.Contains(_observer))
+                _observers.Remove(_observer);
+          }
+
         }
 
     }

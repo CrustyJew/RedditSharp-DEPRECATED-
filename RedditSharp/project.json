@@ -1,23 +1,30 @@
 {
-  "version": "1.0.0-*",
+  "title": "RedditSharp",
+  "version": "2.0.0",
+  "packOptions": {
+    "projectUrl": "https://github.com/CrustyJew/RedditSharp",
+    "summary": "RedditSharp is a .NET library for working with the Reddit API. It is complete(ish). If you want \nmore features, you are encouraged to add them yourself and submit a pull request on \nGitHub. More details are available in the README."
+  },
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1",
-    "System.Net.Http": "4.1.0",
-    "System.Net.Security": "4.0.0",
-    "System.Reflection.TypeExtensions": "4.1.0",
-    "System.Threading.Thread": "4.0.0",
-    "System.Reactive.Linq": "3.1.1"
+    "System.Reactive.Linq": "3.1.1",
+    "System.Net.Http": "4.0.0"
   },
   "frameworks": {
     "net462": {
-      "frameworkAssemblies": {
-      }
+      "dependencies": {
+      },
+      "imports": "dnx462"
     },
-    "netstandard1.6": {
+    "netstandard1.3": {
+      "dependencies": {
+        "System.Net.Security": "4.0.0",
+        "System.Threading.Thread": "4.0.0",
+        "System.Reflection.TypeExtensions": "4.1.0"
+      },
       "imports": "dnxcore50"
     }
-  },
+  }, 
   "buildOptions": {
     "xmlDoc": true,
     "define": [ "DEBUG", "TRACE" ]

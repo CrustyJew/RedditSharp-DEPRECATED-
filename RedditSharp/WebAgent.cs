@@ -18,8 +18,8 @@ namespace RedditSharp
 
         private const string OAuthDomainUrl = "oauth.reddit.com";
         private static HttpClient _httpClient;
-        private object rateLimitLock = new object();
-        private Task rateLimitTask = null;
+        private static SemaphoreSlim rateLimitLock;
+
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
         /// </summary>
@@ -97,6 +97,7 @@ namespace RedditSharp
 
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
+            rateLimitLock = new SemaphoreSlim(1, 1);
             UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
@@ -163,67 +164,56 @@ namespace RedditSharp
             return json;
         }
 
-        async Task Wait(int msec) {
-            lock (rateLimitLock) {
-                // Note: Do not use ConfigureAwait here, it must be in the same
-                // thread context for the lock to release properly
-                rateLimitTask = Task.Delay(msec);
-            }
-            await rateLimitTask;
-            lock (rateLimitLock) {
-                rateLimitTask = null;
-            }
-        }
-
-
         /// <summary>
         /// Enforce the api throttle.
         /// </summary>
         protected virtual async Task EnforceRateLimit()
         {
-            if (rateLimitTask != null) {
-                await rateLimitTask;
-            }
+            await rateLimitLock.WaitAsync().ConfigureAwait(false);
             var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
-            switch (RateLimit)
-            {
-                case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
-                        await Wait(250);
-                    _lastRequest = DateTime.UtcNow;
-                    break;
-                case RateLimitMode.SmallBurst:
-                    if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
-                    {
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
-                    {
-                        while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
-                            await Wait(250);
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    _lastRequest = DateTime.UtcNow;
-                    _requestsThisBurst++;
-                    break;
-                case RateLimitMode.Burst:
-                    if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
-                    {
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
-                    {
-                        while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
-                            await Wait(250);
-                        _burstStart = DateTime.UtcNow;
-                        _requestsThisBurst = 0;
-                    }
-                    _lastRequest = DateTime.UtcNow;
-                    _requestsThisBurst++;
-                    break;
+            try {
+              switch (RateLimit)
+              {
+                  case RateLimitMode.Pace:
+                      while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
+                          await Task.Delay(250).ConfigureAwait(false);
+                      _lastRequest = DateTime.UtcNow;
+                      break;
+                  case RateLimitMode.SmallBurst:
+                      if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
+                      {
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
+                      {
+                          while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
+                              await Task.Delay(250).ConfigureAwait(false);
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      _lastRequest = DateTime.UtcNow;
+                      _requestsThisBurst++;
+                      break;
+                  case RateLimitMode.Burst:
+                      if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
+                      {
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
+                      {
+                          while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
+                              await Task.Delay(250).ConfigureAwait(false);
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      _lastRequest = DateTime.UtcNow;
+                      _requestsThisBurst++;
+                      break;
+              }
+            } finally {
+              rateLimitLock.Release();
             }
         }
 

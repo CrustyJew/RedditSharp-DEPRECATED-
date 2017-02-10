@@ -18,17 +18,12 @@ namespace RedditSharp
 
         private const string OAuthDomainUrl = "oauth.reddit.com";
         private static HttpClient _httpClient;
-        private object rateLimitLock = new object();
+        private static SemaphoreSlim rateLimitLock;
+
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
         /// </summary>
         public static string UserAgent { get; set; }
-
-        /// <summary>
-        /// It is strongly advised that you leave this enabled. Reddit bans excessive
-        /// requests with extreme predjudice.
-        /// </summary>
-        public static bool EnableRateLimit { get; set; }
 
         /// <summary>
         /// web protocol "http", "https"
@@ -100,18 +95,18 @@ namespace RedditSharp
             get { return _requestsThisBurst; }
         }
 
-
-        static WebAgent()
-        {
+        static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
+            rateLimitLock = new SemaphoreSlim(1, 1);
             UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
             _httpClient = new HttpClient();
         }
-        public WebAgent() {
 
+        public WebAgent() {
         }
+
         /// <summary>
         /// Intializes a WebAgent with a specified access token and sets the default url to the oauth api address
         /// </summary>
@@ -128,7 +123,7 @@ namespace RedditSharp
         /// <returns></returns>
         public virtual async Task<JToken> ExecuteRequestAsync(HttpRequestMessage request)
         {
-            EnforceRateLimit();
+            await EnforceRateLimit().ConfigureAwait(false);
             var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -167,57 +162,58 @@ namespace RedditSharp
                 json = JToken.Parse("{'method':'" + response.RequestMessage.Method + "','uri':'" + response.RequestMessage.RequestUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
             }
             return json;
-
         }
 
         /// <summary>
         /// Enforce the api throttle.
         /// </summary>
-        protected virtual void EnforceRateLimit()
+        protected virtual async Task EnforceRateLimit()
         {
-            lock (rateLimitLock)
-            {
-                var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
-                switch (RateLimit)
-                {
-                    case RateLimitMode.Pace:
-                        while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
-                            Thread.Sleep(250);
-                        _lastRequest = DateTime.UtcNow;
-                        break;
-                    case RateLimitMode.SmallBurst:
-                        if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
-                        {
-                            _burstStart = DateTime.UtcNow;
-                            _requestsThisBurst = 0;
-                        }
-                        if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
-                        {
-                            while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
-                                Thread.Sleep(250);
-                            _burstStart = DateTime.UtcNow;
-                            _requestsThisBurst = 0;
-                        }
-                        _lastRequest = DateTime.UtcNow;
-                        _requestsThisBurst++;
-                        break;
-                    case RateLimitMode.Burst:
-                        if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
-                        {
-                            _burstStart = DateTime.UtcNow;
-                            _requestsThisBurst = 0;
-                        }
-                        if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
-                        {
-                            while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
-                                Thread.Sleep(250);
-                            _burstStart = DateTime.UtcNow;
-                            _requestsThisBurst = 0;
-                        }
-                        _lastRequest = DateTime.UtcNow;
-                        _requestsThisBurst++;
-                        break;
-                }
+            await rateLimitLock.WaitAsync().ConfigureAwait(false);
+            var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
+            try {
+              switch (RateLimit)
+              {
+                  case RateLimitMode.Pace:
+                      while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
+                          await Task.Delay(250).ConfigureAwait(false);
+                      _lastRequest = DateTime.UtcNow;
+                      break;
+                  case RateLimitMode.SmallBurst:
+                      if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
+                      {
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
+                      {
+                          while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
+                              await Task.Delay(250).ConfigureAwait(false);
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      _lastRequest = DateTime.UtcNow;
+                      _requestsThisBurst++;
+                      break;
+                  case RateLimitMode.Burst:
+                      if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
+                      {
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
+                      {
+                          while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
+                              await Task.Delay(250).ConfigureAwait(false);
+                          _burstStart = DateTime.UtcNow;
+                          _requestsThisBurst = 0;
+                      }
+                      _lastRequest = DateTime.UtcNow;
+                      _requestsThisBurst++;
+                      break;
+              }
+            } finally {
+              rateLimitLock.Release();
             }
         }
 
@@ -229,7 +225,6 @@ namespace RedditSharp
         /// <returns></returns>
         public virtual HttpRequestMessage CreateRequest(string url, string method)
         {
-            EnforceRateLimit();
             bool prependDomain;
             // IsWellFormedUristring returns true on Mono for some reason when using a string like "/api/me"
             if (Type.GetType("Mono.Runtime") != null)
@@ -265,11 +260,9 @@ namespace RedditSharp
         /// <returns></returns>
         protected virtual HttpRequestMessage CreateRequest(Uri uri, string method)
         {
-            EnforceRateLimit();
             var request = new HttpRequestMessage();
             request.RequestUri = uri;
             if (IsOAuth())// use OAuth
-
             {
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
             }

@@ -98,18 +98,18 @@ namespace RedditSharp.Things
         ///<para>Modhashes are not required when authenticated with OAuth.</para>
         /// </summary>
         [JsonProperty("modhash")]
-        public string Modhash { get; }
+        public string Modhash { get; private set; }
 
         /// <summary>
         /// Returns true of the user has mail.
         /// </summary>
         [JsonProperty("has_mail")]
-        public bool HasMail { get; }
+        public bool HasMail { get; private set; }
 
         /// <summary>
         /// Returns true of the user has modmail.
         /// </summary>
         [JsonProperty("has_mod_mail")]
-        public bool HasModMail { get; }
+        public bool HasModMail { get; private set; }
     }
 }

@@ -55,31 +55,31 @@ namespace RedditSharp.Things
         /// The moderator who approved this item.  This will be null or empty if the item has not been approved.
         /// </summary>
         [JsonProperty("approved_by")]
-        public string ApprovedBy { get; }
+        public string ApprovedBy { get; private set; }
 
         /// <summary>
         /// Author user name.
         /// </summary>
         [JsonProperty("author")]
-        public string AuthorName { get; }
+        public string AuthorName { get; private set; }
 
         /// <summary>
         /// Css flair class of the item author.
         /// </summary>
         [JsonProperty("author_flair_css_class")]
-        public string AuthorFlairCssClass { get; }
+        public string AuthorFlairCssClass { get; private set; }
 
         /// <summary>
         /// Flair text of the item author.
         /// </summary>
         [JsonProperty("author_flair_text")]
-        public string AuthorFlairText { get; }
+        public string AuthorFlairText { get; private set; }
 
         /// <summary>
         /// The moderator who removed this item.  This will be null or empty if the item has not been removed.
         /// </summary>
         [JsonProperty("banned_by")]
-        public string BannedBy { get; }
+        public string BannedBy { get; private set; }
 
         /// <summary>
         /// Number of upvotes on this item.
@@ -91,13 +91,13 @@ namespace RedditSharp.Things
         /// Returns true if this item has been edited by the author.
         /// </summary>
         [JsonProperty("edited")]
-        public bool Edited { get; }
+        public bool Edited { get; private set; }
 
         /// <summary>
         /// Returns true if this item is archived.
         /// </summary>
         [JsonProperty("archived")]
-        public bool IsArchived { get; }
+        public bool IsArchived { get; private set; }
 
         /// <summary>
         /// Returns true if this item has been approved.
@@ -107,7 +107,7 @@ namespace RedditSharp.Things
         /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
         /// </summary>
         [JsonProperty("approved")]
-        public bool? IsApproved { get; }
+        public bool? IsApproved { get; private set; }
 
         /// <summary>
         /// Returns true if this item has been removed.
@@ -117,7 +117,7 @@ namespace RedditSharp.Things
         /// <para>Returns null if the logged in user is not a moderator in the items subreddit.</para>
         /// </summary>
         [JsonProperty("removed")]
-        public bool? IsRemoved { get; }
+        public bool? IsRemoved { get; private set; }
 
         /// <summary>
         /// Number of upvotes on this item.
@@ -129,7 +129,7 @@ namespace RedditSharp.Things
         /// Current score of this item.
         /// </summary>
         [JsonProperty("score")]
-        public int Score { get; }
+        public int Score { get; private set; }
 
         /// <summary>
         /// Returns true if this item is saved.
@@ -141,7 +141,7 @@ namespace RedditSharp.Things
         /// Returns true if the item is sticked.
         /// </summary>
         [JsonProperty("stickied")]
-        public bool IsStickied { get; }
+        public bool IsStickied { get; private set; }
 
         /// <summary>
         /// Number of reports on this item.
@@ -154,14 +154,14 @@ namespace RedditSharp.Things
         /// Number of reports on this item.
         /// </summary>
         [JsonProperty("num_reports")]
-        public int? ReportCount { get; }
+        public int? ReportCount { get; private set; }
 
         /// <summary>
         /// Returns the distinguish type.
         /// </summary>
         [JsonProperty("distinguished")]
         [JsonConverter(typeof(DistinguishConverter))]
-        public DistinguishType Distinguished { get; }
+        public DistinguishType Distinguished { get; private set; }
 
         /// <summary>
         /// True if the logged in user has upvoted this.
@@ -176,20 +176,20 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("mod_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
-        public ICollection<Report> ModReports { get; }
+        public ICollection<Report> ModReports { get; private set; }
 
         /// <summary>
         /// Returns a list of reports made by users.
         /// </summary>
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
-        public ICollection<Report> UserReports { get; }
+        public ICollection<Report> UserReports { get; private set; }
 
         /// <summary>
         /// Number of times this item has been gilded.
         /// </summary>
         [JsonProperty("gilded")]
-        public int Gilded { get; }
+        public int Gilded { get; private set; }
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.

@@ -490,8 +490,7 @@ namespace RedditSharp
         protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
             var json = await WebAgent.Get(url).ConfigureAwait(false);
-            var ret = Thing.Parse(this, json);
-            return (T)ret;
+            return Thing.Parse<T>(this, json);
         }
         #endregion
     }

@@ -17,7 +17,7 @@ namespace RedditSharp.Multi
         /// Name of the subreddit
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Creates a new MultiSubs implementation

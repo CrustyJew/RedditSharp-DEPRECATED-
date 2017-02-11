@@ -9,10 +9,10 @@ namespace RedditSharp
     public class WikiPageSettings
     {
         [JsonProperty("listed")]
-        public bool Listed { get; }
+        public bool Listed { get; private set; }
 
         [JsonProperty("permlevel")]
-        public int PermLevel { get; }
+        public int PermLevel { get; private set; }
 
         [JsonIgnore]
         public IEnumerable<RedditUser> Editors { get; private set; }

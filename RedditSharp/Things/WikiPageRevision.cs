@@ -22,19 +22,19 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("timestamp")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; }
+        public DateTime? TimeStamp { get; private set; }
 
         /// <summary>
         /// Reason for the revision.
         /// </summary>
         [JsonProperty("reason")]
-        public string Reason { get; }
+        public string Reason { get; private set; }
 
         /// <summary>
         /// Page
         /// </summary>
         [JsonProperty("page")]
-        public string Page { get; }
+        public string Page { get; private set; }
 
         /// <summary>
         /// User who made the revision.

@@ -1,6 +1,5 @@
 using System;
 using System.Security.Authentication;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using RedditSharp.Extensions;

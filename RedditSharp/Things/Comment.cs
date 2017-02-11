@@ -2,13 +2,10 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using RedditSharp.Extensions;
-using System.Net.Http;
 
 namespace RedditSharp.Things
 {

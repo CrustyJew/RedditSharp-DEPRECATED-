@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using RedditSharp.Things;
+﻿using RedditSharp.Things;
 using System.Collections.Generic;
 
 namespace RedditSharp
 {
-    using System;
     using System.Threading.Tasks;
 
     public class Wiki

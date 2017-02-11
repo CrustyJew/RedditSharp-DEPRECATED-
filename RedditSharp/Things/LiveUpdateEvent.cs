@@ -36,13 +36,13 @@ namespace RedditSharp.Things
         {
             [JsonProperty]
             [JsonConverter(typeof(PermissionsConverter))]
-            public LiveUpdateEventPermission Permissions { get; }
+            public LiveUpdateEventPermission Permissions { get; private set; }
 
             [JsonProperty("name")]
-            public string Name { get; }
+            public string Name { get; private set; }
 
             [JsonProperty("id")]
-            public string Id { get; }
+            public string Id { get; private set; }
         }
 
         private string AcceptContributorInviteUrl => $"/api/live/{Name}/accept_contribtor_invite";
@@ -65,31 +65,31 @@ namespace RedditSharp.Things
         public string Description { get; private set; }
 
         [JsonProperty("description_html")]
-        public string DescriptionHtml { get; }
+        public string DescriptionHtml { get; private set; }
 
         [JsonProperty("title")]
         public string Title { get; private set; }
 
         [JsonProperty("websocket_uri")]
-        public Uri WebsocketUri { get; }
+        public Uri WebsocketUri { get; private set; }
 
         [JsonProperty("state")]
-        public string State { get; }
+        public string State { get; private set; }
 
         [JsonProperty("nsfw")]
         public bool NSFW { get; private set; }
 
         [JsonProperty("viewer_count")]
-        public int? ViewerCount { get; }
+        public int? ViewerCount { get; private set; }
 
         [JsonProperty("viewer_count_fuzzed")]
-        public bool ViewerCountFuzzed { get; }
+        public bool ViewerCountFuzzed { get; private set; }
 
         [JsonProperty("resources")]
         public string Resources { get; private set; }
 
         [JsonProperty]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Accept an invite to be a live thread contributor.

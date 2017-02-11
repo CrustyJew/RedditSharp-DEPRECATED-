@@ -17,44 +17,44 @@ namespace RedditSharp.Multi
         /// Can the Multi be edited
         /// </summary>
         [JsonProperty("can_edit")]
-        public bool CanEdit { get; }
+        public bool CanEdit { get; private set; }
 
         /// <summary>
         /// Display name for the Multi
         /// </summary>
         [JsonProperty("display_name")]
-        public string DisplayName { get; }
+        public string DisplayName { get; private set; }
 
         /// <summary>
         /// Actual name of the Multi
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Description of the Multi in HTML format
         /// </summary>
         [JsonProperty("description_html")]
-        public string DescriptionHTML { get; }
+        public string DescriptionHTML { get; private set; }
 
         /// <summary>
         /// When the multi was created
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; }
+        public DateTime? Created { get; private set; }
 
         /// <summary>
         /// Where the multi was copied from if it was copied
         /// </summary>
         [JsonProperty("copied_from")]
-        public string CopiedFrom { get; }
+        public string CopiedFrom { get; private set; }
 
         /// <summary>
         /// URL of the icon to use.
         /// </summary>
         [JsonProperty("icon_url")]
-        public string IconUrl { get; }
+        public string IconUrl { get; private set; }
 
         /// <summary>
         /// List of the Subreddits in the multi
@@ -67,43 +67,43 @@ namespace RedditSharp.Multi
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? CreatedUTC { get; }
+        public DateTime? CreatedUTC { get; private set; }
 
         /// <summary>
         /// Hex Code of the color for the multi
         /// </summary>
         [JsonProperty("key_color")]
-        public string KeyColor { get; }
+        public string KeyColor { get; private set; }
 
         /// <summary>
         /// Visiblity property for the Multi
         /// </summary>
         [JsonProperty("visibility")]
-        public string Visibility { get; }
+        public string Visibility { get; private set; }
 
         /// <summary>
         /// Name of the icon corresponding to the URL
         /// </summary>
         [JsonProperty("icon_name")]
-        public string IconName { get; }
+        public string IconName { get; private set; }
 
         /// <summary>
         /// Weighting scheme of the Multi
         /// </summary>
         [JsonProperty("weighting_scheme")]
-        public string WeightingScheme { get; }
+        public string WeightingScheme { get; private set; }
 
         /// <summary>
         /// Path to navigate to the multi
         /// </summary>
         [JsonProperty("path")]
-        public string Path { get; }
+        public string Path { get; private set; }
 
         /// <summary>
         /// Description of the multi in text format.
         /// </summary>
         [JsonProperty("description_md")]
-        public string DescriptionMD { get; }
+        public string DescriptionMD { get; private set; }
 
         /// <summary>
         /// Creates a new mData implementation

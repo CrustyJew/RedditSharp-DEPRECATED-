@@ -16,7 +16,7 @@ namespace RedditSharp
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
-        public Subreddit Subreddit { get; }
+        public Subreddit Subreddit { get; private set; }
 
         public SubredditSettings(Subreddit subreddit) : base(subreddit?.Reddit)
         {

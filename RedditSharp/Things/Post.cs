@@ -31,7 +31,7 @@ namespace RedditSharp.Things
         /// Author of this post.
         /// </summary>
         [JsonProperty("author")]
-        public new string AuthorName { get; }
+        public new string AuthorName { get; private set; }
 
         //TODO Discuss
         public IObservable<Comment> Comments => GetComments();
@@ -40,19 +40,19 @@ namespace RedditSharp.Things
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]
-        public string Domain { get; }
+        public string Domain { get; private set; }
 
         /// <summary>
         /// Returns true if this is a self post.
         /// </summary>
         [JsonProperty("is_self")]
-        public bool IsSelfPost { get; }
+        public bool IsSelfPost { get; private set; }
 
         /// <summary>
         /// Css class of the link flair.
         /// </summary>
         [JsonProperty("link_flair_css_class")]
-        public string LinkFlairCssClass { get; }
+        public string LinkFlairCssClass { get; private set; }
 
         /// <summary>
         /// Text of the link flair.
@@ -64,20 +64,20 @@ namespace RedditSharp.Things
         /// Number of comments on this post.
         /// </summary>
         [JsonProperty("num_comments")]
-        public int CommentCount { get; }
+        public int CommentCount { get; private set; }
 
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
         [JsonProperty("over_18")]
-        public bool NSFW { get; }
+        public bool NSFW { get; private set; }
 
         /// <summary>
         /// Post permalink.
         /// </summary>
         [JsonProperty("permalink")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Permalink { get; }
+        public Uri Permalink { get; private set; }
 
         /// <summary>
         /// Post self text markdown.
@@ -89,26 +89,26 @@ namespace RedditSharp.Things
         /// Post self text html.
         /// </summary>
         [JsonProperty("selftext_html")]
-        public string SelfTextHtml { get; }
+        public string SelfTextHtml { get; private set; }
 
         /// <summary>
         /// Uri to the thumbnail image of this post.
         /// </summary>
         [JsonProperty("thumbnail")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Thumbnail { get; }
+        public Uri Thumbnail { get; private set; }
 
         /// <summary>
         /// Post title.
         /// </summary>
         [JsonProperty("title")]
-        public string Title { get; }
+        public string Title { get; private set; }
 
         /// <summary>
         /// Parent subreddit name.
         /// </summary>
         [JsonProperty("subreddit")]
-        public string SubredditName { get; }
+        public string SubredditName { get; private set; }
 
         /// <summary>
         /// Parent subreddit.
@@ -124,7 +124,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Url { get; }
+        public Uri Url { get; private set; }
 
         /// <summary>
         /// Comment on this post.

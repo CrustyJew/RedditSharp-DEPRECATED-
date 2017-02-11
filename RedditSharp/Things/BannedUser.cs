@@ -15,18 +15,18 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; }
+        public DateTime? TimeStamp { get; private set; }
 
         /// <summary>
         /// Ban note.
         /// </summary>
         [JsonProperty("note")]
-        public string Note { get; }
+        public string Note { get; private set; }
 
         /// <summary>
         /// User name.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; }
+        public string Name { get; private set; }
     }
 }

@@ -34,75 +34,75 @@ namespace RedditSharp.Things
         /// Message body markdown.
         /// </summary>
         [JsonProperty("body")]
-        public string Body { get; }
+        public string Body { get; private set; }
 
         /// <summary>
         /// Message body html.
         /// </summary>
         [JsonProperty("body_html")]
-        public string BodyHtml { get; }
+        public string BodyHtml { get; private set; }
 
         /// <summary>
         /// Returns true if is comment.
         /// </summary>
         [JsonProperty("was_comment")]
-        public bool IsComment { get; }
+        public bool IsComment { get; private set; }
 
         /// <summary>
         /// DateTime message was sent.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Sent { get; }
+        public DateTime Sent { get; private set; }
 
         /// <summary>
         /// DateTime message was sent in UTC.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime SentUTC { get; }
+        public DateTime SentUTC { get; private set; }
 
         /// <summary>
         /// Destination user or subreddit name.
         /// </summary>
         [JsonProperty("dest")]
-        public string Destination { get; }
+        public string Destination { get; private set; }
 
         /// <summary>
         /// Message author.
         /// </summary>
         [JsonProperty("author")]
-        public string Author { get; }
+        public string Author { get; private set; }
 
         /// <summary>
         /// Subreddit (for comments).
         /// </summary>
         [JsonProperty("subreddit")]
-        public string Subreddit { get; }
+        public string Subreddit { get; private set; }
 
         /// <summary>
         /// Returns true if the message is unread.
         /// </summary>
         [JsonProperty("new")]
-        public bool Unread { get; }
+        public bool Unread { get; private set; }
 
         /// <summary>
         /// Message subject.
         /// </summary>
         [JsonProperty("subject")]
-        public string Subject { get; }
+        public string Subject { get; private set; }
 
         /// <summary>
         /// Parent id.
         /// </summary>
         [JsonProperty("parent_id")]
-        public string ParentID { get; }
+        public string ParentID { get; private set; }
 
         /// <summary>
         /// full name of the first message in this message chain.
         /// </summary>
         [JsonProperty("first_message_name")]
-        public string FirstMessageName { get; }
+        public string FirstMessageName { get; private set; }
 
         /// <summary>
         /// Replies to this message.

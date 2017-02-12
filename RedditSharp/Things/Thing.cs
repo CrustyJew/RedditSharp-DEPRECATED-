@@ -68,6 +68,10 @@ namespace RedditSharp.Things
         /// <returns>A "Thing", such as a comment, user, post, etc.</returns>
         public static Thing Parse(Reddit reddit, JToken json)
         {
+            if (reddit == null)
+                throw new ArgumentNullException(nameof(reddit));
+            if (json == null)
+                throw new ArgumentNullException(nameof(json));
             var kind = json["kind"].ValueOrDefault<string>();
             switch (kind)
             {
@@ -108,31 +112,31 @@ namespace RedditSharp.Things
             {
                 if (typeof(T) == typeof(WikiPageRevision))
                 {
-                    return new WikiPageRevision(reddit, json) as T;
+                    result = new WikiPageRevision(reddit, json);
                 }
                 else if (typeof(T) == typeof(ModAction))
                 {
-                    return new ModAction(reddit, json) as T;
+                    result = new ModAction(reddit, json);
                 }
                 else if (typeof(T) == typeof(Contributor))
                 {
-                    return new Contributor(reddit, json) as T;
+                    result = new Contributor(reddit, json);
                 }
                 else if (typeof(T) == typeof(BannedUser))
                 {
-                    return new BannedUser(reddit, json) as T;
+                    result = new BannedUser(reddit, json);
                 }
                 else if (typeof(T) == typeof(More))
                 {
-                    return new More(reddit, json) as T;
+                    result = new More(reddit, json);
                 }
                 else if (typeof(T) == typeof(LiveUpdate))
                 {
-                    return new LiveUpdate(reddit, json) as T;
+                    result = new LiveUpdate(reddit, json);
                 }
                 else if (typeof(T) == typeof(LiveUpdateEvent))
                 {
-                    return new LiveUpdateEvent(reddit, json) as T;
+                    result = new LiveUpdateEvent(reddit, json);
                 }
             }
             return result as T;

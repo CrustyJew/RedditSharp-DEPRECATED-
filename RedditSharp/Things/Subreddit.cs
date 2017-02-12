@@ -65,19 +65,19 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; }
+        public DateTime? Created { get; private set; }
 
         /// <summary>
         /// Subreddit description.
         /// </summary>
         [JsonProperty("description")]
-        public string Description { get; }
+        public string Description { get; private set; }
 
         /// <summary>
         /// Subreddit description html.
         /// </summary>
         [JsonProperty("description_html")]
-        public string DescriptionHTML { get; }
+        public string DescriptionHTML { get; private set; }
 
         /// <summary>
         /// Subreddit display name.
@@ -89,37 +89,37 @@ namespace RedditSharp.Things
         /// Header image.
         /// </summary>
         [JsonProperty("header_img")]
-        public string HeaderImage { get; }
+        public string HeaderImage { get; private set; }
 
         /// <summary>
         /// Header title.
         /// </summary>
         [JsonProperty("header_title")]
-        public string HeaderTitle { get; }
+        public string HeaderTitle { get; private set; }
 
         /// <summary>
         /// Returns true of the subreddit is marked for users over 18.
         /// </summary>
         [JsonProperty("over_18")]
-        public bool NSFW { get; }
+        public bool NSFW { get; private set; }
 
         /// <summary>
         /// Public description of the subreddit.
         /// </summary>
         [JsonProperty("public_description")]
-        public string PublicDescription { get; }
+        public string PublicDescription { get; private set; }
 
         /// <summary>
         /// Total subscribers to the subreddit.
         /// </summary>
         [JsonProperty("subscribers")]
-        public int? Subscribers { get; }
+        public int? Subscribers { get; private set; }
 
         /// <summary>
         /// Current active users .
         /// </summary>
         [JsonProperty("accounts_active")]
-        public int? ActiveUsers { get; }
+        public int? ActiveUsers { get; private set; }
 
         /// <summary>
         /// Subreddit title.
@@ -138,20 +138,20 @@ namespace RedditSharp.Things
         /// Property determining whether the current logged in user is a moderator on this subreddit.
         /// </summary>
         [JsonProperty("user_is_moderator")]
-        public bool? UserIsModerator { get; }
+        public bool? UserIsModerator { get; private set; }
 
         /// <summary>
         /// Property giving the moderator permissions of the logged in user on this subreddit.
         /// </summary>
         [JsonProperty("mod_permissions")]
         [JsonConverter(typeof(ModeratorPermissionConverter))]
-        public ModeratorPermission ModPermissions { get; }
+        public ModeratorPermission ModPermissions { get; private set; }
 
         /// <summary>
         /// Property determining whether the current logged in user is banned from the subreddit.
         /// </summary>
         [JsonProperty("user_is_banned")]
-        public bool? UserIsBanned { get; }
+        public bool? UserIsBanned { get; private set; }
 
         [JsonIgnore]
         public string Name { get; private set; }

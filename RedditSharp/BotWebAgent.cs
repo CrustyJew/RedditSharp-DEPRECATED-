@@ -32,7 +32,6 @@ namespace RedditSharp
         {
             Username = username;
             Password = password;
-            EnableRateLimit = true;
             RateLimit = RateLimitMode.Burst;
             RootDomain = "oauth.reddit.com";
             TokenProvider = new AuthProvider(clientID, clientSecret, redirectURI, this);

@@ -16,10 +16,10 @@ namespace RedditSharp.Things
     private const string MoreUrl = "/api/morechildren.json?link_id={0}&children={1}&api_type=json";
 
     [JsonProperty("children")]
-    public string[] Children { get; }
+    public string[] Children { get; private set; }
 
     [JsonProperty("parent_id")]
-    public string ParentId { get; }
+    public string ParentId { get; private set; }
 
     protected override JToken GetJsonData(JToken json) => json["data"];
 

@@ -139,7 +139,7 @@ namespace RedditSharp
             public ListingEnumerator(Listing<T> listing, int limitPerRequest, int maximumLimit, bool stream = false)
             {
                 Listing = listing;
-                CurrentPage = new ReadOnlyCollection<T>(new T[0]);
+                CurrentPage = null;// new ReadOnlyCollection<T>(new T[0]);
                 done = new HashSet<string>();
                 this.stream = stream;
 
@@ -286,6 +286,11 @@ namespace RedditSharp
 
             private async Task<bool> MoveNextBackAsync()
             {
+                if (CurrentPage == null)
+                {
+                    await FetchNextPageAsync().ConfigureAwait(false);
+                    return true;
+                }
                 if (After == null)
                 {
                     // No more pages to return

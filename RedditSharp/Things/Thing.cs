@@ -25,7 +25,7 @@ namespace RedditSharp.Things
         }
 
         protected virtual JToken GetJsonData(JToken json) {
-          return json.ToString();
+          return json;
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 [![redditsharp MyGet Build Status](https://www.myget.org/BuildSource/Badge/redditsharp?identifier=038d3763-6401-4c84-b579-f5134e1c8efd)](https://www.myget.org/) [![NuGet version](https://badge.fury.io/nu/redditsharp.svg)](https://badge.fury.io/nu/redditsharp)
 
-**This is a hard fork and IS maintained**. 
+**This is a hard fork and IS maintained**.
 
 Due to the project being abandoned and the previous owner's refusal to transfer the repository to someone else to maintain it, I've created this fork to continue on support for the project.
 
@@ -15,9 +15,9 @@ var webAgent = new BotWebAgent("BotUsername", "BotPass", "ClientID", "ClientSecr
 //"false" means that it will NOT load the logged in user profile so reddit.User will be null
 var reddit = new Reddit(webAgent, false);
 var subreddit = reddit.GetSubreddit("/r/example");
-subreddit.Subscribe();
-foreach (var post in subreddit.New.Take(25))
-{
+await subreddit.SubscribeAsync();
+await reddit.RSlashAll.New.Take(2).ForEachAsync(page => {
+  foreach(var post in page) {
     if (post.Title == "What is my karma?")
     {
         // Note: This is an example. Bots are not permitted to cast votes automatically.
@@ -25,27 +25,28 @@ foreach (var post in subreddit.New.Take(25))
         var comment = post.Comment(string.Format("You have {0} link karma!", post.Author.LinkKarma));
         comment.Distinguish(DistinguishType.Moderator);
     }
-}
+  }
+});
 ```
 
 **Important note**: Make sure you use `.Take(int)` when working with pagable content. For example, don't do this:
 
 ```csharp
-var all = reddit.RSlashAll;
-foreach (var post in all.New) // BAD
-{
+await reddit.RSlashAll.New.ForEachAsync(page => { // BAD
+  foreach(var post in page) {
     // ...
-}
+  }
+});
 ```
 
 This will cause you to page through everything that has ever been posted on Reddit. Better:
 
 ```csharp
-var all = reddit.RSlashAll;
-foreach (var post in all.New.Take(25))
-{
+await reddit.RSlashAll.New.Take(2).ForEachAsync(page => {
+  foreach(var post in page) {
     // ...
-}
+  }
+});
 ```
 
 
@@ -57,13 +58,14 @@ Example:
 
 ```csharp
 // get all new comments as they are posted.
+var comments = subreddit.Comments.GetListingStream();
+
+await comments.Execute();
 foreach (var comment in subreddit.CommentStream)
 {
     Console.WriteLine(DateTime.Now + "   New Comment posted to /r/example: " + comment.ShortLink);
 }
 ```
-
-you can call .GetListingStream() on any Listing<Thing>
 
 ```csharp
 // get new modmail
@@ -73,7 +75,6 @@ foreach (var message in newModmail)
     if (message.FirstMessageName == "")
         message.Reply("Thanks for the message - we will get back to you soon.");
 }
-
 ```
 
 ## Development

@@ -816,36 +816,5 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl +
             $"?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}");
-
-        /// <summary>
-        /// Infinitely yields new <see cref="Comment"/> posted to the subreddit.
-        /// </summary>
-        public IEnumerable<Comment> CommentStream
-        {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Comment>(Reddit, "/comments.json").GetListingStream();
-                return new Listing<Comment>(Reddit, CommentsUrl).GetListingStream();
-            }
-        }
-
-        /// <summary>
-        /// Infinitely yields new <see cref="Post"/> made to the subreddit.
-        /// </summary>
-        public IEnumerable<Post> SubmissionStream
-        {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Post>(Reddit, "/new.json").GetListingStream();
-                return new Listing<Post>(Reddit, SubredditNewUrl).GetListingStream();
-            }
-        }
-
-        /// <summary>
-        /// Infinitely yields new <see cref="ModAction"/> made on the subreddit.
-        /// </summary>
-        public IEnumerable<ModAction> ModerationLogStream => new Listing<ModAction>(Reddit, ModLogUrl).GetListingStream();
     }
 }

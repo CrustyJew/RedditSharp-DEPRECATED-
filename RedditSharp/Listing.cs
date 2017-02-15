@@ -28,53 +28,61 @@ namespace RedditSharp
         Year
     }
 
-    public class ListingStream<T> : IObservable<T> where T : Thing {
+    public class ListingStream<T> : IObservable<T> where T : Thing
+    {
 
         Listing<T> Listing { get; set; }
         List<IObserver<T>> _observers;
 
-        internal ListingStream(Listing<T> listing) {
+        internal ListingStream(Listing<T> listing)
+        {
             Listing = listing;
             _observers = new List<IObserver<T>>();
         }
 
-        public IDisposable Subscribe(IObserver<T> observer) {
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
             if (!_observers.Contains(observer))
                 _observers.Add(observer);
             return new Unsubscriber(_observers, observer);
         }
 
-        public async Task Enumerate() {
-            await Listing.ForEachAsync(page => {
-                  foreach(var thing in page) {
-                      foreach(var observer in _observers) {
-                          observer.OnNext(thing);
-                      }
-                  }
-                });
+        public async Task Enumerate()
+        {
+            await Listing.ForEachAsync(thing =>
+            {
+                foreach (var observer in _observers)
+                {
+                    observer.OnNext(thing);
+                }
+
+            });
         }
 
-        private class Unsubscriber : IDisposable {
+        private class Unsubscriber : IDisposable
+        {
 
-          private ICollection<IObserver<T>> _observers;
-          private IObserver<T> _observer;
+            private ICollection<IObserver<T>> _observers;
+            private IObserver<T> _observer;
 
-          public Unsubscriber(ICollection<IObserver<T>> observers,
-                              IObserver<T> observer) {
-              _observers = observers;
-              _observer = observer;
-          }
+            public Unsubscriber(ICollection<IObserver<T>> observers,
+                                IObserver<T> observer)
+            {
+                _observers = observers;
+                _observer = observer;
+            }
 
-          public void Dispose() {
-            if (_observer != null && _observers.Contains(_observer))
-                _observers.Remove(_observer);
-          }
+            public void Dispose()
+            {
+                if (_observer != null && _observers.Contains(_observer))
+                    _observers.Remove(_observer);
+            }
 
         }
 
     }
 
-    public class Listing<T> : RedditObject, IAsyncEnumerable<IReadOnlyCollection<T>> where T : Thing
+    public class Listing<T> : RedditObject, IAsyncEnumerable<T> where T : Thing
     {
         /// <summary>
         /// Gets the default number of listings returned per request
@@ -91,8 +99,15 @@ namespace RedditSharp
         /// <param name="webAgent"></param>
         internal Listing(Reddit reddit, string url) : base(reddit)
         {
+            LimitPerRequest = DefaultListingPerRequest;
+            MaximumLimit = -1;
+            Stream = false;
             Url = url;
         }
+
+        public int LimitPerRequest { get; set; }
+        public int MaximumLimit { get; set; }
+        public bool Stream { get; set; }
 
         /// <summary>
         /// Returns an enumerator that iterates through a collection, using the specified number of listings per
@@ -101,28 +116,30 @@ namespace RedditSharp
         /// <param name="limitPerRequest">The number of listings to be returned per request</param>
         /// <param name="maximumLimit">The maximum number of listings to return</param>
         /// <returns></returns>
-        public IAsyncEnumerator<IReadOnlyCollection<T>> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
+        public IAsyncEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
         {
             return new ListingEnumerator(this, limitPerRequest, maximumLimit, stream);
         }
 
-        public IAsyncEnumerator<IReadOnlyCollection<T>> GetEnumerator()
+        public IAsyncEnumerator<T> GetEnumerator()
         {
-            return GetEnumerator(DefaultListingPerRequest);
+            return GetEnumerator(LimitPerRequest,MaximumLimit,Stream);
         }
 
-        public ListingStream<T> GetListingStream() {
+        public ListingStream<T> GetListingStream()
+        {
             return new ListingStream<T>(this);
         }
 
 #pragma warning disable 0693
-        private class ListingEnumerator : IAsyncEnumerator<IReadOnlyCollection<T>>
+        private class ListingEnumerator : IAsyncEnumerator<T>
         {
             private bool stream = false;
             private Listing<T> Listing { get; set; }
             private string After { get; set; }
             private string Before { get; set; }
             private ReadOnlyCollection<T> CurrentPage { get; set; }
+            private int CurrentIndex { get; set; }
             private int Count { get; set; }
             private int LimitPerRequest { get; set; }
             private int MaximumLimit { get; set; }
@@ -140,6 +157,7 @@ namespace RedditSharp
             {
                 Listing = listing;
                 CurrentPage = null;// new ReadOnlyCollection<T>(new T[0]);
+                CurrentIndex = -1;
                 done = new HashSet<string>();
                 this.stream = stream;
 
@@ -148,7 +166,7 @@ namespace RedditSharp
                 MaximumLimit = maximumLimit;
             }
 
-            public IReadOnlyCollection<T> Current => CurrentPage;
+            public T Current => CurrentPage.ElementAtOrDefault(CurrentIndex);
 
             private Task FetchNextPageAsync()
             {
@@ -161,13 +179,14 @@ namespace RedditSharp
             string AppendQueryParam(string url, string param, string value) =>
                 url + (url.Contains("?") ? "&" : "?") + param + "=" + value;
 
-            string AppendCommonParams(string url) {
-                if (LimitPerRequest < 0)
+            string AppendCommonParams(string url)
+            {
+                if (LimitPerRequest > 0)
                 {
                     int limit = LimitPerRequest;
-                    if(MaximumLimit < 0)
+                    if (MaximumLimit < 0)
                     {
-                        limit = new [] {LimitPerRequest, MaximumLimit, Count + LimitPerRequest - MaximumLimit}.Min();
+                        limit = new[] { LimitPerRequest, MaximumLimit, Count + LimitPerRequest - MaximumLimit }.Min();
                     }
                     if (limit > 0)
                     {
@@ -198,6 +217,7 @@ namespace RedditSharp
                 }
                 url = AppendCommonParams(url);
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
+                json = json.Last();
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listing.");
                 Parse(json);
@@ -216,6 +236,7 @@ namespace RedditSharp
                 }
                 url = AppendCommonParams(url);
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
+                json = json.Last();
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
                 Parse(json);
@@ -264,7 +285,7 @@ namespace RedditSharp
 
                 CurrentPage = new ReadOnlyCollection<T>(things);
                 // Increase the total count of items returned
-                Count += CurrentPage.Count;
+                
 
                 After = json["data"]["after"].Value<string>();
                 Before = json["data"]["before"].Value<string>();
@@ -277,40 +298,52 @@ namespace RedditSharp
 
             public async Task<bool> MoveNext(CancellationToken cancellationToken)
             {
-                if (stream) {
+                if (stream)
+                {
                     return await MoveNextForwardAsync().ConfigureAwait(false);
-                } else {
+                }
+                else
+                {
                     return await MoveNextBackAsync().ConfigureAwait(false);
                 }
             }
 
             private async Task<bool> MoveNextBackAsync()
             {
-                if (CurrentPage == null)
+                if (CurrentIndex == -1)
                 {
+                    //first call, get a page and set CurrentIndex
                     await FetchNextPageAsync().ConfigureAwait(false);
-                    return true;
+                    CurrentIndex = 0;
+                    Count = 1;
+                    return CurrentPage.Count > 0; //if there are no results, return false
                 }
-                if (After == null)
+                else
                 {
-                    // No more pages to return
-                    return false;
+                    Count++;
+                    CurrentIndex++;
                 }
-
+                //I don't think we want to use Count here. Look into this.
                 if (MaximumLimit != -1 && Count >= MaximumLimit)
                 {
                     // Maximum listing count returned
                     return false;
                 }
-
-                // Get the next page
-                await FetchNextPageAsync().ConfigureAwait(false);
-
-                if (CurrentPage.Count == 0)
+                if (CurrentIndex >= CurrentPage.Count)
                 {
-                    // No listings were returned in the page
-                    return false;
+                    if (After == null)
+                    {
+                        // No more pages to return
+                        return false;
+                    }
+                    else
+                    {
+                        await FetchNextPageAsync().ConfigureAwait(false);
+                        CurrentIndex = 0;
+                        return CurrentPage.Count > 0; //if there are no results, return false
+                    }
                 }
+
                 return true;
             }
 
@@ -363,7 +396,7 @@ namespace RedditSharp
                 }
                 else
                 {
-                    seconds = tries*5;
+                    seconds = tries * 5;
                 }
                 await Task.Delay(seconds * 1000).ConfigureAwait(false);
             }

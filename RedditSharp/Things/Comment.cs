@@ -31,7 +31,7 @@ namespace RedditSharp.Things
             ParseComments(json, sender);
         }
 
-        protected override JToken GetJsonData(JToken json) => json;
+        protected override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>
         /// Fill the object with comments.

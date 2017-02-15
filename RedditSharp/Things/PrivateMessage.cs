@@ -124,7 +124,7 @@ namespace RedditSharp.Things
                 //TODO: Convert this into an async function
                 var firstPage = listing.First();
                 firstPage.Wait();
-                var firstMessage = firstPage.Result.FirstOrDefault();
+                var firstMessage = firstPage.Result;
                 if (firstMessage?.FullName == ParentID)
                     return firstMessage;
                 else

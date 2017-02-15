@@ -14,7 +14,7 @@ namespace RedditSharp.Things
     public class Post : VotableThing
     {
         private const string CommentUrl = "/api/comment";
-        private const string GetCommentsUrl = "/comments/{Id}.json";
+        private const string GetCommentsUrl = "/comments/{0}.json";
         private const string EditUserTextUrl = "/api/editusertext";
         private const string HideUrl = "/api/hide";
         private const string UnhideUrl = "/api/unhide";
@@ -34,7 +34,8 @@ namespace RedditSharp.Things
         public new string AuthorName { get; private set; }
 
         //TODO Discuss
-        public IObservable<Comment> Comments => GetComments();
+
+        public Listing<Comment> Comments => new Listing<Comment>(Reddit, string.Format(GetCommentsUrl, Id));
 
         /// <summary>
         /// Domain of this post.
@@ -279,7 +280,6 @@ namespace RedditSharp.Things
 
             return comments;
         }
-
         //TODO discuss this
         public IEnumerable<Comment> EnumerateCommentsAsync() => GetComments().ToEnumerable();
 

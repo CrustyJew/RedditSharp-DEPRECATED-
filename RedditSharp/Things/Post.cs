@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions;
 using System.Net;
 using System.Reactive.Linq;
+using System.Threading;
 
 namespace RedditSharp.Things
 {
@@ -24,7 +25,8 @@ namespace RedditSharp.Things
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
-        public Post(Reddit reddit, JToken json) : base(reddit, json) {
+        public Post(Reddit reddit, JToken json) : base(reddit, json)
+        {
         }
 
         /// <summary>
@@ -32,10 +34,6 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("author")]
         public new string AuthorName { get; private set; }
-
-        //TODO Discuss
-
-        public Listing<Comment> Comments => new Listing<Comment>(Reddit, string.Format(GetCommentsUrl, Id));
 
         /// <summary>
         /// Domain of this post.
@@ -116,9 +114,10 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonIgnore]
         public Subreddit Subreddit =>
-          Task.Run(async () => {
+          Task.Run(async () =>
+          {
               return await Reddit.GetSubredditAsync("/r/" + SubredditName).ConfigureAwait(false);
-            }).Result;
+          }).Result;
 
         /// <summary>
         /// Post uri.
@@ -255,16 +254,16 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Get a <see cref="Listing{T}"/> of comments.
+        /// Get a <see cref="List{T}"/> of comments.
         /// </summary>
-        /// <param name="limit"></param>
+        /// <param name="limit">Maximum number of comments to return</param>
         /// <returns></returns>
-        public async Task<List<Comment>> ListCommentsAsync(int? limit = null)
+        public async Task<List<Comment>> GetCommentsAsync(int limit = 0)
         {
             var url = string.Format(GetCommentsUrl, Id);
-            if (limit.HasValue)
+            if (limit > 0)
             {
-                var query = WebUtility.UrlEncode("limit="+limit.Value.ToString());
+                var query = "limit=" + limit;
                 url = string.Format("{0}?{1}", url, query);
             }
             var json = await WebAgent.Get(url).ConfigureAwait(false);
@@ -280,61 +279,51 @@ namespace RedditSharp.Things
 
             return comments;
         }
-        //TODO discuss this
-        public IEnumerable<Comment> EnumerateCommentsAsync() => GetComments().ToEnumerable();
-
         /// <summary>
-        /// Enumerate more comments.
+        /// Returns a <see cref="List{T}"/> of <see cref="Thing"/> that contains <see cref="Comment"/> and <see cref="More"/>
         /// </summary>
+        /// <param name="limit">Maximum number of comments to return. Returned list may be larger than this number though due to <see cref="More"/></param>
         /// <returns></returns>
-        public IObservable<Comment> GetComments()
+        public async Task<List<Thing>> GetCommentsWithMoresAsync(int limit = 0)
         {
-            return Observable.Create<Comment>(async obs =>
+            var url = string.Format(GetCommentsUrl, Id);
+            if (limit > 0)
             {
-                var json = await WebAgent.Get(GetCommentsUrl).ConfigureAwait(false);
-                var postJson = json.Last()["data"]["children"];
-                More moreComments = null;
-                foreach (var comment in postJson)
+                var query = "limit=" + limit;
+                url = string.Format("{0}?{1}", url, query);
+            }
+            var json = await WebAgent.Get(url).ConfigureAwait(false);
+            var postJson = json.Last()["data"]["children"];
+
+            var things = new List<Thing>();
+            foreach (var comment in postJson)
+            {
+                Comment newComment = new Comment(Reddit, comment, this);
+                if (newComment.Kind != "more")
                 {
-                    Comment newComment = new Comment(Reddit, comment, this);
-                    if (newComment.Kind == "more")
-                    {
-                        moreComments = new More(Reddit, comment);
-                    }
-                    else
-                    {
-                        obs.OnNext(newComment);
-                    }
+                    things.Add(newComment);
                 }
-
-
-                if (moreComments != null)
+                else 
                 {
-                    var baseThings = await moreComments.GetThingsAsync().ConfigureAwait(false);
-                    IEnumerator<Thing> things = baseThings.GetEnumerator();
-                    things.MoveNext();
-                    Thing currentThing = null;
-                    while (currentThing != things.Current)
-                    {
-                        var comment = things.Current as Comment;
-                        var more = things.Current as More;
-                        if (comment != null)
-                        {
-                            Comment next = comment.PopulateComments(things);
-                            obs.OnNext(next);
-                        }
-                        if (more != null)
-                        {
-                            if (more.ParentId != FullName) break;
-                            var moreThings = await more.GetThingsAsync().ConfigureAwait(false);
-                            things = moreThings.GetEnumerator();
-                            things.MoveNext();
-                        }
-                    }
+                    things.Add(new More(Reddit, comment));
                 }
+            }
 
-                obs.OnCompleted();
-            });
+            return things;
+
         }
+        /// <summary>
+        /// Returns an <see cref="IAsyncEnumerable{T}"/> of <see cref="Comment"/> containing all comments in a post.
+        /// This will cause multiple web requests on larger comment sections.
+        /// </summary>
+        /// <param name="limitPerRequest">Maximum number of comments to retrieve at a time. 0 for Reddit maximum</param>
+        /// <returns></returns>
+        public IAsyncEnumerable<Comment> EnumerateCommentTreeAsync(int limitPerRequest = 0)
+        {
+            return new CommentsEnumarable(Reddit, this, limitPerRequest);
+        }
+        
     }
+
 }
+

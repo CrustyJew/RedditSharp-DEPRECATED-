@@ -6,8 +6,12 @@ using RedditSharp.Extensions;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// The base reddit class.
+    /// </summary>
     public class Thing : RedditObject
     {
+#pragma warning disable 1591
         public Thing(Reddit reddit, JToken json) : base(reddit) {
           Populate(json);
         }
@@ -26,6 +30,7 @@ namespace RedditSharp.Things
         protected virtual JToken GetJsonData(JToken json) {
           return json.ToString();
         }
+#pragma warning restore 1591
 
         /// <summary>
         /// Shortlink to the item

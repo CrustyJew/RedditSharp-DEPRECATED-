@@ -7,15 +7,29 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Manages OAuth connections to reddit.
+    /// </summary>
     public class AuthProvider
     {
+        /// <summary>
+        /// Access token request url.
+        /// </summary>
         public const string AccessUrl = "https://ssl.reddit.com/api/v1/access_token";
         private const string OauthGetMeUrl = "https://oauth.reddit.com/api/v1/me";
         private const string RevokeUrl = "https://www.reddit.com/api/v1/revoke_token";
 
+        /// <summary>
+        /// OAuth2 token.
+        /// </summary>
         public static string OAuthToken { get; set; }
+
+        /// <summary>
+        /// OAuth2 refresh token.
+        /// </summary>
         public static string RefreshToken { get; set; }
 
+#pragma warning disable 1591
         [Flags]
         public enum Scope
         {
@@ -40,6 +54,8 @@ namespace RedditSharp
             wikiedit = 0x20000,
             wikiread = 0x40000
         }
+#pragma warning restore 1591
+
         private IWebAgent _webAgent;
         private readonly string _redirectUri;
         private readonly string _clientId;
@@ -181,23 +197,6 @@ namespace RedditSharp
                 token_type = tokenType
             });
             await _webAgent.ExecuteRequestAsync(request).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Gets a user authenticated by OAuth2.
-        /// </summary>
-        /// <param name="accessToken">Obtained using GetOAuthToken</param>
-        /// <returns></returns>
-        [Obsolete("Reddit.InitOrUpdateUser is preferred")]
-        public async Task<AuthenticatedUser> GetUserAsync(string accessToken)
-        {
-            var request = _webAgent.CreateRequest(OauthGetMeUrl, "GET");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", accessToken);
-            var response = await _webAgent.GetResponseAsync(request);
-            var result = await response.Content.ReadAsStringAsync();
-            var thingjson = "{\"kind\": \"t2\", \"data\": " + result + "}";
-            var json = JObject.Parse(thingjson);
-            return new AuthenticatedUser(new Reddit(_webAgent), json);
         }
     }
 }

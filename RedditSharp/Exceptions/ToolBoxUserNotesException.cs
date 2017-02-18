@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable 1591
+using System;
 
 namespace RedditSharp
 {
@@ -19,3 +20,4 @@ namespace RedditSharp
         }
     }
 }
+#pragma warning restore 1591

@@ -5,6 +5,9 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Permissions granted to a moderator.
+    /// </summary>
     [Flags]
     public enum ModeratorPermission
     {

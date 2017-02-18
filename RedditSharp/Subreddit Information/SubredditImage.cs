@@ -3,10 +3,19 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Subreddit image logo.
+    /// </summary>
     public class SubredditImage : RedditObject
     {
         private const string DeleteImageUrl = "/api/delete_sr_img";
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="subredditStyle">Subreddit style.</param>
+        /// <param name="cssLink">Css link.</param>
+        /// <param name="name">Name of the image.</param>
         public SubredditImage(SubredditStyle subredditStyle,
             string cssLink, string name) : base(subredditStyle?.Reddit)
         {
@@ -15,6 +24,13 @@ namespace RedditSharp
             CssLink = cssLink;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="subreddit">Subreddit style.</param>
+        /// <param name="cssLink">Css link.</param>
+        /// <param name="name">Name of the image.</param>
+        /// <param name="url">Url of the image.</param>
         public SubredditImage(SubredditStyle subreddit,
             string cssLink, string name, string url)
             : this(subreddit, cssLink, name)

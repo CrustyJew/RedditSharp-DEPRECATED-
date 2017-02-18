@@ -9,12 +9,17 @@ using RedditSharp.Extensions.DateTimeExtensions;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// Represents a subreddit.
+    /// </summary>
     public class Subreddit : Thing
     {
+        #pragma warning disable 1591
         public Subreddit(Reddit reddit, JToken json) : base(reddit, json) {
             SetName();
             Wiki = new Wiki(this);
         }
+        #pragma warning restore 1591
 
         private string SubredditPostUrl => $"/r/{Name}.json";
         private string SubredditNewUrl => $"/r/{Name}/new.json?sort=new";
@@ -153,6 +158,9 @@ namespace RedditSharp.Things
         [JsonProperty("user_is_banned")]
         public bool? UserIsBanned { get; }
 
+        /// <summary>
+        /// Name of the subreddit.
+        /// </summary>
         [JsonIgnore]
         public string Name { get; private set; }
 
@@ -170,6 +178,7 @@ namespace RedditSharp.Things
             }
             return new Listing<Post>(Reddit, SubredditTopUrl(period));
         }
+
         /// <summary>
         /// All posts on a subredit
         /// </summary>
@@ -182,6 +191,7 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, SubredditPostUrl);
             }
         }
+
         /// <summary>
         /// Comments for a subreddit, all of them, irrespective of replies and what it is replying to
         /// </summary>
@@ -194,6 +204,7 @@ namespace RedditSharp.Things
                 return new Listing<Comment>(Reddit, CommentsUrl);
             }
         }
+
         /// <summary>
         /// Posts on the subreddit/new
         /// </summary>
@@ -206,6 +217,7 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, SubredditNewUrl);
             }
         }
+
         /// <summary>
         /// Posts on the front page of the subreddits
         /// </summary>
@@ -218,6 +230,7 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, SubredditHotUrl);
             }
         }
+
         /// <summary>
         /// List of rising posts
         /// </summary>
@@ -230,6 +243,7 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, SubredditRisingUrl);
             }
         }
+
         /// <summary>
         /// List of Controversial posts
         /// </summary>
@@ -242,6 +256,7 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, SubredditControversialUrl);
             }
         }
+
         /// <summary>
         /// List of gilded things
         /// </summary>
@@ -397,6 +412,7 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) =>  json["data"];
 
         private void SetName()
@@ -511,12 +527,9 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Add a new flair template.
+        /// Get the flair text of a user.
         /// </summary>
-        /// <param name="cssClass">css class name</param>
-        /// <param name="flairType"><see cref="FlairType"/></param>
-        /// <param name="text">flair text</param>
-        /// <param name="userEditable">set flair user editable</param>
+        /// <param name="user">user name.</param>
         public async Task<string> GetFlairTextAsync(string user)
         {
             var json= await WebAgent.Get(FlairListUrl + "?name=" + user).ConfigureAwait(false);
@@ -710,7 +723,6 @@ namespace RedditSharp.Things
         /// Unbans a user
         /// </summary>
         /// <param name="user">User to unban, by username</param>
-        /// <summary>
         public async Task UnBanUserAsync(string user)
         {
             await WebAgent.Post(UnBanUserUrl, new
@@ -757,6 +769,9 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="title">The title of the submission</param>
         /// <param name="url">The url of the submission link</param>
+        /// <param name="captchaId"></param>
+        /// <param name="captchaAnswer"></param>
+        /// <param name="resubmit"></param>
         public async Task<Post> SubmitPostAsync(string title, string url, string captchaId = "", string captchaAnswer = "", bool resubmit = false)
         {
             return await SubmitAsync(new LinkData
@@ -776,6 +791,8 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="title">The title of the submission</param>
         /// <param name="text">The raw markdown text of the submission</param>
+        /// <param name="captchaId"></param>
+        /// <param name="captchaAnswer"></param>
         public async Task<Post> SubmitTextPostAsync(string title, string text, string captchaId = "", string captchaAnswer = "")
         {
             return await SubmitAsync(new TextData

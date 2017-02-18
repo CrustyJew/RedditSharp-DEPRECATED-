@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 1591
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Extensions
@@ -13,3 +14,4 @@ namespace RedditSharp.Extensions
         }
     }
 }
+#pragma warning restore 1591

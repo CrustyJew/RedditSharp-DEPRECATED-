@@ -4,11 +4,17 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// An item that is created.
+    /// </summary>
     public class CreatedThing : Thing
     {
+        #pragma warning disable 1591
         public CreatedThing(Reddit reddit, JToken json) : base(reddit, json) {
         }
+        #pragma warning restore 1591
 
+        /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>

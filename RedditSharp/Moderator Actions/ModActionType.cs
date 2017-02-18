@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿#pragma warning disable 1591
+using Newtonsoft.Json;
 using System;
 
 namespace RedditSharp
@@ -80,3 +81,4 @@ namespace RedditSharp
         }
     }
 }
+#pragma warning restore 1591

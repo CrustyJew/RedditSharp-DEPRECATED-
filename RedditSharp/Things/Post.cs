@@ -11,6 +11,9 @@ using System.Reactive.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A post.
+    /// </summary>
     public class Post : VotableThing
     {
         private const string CommentUrl = "/api/comment";
@@ -24,8 +27,10 @@ namespace RedditSharp.Things
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
+        #pragma warning disable 1591
         public Post(Reddit reddit, JToken json) : base(reddit, json) {
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Author of this post.
@@ -34,6 +39,9 @@ namespace RedditSharp.Things
         public new string AuthorName { get; }
 
         //TODO Discuss
+        /// <summary>
+        /// The comments on this post.
+        /// </summary>
         public IObservable<Comment> Comments => GetComments();
 
         /// <summary>
@@ -281,6 +289,10 @@ namespace RedditSharp.Things
         }
 
         //TODO discuss this
+        /// <summary>
+        /// Get the comments for this post.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Comment> EnumerateCommentsAsync() => GetComments().ToEnumerable();
 
         /// <summary>

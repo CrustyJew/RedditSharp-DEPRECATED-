@@ -1,10 +1,13 @@
 ﻿using RedditSharp.Things;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {
-    using System.Threading.Tasks;
 
+    /// <summary>
+    /// A subreddit wiki.
+    /// </summary>
     public class Wiki
     {
         private Subreddit Subreddit { get; set; }
@@ -39,10 +42,12 @@ namespace RedditSharp
         /// </summary>
         public Listing<WikiPageRevision> Revisions => new Listing<WikiPageRevision>(Reddit, WikiRevisionsUrl);
 
+        #pragma warning disable 1591
         protected internal Wiki(Subreddit subreddit)
         {
             Subreddit = subreddit;
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Get a wiki page

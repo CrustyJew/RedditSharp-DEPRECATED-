@@ -9,12 +9,16 @@ using RedditSharp.Extensions;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A comment.
+    /// </summary>
     public class Comment : VotableThing
     {
         private const string CommentUrl = "/api/comment";
         private const string EditUserTextUrl = "/api/editusertext";
         private const string SetAsReadUrl = "/api/read_message";
 
+        #pragma warning disable 1591
         public Comment(Reddit reddit, JToken json, Thing sender) : base(reddit, json) {
             var data = json["data"];
             Parent = sender;
@@ -27,7 +31,9 @@ namespace RedditSharp.Things
             }
             ParseComments(json, sender);
         }
+        #pragma warning restore 1591
 
+        /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) => json;
 
         /// <summary>
@@ -229,6 +235,7 @@ namespace RedditSharp.Things
                 throw new Exception("Error editing text.");
         }
 
+        /// <inheritdoc />
         protected override async Task<JToken> SimpleActionAsync(string endpoint)
         {
             if (Reddit.User == null)

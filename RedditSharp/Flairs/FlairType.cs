@@ -1,4 +1,5 @@
-﻿namespace RedditSharp
+﻿#pragma warning disable 1591
+namespace RedditSharp
 {
     public enum FlairType
     {
@@ -6,3 +7,4 @@
         User
     }
 }
+#pragma warning restore 1591

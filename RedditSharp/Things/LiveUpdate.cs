@@ -5,39 +5,77 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A live update.
+    /// </summary>
     public class LiveUpdate : CreatedThing
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reddit">Reddit.</param>
+        /// <param name="json">Json payload.</param>
         public LiveUpdate(Reddit reddit, JToken json) : base(reddit, json) {
         }
 
         private const string StrikeUpdateUrl = "/api/live/{0}/strike_update";
         private const string DeleteUpdateUrl = "/api/live/{0}/delete_update";
 
+        /// <summary>
+        /// Body of the update.
+        /// </summary>
         [JsonProperty("body")]
         public string Body { get; }
 
+        /// <summary>
+        /// Body of the update in Html.
+        /// </summary>
         [JsonProperty("body_html")]
         public string BodyHtml { get; }
 
+        /// <summary>
+        /// Name of the update.
+        /// </summary>
         [JsonProperty("name")]
         public string Name { get; }
 
+        /// <summary>
+        /// Embeded items for mobile.
+        /// </summary>
         [JsonProperty("mobile_embeds")]
         public ICollection<MobileEmbed> MobileEmbeds { get; }
 
+        /// <summary>
+        /// Name of the redditor who made the update.
+        /// </summary>
         [JsonProperty("author")]
         public string Author { get; }
 
+        /// <summary>
+        /// Embeded items.
+        /// </summary>
         [JsonProperty("embeds")]
         public ICollection<Embed> Embeds { get; }
 
+        /// <summary>
+        /// Returns true is the update is stricken.
+        /// </summary>
         [JsonProperty("stricken")]
         public bool IsStricken { get; }
 
+        /// <summary>
+        /// Strike this update.
+        /// </summary>
+        /// <returns></returns>
         public Task StrikeAsync() => SimpleActionAsync(StrikeUpdateUrl);
 
+        /// <summary>
+        /// Delete this update.
+        /// </summary>
+        /// <returns></returns>
         public Task DeleteAsync() => SimpleActionAsync(DeleteUpdateUrl);
 
+#pragma warning disable 1591
         public class MobileEmbed
         {
             [JsonProperty("provider_url")]
@@ -91,5 +129,6 @@ namespace RedditSharp.Things
             [JsonProperty("height")]
             public int Height { get; }
         }
+#pragma warning restore 1591
     }
 }

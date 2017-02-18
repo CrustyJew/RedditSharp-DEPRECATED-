@@ -4,6 +4,9 @@ using System;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// A domain submitted to reddit.
+    /// </summary>
     public class Domain : RedditObject
     {
         private string DomainPostUrl => $"/domain/{Name}.json";
@@ -32,10 +35,12 @@ namespace RedditSharp
         /// </summary>
         public Listing<Post> Hot => new Listing<Post>(Reddit, DomainHotUrl);
 
+        #pragma warning disable 1591
         protected internal Domain(Reddit reddit, Uri domain) : base(reddit)
         {
             Name = domain.Host;
         }
+        #pragma warning restore 1591
 
         /// <inheritdoc/>
         public override string ToString() => "/domain/" + Name;

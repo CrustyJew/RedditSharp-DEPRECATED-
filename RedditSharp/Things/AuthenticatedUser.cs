@@ -4,10 +4,15 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// An authenticated user.
+    /// </summary>
     public class AuthenticatedUser : RedditUser
     {
+        #pragma warning disable 1591
         public AuthenticatedUser(Reddit reddit, JToken json) : base (reddit, json) {
         }
+        #pragma warning restore 1591
 
         private const string ModeratorUrl = "/reddits/mine/moderator.json";
         private const string UnreadMessagesUrl = "/message/unread.json?mark=true&limit=25";
@@ -18,8 +23,9 @@ namespace RedditSharp.Things
         private const string InboxUrl = "/message/inbox.json";
         private const string SentUrl = "/message/sent.json";
 
+        /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) {
-          return json["name"] == null ? json["data"] : json;
+            return json["name"] == null ? json["data"] : json;
         }
 
         /// <summary>
@@ -66,28 +72,6 @@ namespace RedditSharp.Things
         /// Get a <see cref="Listing{T}"/> of unmoderated links.
         /// </summary>
         public Listing<Post> GetUnmoderatedLinks() => new Listing<Post>(Reddit, UnmoderatedUrl);
-
-        #region Obsolete Getter Methods
-
-        [Obsolete("Use ModeratorSubreddits property instead")]
-        public Listing<Subreddit> GetModeratorReddits() => ModeratorSubreddits;
-
-        [Obsolete("Use UnreadMessages property instead")]
-        public Listing<Thing> GetUnreadMessages() => UnreadMessages;
-
-        [Obsolete("Use ModerationQueue property instead")]
-        public Listing<VotableThing> GetModerationQueue() => new Listing<VotableThing>(Reddit, ModQueueUrl);
-
-        [Obsolete("Use ModMail property instead")]
-        public Listing<PrivateMessage> GetModMail() => new Listing<PrivateMessage>(Reddit, ModMailUrl);
-
-        [Obsolete("Use PrivateMessages property instead")]
-        public Listing<PrivateMessage> GetPrivateMessages() => new Listing<PrivateMessage>(Reddit, MessagesUrl);
-
-        [Obsolete("Use Inbox property instead")]
-        public Listing<PrivateMessage> GetInbox() => new Listing<PrivateMessage>(Reddit, InboxUrl);
-
-        #endregion Obsolete Getter Methods
 
         /// <summary>
         /// User modhash.

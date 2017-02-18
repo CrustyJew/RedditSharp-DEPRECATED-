@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
+#pragma warning disable 1591
     public enum Sorting
     {
         Relevance,
@@ -24,7 +25,12 @@ namespace RedditSharp
         Month,
         Year
     }
+#pragma warning restore 1591
 
+    /// <summary>
+    /// A reddit listing.  https://github.com/reddit/reddit/wiki/JSON#listing
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Listing<T> : RedditObject, IEnumerable<T> where T : Thing
     {
         /// <summary>
@@ -39,7 +45,6 @@ namespace RedditSharp
         /// </summary>
         /// <param name="reddit"></param>
         /// <param name="url"></param>
-        /// <param name="webAgent"></param>
         internal Listing(Reddit reddit, string url) : base(reddit)
         {
             Url = url;
@@ -51,6 +56,7 @@ namespace RedditSharp
         /// </summary>
         /// <param name="limitPerRequest">The number of listings to be returned per request</param>
         /// <param name="maximumLimit">The maximum number of listings to return</param>
+        /// <param name="stream">Set to true for a listing stream.</param>
         /// <returns></returns>
         public IEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
         {

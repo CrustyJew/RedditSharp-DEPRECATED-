@@ -3,11 +3,25 @@ using Newtonsoft.Json.Converters;
 
 namespace RedditSharp
 {
+    // TODO: confirm this?
+    /// <summary>
+    /// Justification 
+    /// </summary>
     public enum FlairPosition
     {
+        /// <summary>
+        /// Right justified.
+        /// </summary>
         right,
+        /// <summary>
+        /// Left justified.
+        /// </summary>
         left
     }
+
+    /// <summary>
+    /// Template for a user flair.
+    /// </summary>
     public class UserFlairTemplate // TODO: Consider using this class to set templates as well
     {
         /// <summary>

@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
+using RedditSharp.Extensions;
 using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
-using RedditSharp.Extensions;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RedditSharp
@@ -28,10 +31,71 @@ namespace RedditSharp
 #pragma warning restore 1591
 
     /// <summary>
+    /// A semi-realtime stream of <see cref="Thing"/> being posted to an item.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class ListingStream<T> : IObservable<T> where T : Thing
+    {
+
+        Listing<T> Listing { get; set; }
+        List<IObserver<T>> _observers;
+
+        internal ListingStream(Listing<T> listing)
+        {
+            Listing = listing;
+            _observers = new List<IObserver<T>>();
+        }
+
+        /// <inheritdoc />
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
+            return new Unsubscriber(_observers, observer);
+        }
+
+        #pragma warning disable 1591
+        public async Task Enumerate()
+        {
+            await Listing.ForEachAsync(thing =>
+            {
+                foreach (var observer in _observers)
+                {
+                    observer.OnNext(thing);
+                }
+
+            });
+        }
+        #pragma warning restore 1591
+
+        private class Unsubscriber : IDisposable
+        {
+
+            private ICollection<IObserver<T>> _observers;
+            private IObserver<T> _observer;
+
+            public Unsubscriber(ICollection<IObserver<T>> observers,
+                                IObserver<T> observer)
+            {
+                _observers = observers;
+                _observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (_observer != null && _observers.Contains(_observer))
+                    _observers.Remove(_observer);
+            }
+
+        }
+
+    }
+
+    /// <summary>
     /// A reddit listing.  https://github.com/reddit/reddit/wiki/JSON#listing
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Listing<T> : RedditObject, IEnumerable<T> where T : Thing
+    public class Listing<T> : RedditObject, IAsyncEnumerable<T> where T : Thing
     {
         /// <summary>
         /// Gets the default number of listings returned per request
@@ -47,8 +111,26 @@ namespace RedditSharp
         /// <param name="url"></param>
         internal Listing(Reddit reddit, string url) : base(reddit)
         {
+            LimitPerRequest = DefaultListingPerRequest;
+            MaximumLimit = -1;
+            Stream = false;
             Url = url;
         }
+
+        /// <summary>
+        /// Number of records to return for each request.
+        /// </summary>
+        public int LimitPerRequest { get; set; }
+
+        /// <summary>
+        /// Maximum number of records to return.
+        /// </summary>
+        public int MaximumLimit { get; set; }
+
+        /// <summary>
+        /// Returns true is this a ListingStream.
+        /// </summary>
+        public bool Stream { get; set; }
 
         /// <summary>
         /// Returns an enumerator that iterates through a collection, using the specified number of listings per
@@ -58,100 +140,38 @@ namespace RedditSharp
         /// <param name="maximumLimit">The maximum number of listings to return</param>
         /// <param name="stream">Set to true for a listing stream.</param>
         /// <returns></returns>
-        public IEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
+        public IAsyncEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
         {
-            return new ListingEnumerator<T>(this, limitPerRequest, maximumLimit, stream);
+            return new ListingEnumerator(this, limitPerRequest, maximumLimit, stream);
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection, using the default number of listings per request
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerator<T> GetEnumerator()
+        /// <inheritdoc/>
+        public IAsyncEnumerator<T> GetEnumerator()
         {
-            return GetEnumerator(DefaultListingPerRequest);
+            return GetEnumerator(LimitPerRequest,MaximumLimit,Stream);
         }
 
-
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection
-        /// </summary>
-        /// <returns></returns>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        #pragma warning disable 1591
+        public ListingStream<T> GetListingStream()
         {
-            return GetEnumerator();
+            return new ListingStream<T>(this);
         }
-
-        /// <summary>
-        /// Returns an IEnumerable instance which will return the specified maximum number of listings
-        /// </summary>
-        /// <param name="maximumLimit"></param>
-        /// <returns></returns>
-        public IEnumerable<T> GetListing(int maximumLimit)
-        {
-            return GetListing(maximumLimit, DefaultListingPerRequest);
-        }
-
-        /// <summary>
-        /// Returns an IEnumerable instance which will return the specified maximum number of listings
-        /// with the limited number per request
-        /// </summary>
-        /// <param name="maximumLimit"></param>
-        /// <param name="limitPerRequest"></param>
-        /// <returns></returns>
-        public IEnumerable<T> GetListing(int maximumLimit, int limitPerRequest)
-        {
-            // Get the enumerator with the specified maximum and per request limits
-            var enumerator = GetEnumerator(limitPerRequest, maximumLimit);
-
-            return GetEnumerator(enumerator);
-        }
-
-        /// <summary>
-        /// Returns an IEnumerable instance which will infinitely yield new <see cref="Thing"/>
-        /// </summary>
-        /// <param name="limitPerRequest">
-        ///   Number of records to return in each request to the reddit api.  Defaults to using the reddit
-        ///   standard of 25 records of requests.
-        ///   Adjusting this up or down based on the size of your subreddit and the rate at which new content
-        ///   is created.
-        /// </param>
-        /// <param name="maximumLimit">maximum number of records to return</param>
-        /// <returns></returns>
-        public IEnumerable<T> GetListingStream(int limitPerRequest = -1, int maximumLimit = -1)
-        {
-            // Get the enumerator with the specified maximum and per request limits
-            var enumerator = GetEnumerator(limitPerRequest, maximumLimit, true);
-            return GetEnumerator(enumerator);
-        }
-
-        /// <summary>
-        /// Converts an IEnumerator instance to an IEnumerable
-        /// </summary>
-        /// <param name="enumerator"></param>
-        /// <returns></returns>
-        private static IEnumerable<T> GetEnumerator(IEnumerator<T> enumerator)
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-            }
-        }
+        #pragma warning restore 1591
 
 #pragma warning disable 0693
-        private class ListingEnumerator<T> : IEnumerator<T> where T : Thing
+        private class ListingEnumerator : IAsyncEnumerator<T>
         {
             private bool stream = false;
             private Listing<T> Listing { get; set; }
-            private int CurrentPageIndex { get; set; }
             private string After { get; set; }
             private string Before { get; set; }
-            private Thing[] CurrentPage { get; set; }
+            private ReadOnlyCollection<T> CurrentPage { get; set; }
+            private int CurrentIndex { get; set; }
             private int Count { get; set; }
             private int LimitPerRequest { get; set; }
             private int MaximumLimit { get; set; }
 
-            private List<string> done;
+            private ICollection<string> done;
 
             /// <summary>
             /// Creates a new ListingEnumerator instance
@@ -163,9 +183,9 @@ namespace RedditSharp
             public ListingEnumerator(Listing<T> listing, int limitPerRequest, int maximumLimit, bool stream = false)
             {
                 Listing = listing;
-                CurrentPageIndex = -1;
-                CurrentPage = new Thing[0];
-                done = new List<string>();
+                CurrentPage = null;// new ReadOnlyCollection<T>(new T[0]);
+                CurrentIndex = -1;
+                done = new HashSet<string>();
                 this.stream = stream;
 
                 // Set the listings per page (if not specified, use the Reddit default of 25) and the maximum listings
@@ -173,7 +193,7 @@ namespace RedditSharp
                 MaximumLimit = maximumLimit;
             }
 
-            public T Current => (T)CurrentPage[CurrentPageIndex];
+            public T Current => CurrentPage.ElementAtOrDefault(CurrentIndex);
 
             private Task FetchNextPageAsync()
             {
@@ -181,6 +201,34 @@ namespace RedditSharp
                     return PageForwardAsync();
                 else
                     return PageBackAsync();
+            }
+
+            string AppendQueryParam(string url, string param, string value) =>
+                url + (url.Contains("?") ? "&" : "?") + param + "=" + value;
+
+            string AppendCommonParams(string url)
+            {
+                if (LimitPerRequest > 0)
+                {
+                    int limit = LimitPerRequest;
+                    if (MaximumLimit < 0)
+                    {
+                        limit = new[] { LimitPerRequest, MaximumLimit, Count + LimitPerRequest - MaximumLimit }.Min();
+                    }
+                    if (limit > 0)
+                    {
+                        // Add the limit, the maximum number of items to be returned per page
+                        url = AppendQueryParam(url, "limit", limit.ToString());
+                    }
+                }
+
+                if (Count > 0)
+                {
+                    // Add the count, the number of items already seen in this listing
+                    // The Reddit API uses this to determine when to give values for before and after fields
+                    url = AppendQueryParam(url, "count", Count.ToString());
+                }
+                return url;
             }
 
             /// <summary>
@@ -192,46 +240,15 @@ namespace RedditSharp
 
                 if (After != null)
                 {
-                    url += (url.Contains("?") ? "&" : "?") + "after=" + After;
+                    url = AppendQueryParam(url, "after", After);
                 }
-
-                if (LimitPerRequest != -1)
-                {
-                    int limit = LimitPerRequest;
-                    if(MaximumLimit != -1)
-                    {
-                        if (limit > MaximumLimit)
-                        {
-                            // If the limit is more than the maximum number of listings, adjust
-                            limit = MaximumLimit;
-                        }
-                        else if (Count + limit > MaximumLimit)
-                        {
-                            // If a smaller subset of listings are needed, adjust the limit
-                            limit = MaximumLimit - Count;
-                        }
-                    }
-
-                    if (limit > 0)
-                    {
-                        // Add the limit, the maximum number of items to be returned per page
-                        url += (url.Contains("?") ? "&" : "?") + "limit=" + limit;
-                    }
-                }
-
-                if (Count > 0)
-                {
-                    // Add the count, the number of items already seen in this listing
-                    // The Reddit API uses this to determine when to give values for before and after fields
-                    url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
-                }
-
+                url = AppendCommonParams(url);
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
+                //json = json.Last();
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listing.");
                 Parse(json);
             }
-
 
             /// <summary>
             /// Page from oldest to newest - "forward" in time.
@@ -242,39 +259,11 @@ namespace RedditSharp
 
                 if (Before != null)
                 {
-                    url += (url.Contains("?") ? "&" : "?") + "before=" + Before;
+                    url = AppendQueryParam(url, "before", Before);
                 }
-
-                if (LimitPerRequest != -1)
-                {
-                    int limit = LimitPerRequest;
-
-                    if (limit > MaximumLimit && MaximumLimit != -1)
-                    {
-                        // If the limit is more than the maximum number of listings, adjust
-                        limit = MaximumLimit;
-                    }
-                    else if (Count + limit > MaximumLimit && MaximumLimit != -1)
-                    {
-                        // If a smaller subset of listings are needed, adjust the limit
-                        limit = MaximumLimit - Count;
-                    }
-
-                    if (limit > 0)
-                    {
-                        // Add the limit, the maximum number of items to be returned per page
-                        url += (url.Contains("?") ? "&" : "?") + "limit=" + limit;
-                    }
-                }
-
-                if (Count > 0)
-                {
-                    // Add the count, the number of items already seen in this listingStream
-                    // The Reddit API uses this to determine when to give values for before and after fields
-                    url += (url.Contains("?") ? "&" : "?") + "count=" + Count;
-                }
-
+                url = AppendCommonParams(url);
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
+                json = json.Last();
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
                 Parse(json);
@@ -283,7 +272,7 @@ namespace RedditSharp
             private void Parse(JToken json)
             {
                 var children = json["data"]["children"] as JArray;
-                var things = new List<Thing>();
+                var things = new List<T>();
 
                 for (int i = 0; i < children.Count; i++)
                 {
@@ -321,9 +310,9 @@ namespace RedditSharp
                 if (stream)
                     things.Reverse();
 
-                CurrentPage = things.ToArray();
+                CurrentPage = new ReadOnlyCollection<T>(things);
                 // Increase the total count of items returned
-                Count += CurrentPage.Length;
+                
 
                 After = json["data"]["after"].Value<string>();
                 Before = json["data"]["before"].Value<string>();
@@ -334,100 +323,99 @@ namespace RedditSharp
                 // ...
             }
 
-            object System.Collections.IEnumerator.Current
-            {
-                get { return Current; }
-            }
-
-            public bool MoveNext()
+            public async Task<bool> MoveNext(CancellationToken cancellationToken)
             {
                 if (stream)
                 {
-                    var result = Task.Run(MoveNextForwardAsync).Result;
-                    return result;
+                    return await MoveNextForwardAsync().ConfigureAwait(false);
                 }
-                else {
-                    var result = Task.Run(MoveNextBackAsync).Result;
-                    return result;
+                else
+                {
+                    return await MoveNextBackAsync().ConfigureAwait(false);
                 }
             }
 
             private async Task<bool> MoveNextBackAsync()
             {
-                CurrentPageIndex++;
-                if (CurrentPageIndex == CurrentPage.Length)
+                if (CurrentIndex == -1)
                 {
-                    if (After == null && CurrentPageIndex != 0)
+                    //first call, get a page and set CurrentIndex
+                    await FetchNextPageAsync().ConfigureAwait(false);
+                    CurrentIndex = 0;
+                    Count = 1;
+                    return CurrentPage.Count > 0; //if there are no results, return false
+                }
+                else
+                {
+                    Count++;
+                    CurrentIndex++;
+                }
+                //I don't think we want to use Count here. Look into this.
+                if (MaximumLimit != -1 && Count >= MaximumLimit)
+                {
+                    // Maximum listing count returned
+                    return false;
+                }
+                if (CurrentIndex >= CurrentPage.Count)
+                {
+                    if (After == null)
                     {
                         // No more pages to return
                         return false;
                     }
-
-                    if (MaximumLimit != -1 && Count >= MaximumLimit)
+                    else
                     {
-                        // Maximum listing count returned
-                        return false;
-                    }
-
-                    // Get the next page
-                    await FetchNextPageAsync().ConfigureAwait(false);
-                    CurrentPageIndex = 0;
-
-                    if (CurrentPage.Length == 0)
-                    {
-                        // No listings were returned in the page
-                        return false;
+                        await FetchNextPageAsync().ConfigureAwait(false);
+                        CurrentIndex = 0;
+                        return CurrentPage.Count > 0; //if there are no results, return false
                     }
                 }
+
                 return true;
             }
 
             private async Task<bool> MoveNextForwardAsync()
             {
-                CurrentPageIndex++;
-                if (CurrentPageIndex == CurrentPage.Length)
+                int tries = 0;
+                while (true)
                 {
-                    int tries = 0;
-                    while (true)
+                    if (MaximumLimit != -1 && Count >= MaximumLimit)
+                        return false;
+
+                    tries++;
+                    // Get the next page
+                    try
                     {
-                        if (MaximumLimit != -1 && Count >= MaximumLimit)
-                            return false;
+                        await FetchNextPageAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        // sleep for a while to see if we can recover
+                        await Sleep(tries, ex).ConfigureAwait(false);
+                    }
 
-                        tries++;
-                        // Get the next page
-                        try
-                        {
-                            await FetchNextPageAsync().ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            // sleep for a while to see if we can recover
-                            Sleep(tries,ex);
-                        }
-
-                        CurrentPageIndex = 0;
-
-                        if (CurrentPage.Length == 0)
-                        {
-                            // No listings were returned in the page
-                            // sleep for a while
-                            Sleep(tries);
-                        }
-                        else
-                        {
-                            tries = 0;
-                            break;
-                        }
+                    if (CurrentPage.Count == 0)
+                    {
+                        // No listings were returned in the page
+                        // sleep for a while
+                        await Sleep(tries).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        tries = 0;
+                        break;
                     }
                 }
                 return true;
             }
 
-            private void Sleep(int tries, Exception ex = null)
+            private async Task Sleep(int tries, Exception ex = null)
             {
                 // wait up to 3 minutes between tries
+                // TODO: Make this configurable
                 int seconds = 180;
 
+                // TODO: Make this configurable
                 if (tries > 36)
                 {
                     if (ex != null)
@@ -435,17 +423,9 @@ namespace RedditSharp
                 }
                 else
                 {
-                    seconds = tries*5;
+                    seconds = tries * 5;
                 }
-
-                System.Threading.Thread.Sleep(seconds*1000);
-            }
-
-            public void Reset()
-            {
-                After = Before = null;
-                CurrentPageIndex = -1;
-                CurrentPage = new Thing[0];
+                await Task.Delay(seconds * 1000).ConfigureAwait(false);
             }
         }
 #pragma warning restore

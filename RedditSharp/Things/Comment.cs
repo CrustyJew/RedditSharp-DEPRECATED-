@@ -34,7 +34,7 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json;
+        protected override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>
         /// Fill the object with comments.
@@ -120,31 +120,31 @@ namespace RedditSharp.Things
         /// Comment body html.
         /// </summary>
         [JsonProperty("body_html")]
-        public string BodyHtml { get; }
+        public string BodyHtml { get; private set; }
 
         /// <summary>
         /// Id of the parent <see cref="VotableThing"/>.
         /// </summary>
         [JsonProperty("parent_id")]
-        public string ParentId { get; }
+        public string ParentId { get; private set; }
 
         /// <summary>
         /// Parent subreddit name.
         /// </summary>
         [JsonProperty("subreddit")]
-        public string Subreddit { get; }
+        public string Subreddit { get; private set; }
 
         /// <summary>
         /// Link id.
         /// </summary>
         [JsonProperty("link_id")]
-        public string LinkId { get; }
+        public string LinkId { get; private set; }
 
         /// <summary>
         /// Parent link title.
         /// </summary>
         [JsonProperty("link_title")]
-        public string LinkTitle { get; }
+        public string LinkTitle { get; private set; }
 
         /// <summary>
         /// More comments.

@@ -12,7 +12,7 @@ namespace RedditSharp.Multi
         /// Kind of Multi
         /// </summary>
         [JsonProperty("kind")]
-        public string Kind { get; }
+        public string Kind { get; private set; }
 
         /// <summary>
         /// Internal Model Data of the Multi Class

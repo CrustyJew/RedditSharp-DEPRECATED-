@@ -19,7 +19,7 @@ namespace RedditSharp
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
-        public Subreddit Subreddit { get; }
+        public Subreddit Subreddit { get; private set; }
 
         /// <summary>
         /// Get the subreddit settings page.

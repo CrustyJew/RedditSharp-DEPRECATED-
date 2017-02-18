@@ -31,38 +31,38 @@ namespace RedditSharp.Things
         /// Reddit username.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Returns true if the user has reddit gold.
         /// </summary>
         [JsonProperty("is_gold")]
-        public bool HasGold { get; }
+        public bool HasGold { get; private set; }
 
         /// <summary>
         /// Returns true if the user is a moderator of any subreddit.
         /// </summary>
         [JsonProperty("is_mod")]
-        public bool IsModerator { get; }
+        public bool IsModerator { get; private set; }
 
         /// <summary>
         /// Total link karma of the user.
         /// </summary>
         [JsonProperty("link_karma")]
-        public int LinkKarma { get; }
+        public int LinkKarma { get; private set; }
 
         /// <summary>
         /// Total comment karma of the user.
         /// </summary>
         [JsonProperty("comment_karma")]
-        public int CommentKarma { get; }
+        public int CommentKarma { get; private set; }
 
         /// <summary>
         /// Date the user was created.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Created { get; }
+        public DateTime Created { get; private set; }
 
         /// <summary>
         /// Return the users overview.

@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions;
 using System.Net;
 using System.Reactive.Linq;
+using System.Threading;
 
 namespace RedditSharp.Things
 {
@@ -17,7 +18,7 @@ namespace RedditSharp.Things
     public class Post : VotableThing
     {
         private const string CommentUrl = "/api/comment";
-        private const string GetCommentsUrl = "/comments/{Id}.json";
+        private const string GetCommentsUrl = "/comments/{0}.json";
         private const string EditUserTextUrl = "/api/editusertext";
         private const string HideUrl = "/api/hide";
         private const string UnhideUrl = "/api/unhide";
@@ -28,7 +29,8 @@ namespace RedditSharp.Things
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
         #pragma warning disable 1591
-        public Post(Reddit reddit, JToken json) : base(reddit, json) {
+        public Post(Reddit reddit, JToken json) : base(reddit, json)
+        {
         }
         #pragma warning restore 1591
 
@@ -36,31 +38,25 @@ namespace RedditSharp.Things
         /// Author of this post.
         /// </summary>
         [JsonProperty("author")]
-        public new string AuthorName { get; }
-
-        //TODO Discuss
-        /// <summary>
-        /// The comments on this post.
-        /// </summary>
-        public IObservable<Comment> Comments => GetComments();
+        public new string AuthorName { get; private set; }
 
         /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]
-        public string Domain { get; }
+        public string Domain { get; private set; }
 
         /// <summary>
         /// Returns true if this is a self post.
         /// </summary>
         [JsonProperty("is_self")]
-        public bool IsSelfPost { get; }
+        public bool IsSelfPost { get; private set; }
 
         /// <summary>
         /// Css class of the link flair.
         /// </summary>
         [JsonProperty("link_flair_css_class")]
-        public string LinkFlairCssClass { get; }
+        public string LinkFlairCssClass { get; private set; }
 
         /// <summary>
         /// Text of the link flair.
@@ -72,20 +68,20 @@ namespace RedditSharp.Things
         /// Number of comments on this post.
         /// </summary>
         [JsonProperty("num_comments")]
-        public int CommentCount { get; }
+        public int CommentCount { get; private set; }
 
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
         [JsonProperty("over_18")]
-        public bool NSFW { get; }
+        public bool NSFW { get; private set; }
 
         /// <summary>
         /// Post permalink.
         /// </summary>
         [JsonProperty("permalink")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Permalink { get; }
+        public Uri Permalink { get; private set; }
 
         /// <summary>
         /// Post self text markdown.
@@ -97,42 +93,43 @@ namespace RedditSharp.Things
         /// Post self text html.
         /// </summary>
         [JsonProperty("selftext_html")]
-        public string SelfTextHtml { get; }
+        public string SelfTextHtml { get; private set; }
 
         /// <summary>
         /// Uri to the thumbnail image of this post.
         /// </summary>
         [JsonProperty("thumbnail")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Thumbnail { get; }
+        public Uri Thumbnail { get; private set; }
 
         /// <summary>
         /// Post title.
         /// </summary>
         [JsonProperty("title")]
-        public string Title { get; }
+        public string Title { get; private set; }
 
         /// <summary>
         /// Parent subreddit name.
         /// </summary>
         [JsonProperty("subreddit")]
-        public string SubredditName { get; }
+        public string SubredditName { get; private set; }
 
         /// <summary>
         /// Parent subreddit.
         /// </summary>
         [JsonIgnore]
         public Subreddit Subreddit =>
-          Task.Run(async () => {
+          Task.Run(async () =>
+          {
               return await Reddit.GetSubredditAsync("/r/" + SubredditName).ConfigureAwait(false);
-            }).Result;
+          }).Result;
 
         /// <summary>
         /// Post uri.
         /// </summary>
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
-        public Uri Url { get; }
+        public Uri Url { get; private set; }
 
         /// <summary>
         /// Comment on this post.
@@ -262,16 +259,16 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Get a <see cref="Listing{T}"/> of comments.
+        /// Get a <see cref="List{T}"/> of comments.
         /// </summary>
-        /// <param name="limit"></param>
+        /// <param name="limit">Maximum number of comments to return</param>
         /// <returns></returns>
-        public async Task<List<Comment>> ListCommentsAsync(int? limit = null)
+        public async Task<List<Comment>> GetCommentsAsync(int limit = 0)
         {
             var url = string.Format(GetCommentsUrl, Id);
-            if (limit.HasValue)
+            if (limit > 0)
             {
-                var query = WebUtility.UrlEncode("limit="+limit.Value.ToString());
+                var query = "limit=" + limit;
                 url = string.Format("{0}?{1}", url, query);
             }
             var json = await WebAgent.Get(url).ConfigureAwait(false);
@@ -288,65 +285,51 @@ namespace RedditSharp.Things
             return comments;
         }
 
-        //TODO discuss this
         /// <summary>
-        /// Get the comments for this post.
+        /// Returns a <see cref="List{T}"/> of <see cref="Thing"/> that contains <see cref="Comment"/> and <see cref="More"/>
         /// </summary>
+        /// <param name="limit">Maximum number of comments to return. Returned list may be larger than this number though due to <see cref="More"/></param>
         /// <returns></returns>
-        public IEnumerable<Comment> EnumerateCommentsAsync() => GetComments().ToEnumerable();
-
-        /// <summary>
-        /// Enumerate more comments.
-        /// </summary>
-        /// <returns></returns>
-        public IObservable<Comment> GetComments()
+        public async Task<List<Thing>> GetCommentsWithMoresAsync(int limit = 0)
         {
-            return Observable.Create<Comment>(async obs =>
+            var url = string.Format(GetCommentsUrl, Id);
+            if (limit > 0)
             {
-                var json = await WebAgent.Get(GetCommentsUrl).ConfigureAwait(false);
-                var postJson = json.Last()["data"]["children"];
-                More moreComments = null;
-                foreach (var comment in postJson)
+                var query = "limit=" + limit;
+                url = string.Format("{0}?{1}", url, query);
+            }
+            var json = await WebAgent.Get(url).ConfigureAwait(false);
+            var postJson = json.Last()["data"]["children"];
+
+            var things = new List<Thing>();
+            foreach (var comment in postJson)
+            {
+                Comment newComment = new Comment(Reddit, comment, this);
+                if (newComment.Kind != "more")
                 {
-                    Comment newComment = new Comment(Reddit, comment, this);
-                    if (newComment.Kind == "more")
-                    {
-                        moreComments = new More(Reddit, comment);
-                    }
-                    else
-                    {
-                        obs.OnNext(newComment);
-                    }
+                    things.Add(newComment);
                 }
-
-
-                if (moreComments != null)
+                else 
                 {
-                    var baseThings = await moreComments.GetThingsAsync().ConfigureAwait(false);
-                    IEnumerator<Thing> things = baseThings.GetEnumerator();
-                    things.MoveNext();
-                    Thing currentThing = null;
-                    while (currentThing != things.Current)
-                    {
-                        var comment = things.Current as Comment;
-                        var more = things.Current as More;
-                        if (comment != null)
-                        {
-                            Comment next = comment.PopulateComments(things);
-                            obs.OnNext(next);
-                        }
-                        if (more != null)
-                        {
-                            if (more.ParentId != FullName) break;
-                            var moreThings = await more.GetThingsAsync().ConfigureAwait(false);
-                            things = moreThings.GetEnumerator();
-                            things.MoveNext();
-                        }
-                    }
+                    things.Add(new More(Reddit, comment));
                 }
+            }
 
-                obs.OnCompleted();
-            });
+            return things;
+
         }
+        /// <summary>
+        /// Returns an <see cref="IAsyncEnumerable{T}"/> of <see cref="Comment"/> containing all comments in a post.
+        /// This will cause multiple web requests on larger comment sections.
+        /// </summary>
+        /// <param name="limitPerRequest">Maximum number of comments to retrieve at a time. 0 for Reddit maximum</param>
+        /// <returns></returns>
+        public IAsyncEnumerable<Comment> EnumerateCommentTreeAsync(int limitPerRequest = 0)
+        {
+            return new CommentsEnumarable(Reddit, this, limitPerRequest);
+        }
+        
     }
+
 }
+

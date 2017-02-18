@@ -26,13 +26,13 @@ namespace RedditSharp.Things
         /// Bae36 Ids of children.
         /// </summary>
         [JsonProperty("children")]
-        public string[] Children { get; }
+        public string[] Children { get; private set; }
 
         /// <summary>
         /// Parent base36 id.
         /// </summary>
         [JsonProperty("parent_id")]
-        public string ParentId { get; }
+        public string ParentId { get; private set; }
 
         /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) => json["data"];

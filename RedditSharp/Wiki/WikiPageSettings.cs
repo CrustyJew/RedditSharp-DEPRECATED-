@@ -34,14 +34,13 @@ namespace RedditSharp
         /// Returns true if this page appears in the list of wiki pages.
         /// </summary>
         [JsonProperty("listed")]
-        public bool Listed { get; }
+        public bool Listed { get; private set; }
 
         /// <summary>
         /// Indicates who can edit this page.
-        /// <para>1 = use subreddit wiki permissions</para>
         /// </summary>
         [JsonProperty("permlevel")]
-        public WikiPagePermissionLevel PermLevel { get; }
+        public WikiPagePermissionLevel PermLevel { get; private set; }
 
         /// <summary>
         /// Users who are allowed to edit the wiki.

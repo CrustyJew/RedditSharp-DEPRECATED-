@@ -18,13 +18,13 @@ namespace RedditSharp.Things
         /// Contributor name.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Date contributor was added.
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime DateAdded { get; }
+        public DateTime DateAdded { get; private set; }
     }
 }

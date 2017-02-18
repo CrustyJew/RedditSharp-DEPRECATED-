@@ -28,7 +28,7 @@ namespace RedditSharp.Things
         }
 
         protected virtual JToken GetJsonData(JToken json) {
-          return json.ToString();
+          return json;
         }
 #pragma warning restore 1591
 
@@ -72,6 +72,10 @@ namespace RedditSharp.Things
         /// <returns>A "Thing", such as a comment, user, post, etc.</returns>
         public static Thing Parse(Reddit reddit, JToken json)
         {
+            if (reddit == null)
+                throw new ArgumentNullException(nameof(reddit));
+            if (json == null)
+                throw new ArgumentNullException(nameof(json));
             var kind = json["kind"].ValueOrDefault<string>();
             switch (kind)
             {
@@ -105,41 +109,41 @@ namespace RedditSharp.Things
         /// <param name="reddit"></param>
         /// <param name="json"></param>
         /// <returns>The "Thing"</returns>
-        public static Thing Parse<T>(Reddit reddit, JToken json) where T : Thing
+        public static T Parse<T>(Reddit reddit, JToken json) where T : Thing
         {
             Thing result = Parse(reddit, json);
             if (result == null)
             {
                 if (typeof(T) == typeof(WikiPageRevision))
                 {
-                    return new WikiPageRevision(reddit, json);
+                    result = new WikiPageRevision(reddit, json);
                 }
                 else if (typeof(T) == typeof(ModAction))
                 {
-                    return new ModAction(reddit, json);
+                    result = new ModAction(reddit, json);
                 }
                 else if (typeof(T) == typeof(Contributor))
                 {
-                    return new Contributor(reddit, json);
+                    result = new Contributor(reddit, json);
                 }
                 else if (typeof(T) == typeof(BannedUser))
                 {
-                    return new BannedUser(reddit, json);
+                    result = new BannedUser(reddit, json);
                 }
                 else if (typeof(T) == typeof(More))
                 {
-                    return new More(reddit, json);
+                    result = new More(reddit, json);
                 }
                 else if (typeof(T) == typeof(LiveUpdate))
                 {
-                    return new LiveUpdate(reddit, json);
+                    result = new LiveUpdate(reddit, json);
                 }
                 else if (typeof(T) == typeof(LiveUpdateEvent))
                 {
-                    return new LiveUpdateEvent(reddit, json);
+                    result = new LiveUpdateEvent(reddit, json);
                 }
             }
-            return result;
+            return result as T;
         }
 
         /// <summary>

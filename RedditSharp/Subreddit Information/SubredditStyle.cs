@@ -1,5 +1,4 @@
-﻿#pragma warning disable 1591
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Things;
 using System.Threading.Tasks;
@@ -7,23 +6,19 @@ using System.Net;
 
 namespace RedditSharp
 {
+#pragma warning disable 1591
     public class SubredditStyle : RedditObject
     {
         private const string UploadImageUrl = "/api/upload_sr_img";
         private const string UpdateCssUrl = "/api/subreddit_stylesheet";
 
-        #pragma warning disable 1591
+        
         public SubredditStyle(Subreddit subreddit) : base(subreddit?.Reddit)
         {
             Subreddit = subreddit;
         }
-        #pragma warning restore 1591
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="subreddit">Subreddit.</param>
-        /// <param name="json">json payload.</param>
+
         public SubredditStyle(Subreddit subreddit, JToken json) : this(subreddit)
         {
             Images = new List<SubredditImage>();
@@ -35,7 +30,7 @@ namespace RedditSharp
                     image["name"].Value<string>(), image["url"].Value<string>()));
             }
         }
-
+#pragma warning restore 1591
         /// <summary>
         /// Subreddit stylesheet.
         /// </summary>
@@ -93,10 +88,11 @@ namespace RedditSharp
         }
     }
 
+    #pragma warning disable 1591
     public enum ImageType
     {
         PNG,
         JPEG
     }
+    #pragma warning restore 1591
 }
-#pragma warning restore 1591

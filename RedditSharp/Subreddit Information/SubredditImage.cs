@@ -53,22 +53,22 @@ namespace RedditSharp
         /// <summary>
         /// css link.
         /// </summary>
-        public string CssLink { get; }
+        public string CssLink { get; private set; }
 
         /// <summary>
         /// Name.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Url.
         /// </summary>
-        public Uri Url { get; }
+        public Uri Url { get; private set; }
 
         /// <summary>
         /// Subreddit style.
         /// </summary>
-        public SubredditStyle SubredditStyle { get; }
+        public SubredditStyle SubredditStyle { get; private set; }
 
         /// <summary>
         /// Delete this subreddit image.

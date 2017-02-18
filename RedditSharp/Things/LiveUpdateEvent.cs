@@ -45,19 +45,19 @@ namespace RedditSharp.Things
             /// </summary>
             [JsonProperty]
             [JsonConverter(typeof(PermissionsConverter))]
-            public LiveUpdateEventPermission Permissions { get; }
+            public LiveUpdateEventPermission Permissions { get; private set; }
 
             /// <summary>
             /// User name.
             /// </summary>
             [JsonProperty("name")]
-            public string Name { get; }
+            public string Name { get; private set; }
 
             /// <summary>
             /// Base36 id of the user.
             /// </summary>
             [JsonProperty("id")]
-            public string Id { get; }
+            public string Id { get; private set; }
         }
 
         private string AcceptContributorInviteUrl => $"/api/live/{Name}/accept_contribtor_invite";
@@ -86,7 +86,7 @@ namespace RedditSharp.Things
         /// Description of the live event in html.
         /// </summary>
         [JsonProperty("description_html")]
-        public string DescriptionHtml { get; }
+        public string DescriptionHtml { get; private set; }
 
         /// <summary>
         /// Live event title.
@@ -98,13 +98,13 @@ namespace RedditSharp.Things
         /// Websocket URL for this live event.
         /// </summary>
         [JsonProperty("websocket_uri")]
-        public Uri WebsocketUri { get; }
+        public Uri WebsocketUri { get; private set; }
 
         /// <summary>
         /// Live event state.
         /// </summary>
         [JsonProperty("state")]
-        public string State { get; }
+        public string State { get; private set; }
 
         /// <summary>
         /// Returns true if this live event is marked not safe for work.
@@ -116,13 +116,13 @@ namespace RedditSharp.Things
         /// Number of people viewing this live event.
         /// </summary>
         [JsonProperty("viewer_count")]
-        public int? ViewerCount { get; }
+        public int? ViewerCount { get; private set; }
 
         /// <summary>
         /// Returns true if <see cref="ViewerCount"/> is fuzzed.
         /// </summary>
         [JsonProperty("viewer_count_fuzzed")]
-        public bool ViewerCountFuzzed { get; }
+        public bool ViewerCountFuzzed { get; private set; }
 
         /// <summary>
         /// Resources markdown.
@@ -134,7 +134,7 @@ namespace RedditSharp.Things
         /// Name of the live event.
         /// </summary>
         [JsonProperty]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Accept an invite to be a live thread contributor.

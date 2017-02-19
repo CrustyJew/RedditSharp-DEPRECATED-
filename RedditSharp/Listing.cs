@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
+#pragma warning disable 1591
     public enum Sorting
     {
         Relevance,
@@ -27,7 +28,12 @@ namespace RedditSharp
         Month,
         Year
     }
+#pragma warning restore 1591
 
+    /// <summary>
+    /// A semi-realtime stream of <see cref="Thing"/> being posted to an item.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ListingStream<T> : IObservable<T> where T : Thing
     {
 
@@ -40,6 +46,7 @@ namespace RedditSharp
             _observers = new List<IObserver<T>>();
         }
 
+        /// <inheritdoc />
         public IDisposable Subscribe(IObserver<T> observer)
         {
             if (!_observers.Contains(observer))
@@ -47,6 +54,7 @@ namespace RedditSharp
             return new Unsubscriber(_observers, observer);
         }
 
+        #pragma warning disable 1591
         public async Task Enumerate()
         {
             await Listing.ForEachAsync(thing =>
@@ -58,6 +66,7 @@ namespace RedditSharp
 
             });
         }
+        #pragma warning restore 1591
 
         private class Unsubscriber : IDisposable
         {
@@ -82,6 +91,10 @@ namespace RedditSharp
 
     }
 
+    /// <summary>
+    /// A reddit listing.  https://github.com/reddit/reddit/wiki/JSON#listing
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Listing<T> : RedditObject, IAsyncEnumerable<T> where T : Thing
     {
         /// <summary>
@@ -96,7 +109,6 @@ namespace RedditSharp
         /// </summary>
         /// <param name="reddit"></param>
         /// <param name="url"></param>
-        /// <param name="webAgent"></param>
         internal Listing(Reddit reddit, string url) : base(reddit)
         {
             LimitPerRequest = DefaultListingPerRequest;
@@ -105,8 +117,19 @@ namespace RedditSharp
             Url = url;
         }
 
+        /// <summary>
+        /// Number of records to return for each request.
+        /// </summary>
         public int LimitPerRequest { get; set; }
+
+        /// <summary>
+        /// Maximum number of records to return.
+        /// </summary>
         public int MaximumLimit { get; set; }
+
+        /// <summary>
+        /// Returns true is this a ListingStream.
+        /// </summary>
         public bool Stream { get; set; }
 
         /// <summary>
@@ -115,21 +138,25 @@ namespace RedditSharp
         /// </summary>
         /// <param name="limitPerRequest">The number of listings to be returned per request</param>
         /// <param name="maximumLimit">The maximum number of listings to return</param>
+        /// <param name="stream">Set to true for a listing stream.</param>
         /// <returns></returns>
         public IAsyncEnumerator<T> GetEnumerator(int limitPerRequest, int maximumLimit = -1, bool stream = false)
         {
             return new ListingEnumerator(this, limitPerRequest, maximumLimit, stream);
         }
 
+        /// <inheritdoc/>
         public IAsyncEnumerator<T> GetEnumerator()
         {
             return GetEnumerator(LimitPerRequest,MaximumLimit,Stream);
         }
 
+        #pragma warning disable 1591
         public ListingStream<T> GetListingStream()
         {
             return new ListingStream<T>(this);
         }
+        #pragma warning restore 1591
 
 #pragma warning disable 0693
         private class ListingEnumerator : IAsyncEnumerator<T>

@@ -8,8 +8,12 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A private message (or modmail).
+    /// </summary>
     public class PrivateMessage : Thing
     {
+        #pragma warning disable 1591
         public PrivateMessage(Reddit reddit, JToken json) : base(reddit, json) {
             var data = json["data"];
             if (data["replies"] != null && data["replies"].Any())
@@ -26,6 +30,7 @@ namespace RedditSharp.Things
                 }
             }
         }
+        #pragma warning restore 1591
 
         private const string SetAsReadUrl = "/api/read_message";
         private const string CommentUrl = "/api/comment";
@@ -147,6 +152,7 @@ namespace RedditSharp.Things
         }
         // Awaitables don't have to be called asynchronously
 
+        /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>

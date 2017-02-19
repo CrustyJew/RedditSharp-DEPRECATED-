@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Security.Authentication;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A thing that can be voted on or actionable by a moderator.
+    /// </summary>
     public class VotableThing : CreatedThing
     {
+#pragma warning disable 1591
         public VotableThing(Reddit reddit, JToken json) : base(reddit, json) {
         }
 
@@ -38,6 +41,7 @@ namespace RedditSharp.Things
             Special,
             None
         }
+#pragma warning restore 1591
 
         private const string VoteUrl = "/api/vote";
         private const string SaveUrl = "/api/save";
@@ -365,21 +369,34 @@ namespace RedditSharp.Things
                 throw new Exception("You are not permitted to distinguish this comment.");
         }
 
+        /// <summary>
+        /// Approve this item.
+        /// </summary>
+        /// <returns></returns>
         public Task ApproveAsync()
         {
             return SimpleActionAsync(ApproveUrl);
         }
 
+        /// <summary>
+        /// Remove this item.
+        /// </summary>
+        /// <returns></returns>
         public Task RemoveAsync()
         {
             return RemoveImplAsync(false);
         }
 
+        /// <summary>
+        /// Remove this item and flag it as spam.
+        /// </summary>
+        /// <returns></returns>
         public Task RemoveSpamAsync()
         {
             return RemoveImplAsync(true);
         }
 
+        #pragma warning disable 1591
         protected async Task RemoveImplAsync(bool spam)
         {
             await WebAgent.Post(RemoveUrl, new
@@ -389,17 +406,30 @@ namespace RedditSharp.Things
                 uh = Reddit.User.Modhash
             }).ConfigureAwait(false);
         }
+        #pragma warning restore 1591
 
+        /// <summary>
+        /// Delete this item.
+        /// </summary>
+        /// <returns></returns>
         public Task DelAsync()
         {
             return SimpleActionAsync(DelUrl);
         }
 
+        /// <summary>
+        /// Ignore reports on this item.
+        /// </summary>
+        /// <returns></returns>
         public Task IgnoreReportsAsync()
         {
             return SimpleActionAsync(IgnoreReportsUrl);
         }
 
+        /// <summary>
+        /// Stop ignoring reports on this item.
+        /// </summary>
+        /// <returns></returns>
         public Task UnIgnoreReportsAsync()
         {
             return SimpleActionAsync(UnIgnoreReportsUrl);
@@ -511,6 +541,9 @@ namespace RedditSharp.Things
         }
     }
 
+    /// <summary>
+    /// A user or moderator report on a <see cref="VotableThing"/>
+    /// </summary>
     public class Report
     {
         /// <summary>

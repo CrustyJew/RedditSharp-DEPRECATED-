@@ -1,11 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
@@ -13,6 +9,7 @@ using System.Collections.Generic;
 
 namespace RedditSharp
 {
+    /// <inheritdoc />
     public class WebAgent : IWebAgent
     {
 
@@ -65,9 +62,7 @@ namespace RedditSharp
         /// </summary>
         public static string RootDomain { get; set; }
 
-        /// <summary>
-        /// Used to make calls against Reddit's API using OAuth2
-        /// </summary>
+        /// <inheritdoc />
         public string AccessToken { get; set; }
 
         private static DateTime _lastRequest;
@@ -104,6 +99,9 @@ namespace RedditSharp
             _httpClient = new HttpClient();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public WebAgent() {
         }
 
@@ -116,11 +114,7 @@ namespace RedditSharp
             AccessToken = accessToken;
         }
 
-        /// <summary>
-        /// Executes the web request and handles errors in the response
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public virtual async Task<JToken> ExecuteRequestAsync(HttpRequestMessage request)
         {
             await EnforceRateLimit().ConfigureAwait(false);
@@ -217,12 +211,7 @@ namespace RedditSharp
             }
         }
 
-        /// <summary>
-        /// Create a <see cref="HttpRequestMessage"/>
-        /// </summary>
-        /// <param name="url">target  uri</param>
-        /// <param name="method">http method</param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public virtual HttpRequestMessage CreateRequest(string url, string method)
         {
             bool prependDomain;
@@ -252,12 +241,7 @@ namespace RedditSharp
             return request;
         }
 
-        /// <summary>
-        /// Create a <see cref="HttpRequestMessage"/>
-        /// </summary>
-        /// <param name="uri">target  uri</param>
-        /// <param name="method">http method</param>
-        /// <returns></returns>
+        /// <inheritdoc />
         protected virtual HttpRequestMessage CreateRequest(Uri uri, string method)
         {
             var request = new HttpRequestMessage();
@@ -272,23 +256,30 @@ namespace RedditSharp
             return request;
         }
 
-        public async Task<JToken> Get(string url) {
+        /// <inheritdoc />
+        public async Task<JToken> Get(string url)
+        {
             var request = CreateRequest(url, "GET");
             return await ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
-        public async Task<JToken> Post(string url, object data, params string[] additionalFields) {
+        /// <inheritdoc />
+        public async Task<JToken> Post(string url, object data, params string[] additionalFields)
+        {
             var request = CreateRequest(url, "POST");
             WritePostBody(request, data, additionalFields);
             return await ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
-        public async Task<JToken> Put(string url, object data) {
+        /// <inheritdoc />
+        public async Task<JToken> Put(string url, object data)
+        {
             var request = CreateRequest(url, "POST");
             WritePostBody(request, data);
             return await ExecuteRequestAsync(request).ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public virtual void WritePostBody(HttpRequestMessage request, object data, params string[] additionalFields)
         {
             var type = data.GetType();
@@ -310,6 +301,7 @@ namespace RedditSharp
             request.Content = new FormUrlEncodedContent(content);
         }
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage message) {
           return _httpClient.SendAsync(message);
         }

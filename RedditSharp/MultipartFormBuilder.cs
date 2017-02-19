@@ -1,13 +1,18 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Builds form post data.
+    /// </summary>
     public class MultipartFormBuilder
     {
+        /// <summary>
+        /// Web request.
+        /// </summary>
         public HttpRequestMessage Request { get; set; }
 
         private string Boundary { get; set; }
@@ -16,6 +21,7 @@ namespace RedditSharp
 
         private MultipartFormDataContent Content { get; set; }
 
+        #pragma warning disable 1591
         public MultipartFormBuilder(HttpRequestMessage request)
         {
             // TODO: See about regenerating the boundary when needed
@@ -26,6 +32,7 @@ namespace RedditSharp
             Buffer = new MemoryStream();
             TextBuffer = new StreamWriter(Buffer);
         }
+        #pragma warning restore 1591
 
         private string CreateRandomBoundary()
         {
@@ -38,6 +45,10 @@ namespace RedditSharp
             return value;
         }
 
+        /// <summary>
+        /// Add a dynamic object to this form.
+        /// </summary>
+        /// <param name="data"></param>
         public void AddDynamic(object data)
         {
             var type = data.GetType();
@@ -49,6 +60,11 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Add a string value to this form.
+        /// </summary>
+        /// <param name="name">key</param>
+        /// <param name="value">value</param>
         public void AddString(string name, string value)
         {
             TextBuffer.Write("{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n",
@@ -56,6 +72,13 @@ namespace RedditSharp
             TextBuffer.Flush();
         }
 
+        /// <summary>
+        /// Add a file to this form
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="filename"></param>
+        /// <param name="value"></param>
+        /// <param name="contentType"></param>
         public void AddFile(string name, string filename, byte[] value, string contentType)
         {
             TextBuffer.Write("{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n",
@@ -67,6 +90,9 @@ namespace RedditSharp
             TextBuffer.Flush();
         }
 
+        /// <summary>
+        /// Finish this form.
+        /// </summary>
         public void Finish()
         {
             TextBuffer.Write("--" + Boundary + "--");

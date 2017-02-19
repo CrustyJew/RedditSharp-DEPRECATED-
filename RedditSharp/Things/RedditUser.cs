@@ -1,14 +1,18 @@
 using System;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A reddit user.
+    /// </summary>
     public class RedditUser : Thing
     {
+        #pragma warning disable 1591
         public RedditUser(Reddit reddit, JToken json) : base(reddit, json) {
         }
+        #pragma warning restore 1591
 
         private string OverviewUrl => $"/user/{Name}.json";
         private string CommentsUrl => $"/user/{Name}/comments.json";
@@ -20,6 +24,7 @@ namespace RedditSharp.Things
 
         private const int MAX_LIMIT = 100;
 
+        /// <inheritdoc/>
         protected override JToken GetJsonData(JToken json) => json["name"] == null ? json["data"] : json;
 
         /// <summary>
@@ -161,7 +166,7 @@ namespace RedditSharp.Things
         public override string ToString() => Name;
 
     }
-
+#pragma warning disable 1591
     public enum Sort
     {
         New,
@@ -179,4 +184,5 @@ namespace RedditSharp.Things
         Day,
         Hour
     }
+#pragma warning restore 1591
 }

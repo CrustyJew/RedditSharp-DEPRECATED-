@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RedditSharp.Multi
 {
@@ -30,7 +25,6 @@ namespace RedditSharp.Multi
         /// </summary>
         /// <param name="reddit">Reddit Object to use</param>
         /// <param name="json">Json Token containing the information for the Multi</param>
-        /// <param name="webAgent">Web Agent to use</param>
         /// <param name="subs">Whether there are subs</param>
         protected internal MultiData(Reddit reddit, JToken json, bool subs = true)
         {

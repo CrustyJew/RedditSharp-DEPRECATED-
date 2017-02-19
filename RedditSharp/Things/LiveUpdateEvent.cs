@@ -15,6 +15,7 @@ namespace RedditSharp.Things
     // https://github.com/reddit/reddit-plugin-liveupdate/blob/master/reddit_liveupdate/models.py#L19
     public class LiveUpdateEvent : CreatedThing
     {
+#pragma warning disable 1591
         [Flags]
         public enum LiveUpdateEventPermission
         {
@@ -32,15 +33,29 @@ namespace RedditSharp.Things
             Name = Name.Replace("LiveUpdateEvent_", "");
         }
 
+#pragma warning restore 1591
+
+        /// <summary>
+        /// A user participating in this live event.
+        /// </summary>
         public class LiveUpdateEventUser
         {
+            /// <summary>
+            /// Permissions of the user.
+            /// </summary>
             [JsonProperty]
             [JsonConverter(typeof(PermissionsConverter))]
             public LiveUpdateEventPermission Permissions { get; private set; }
 
+            /// <summary>
+            /// User name.
+            /// </summary>
             [JsonProperty("name")]
             public string Name { get; private set; }
 
+            /// <summary>
+            /// Base36 id of the user.
+            /// </summary>
             [JsonProperty("id")]
             public string Id { get; private set; }
         }
@@ -61,33 +76,63 @@ namespace RedditSharp.Things
         private string DiscussionsUrl => $"/live/{Name}/discussions";
         private string ReportUrl => $"/api/live/{Name}/report";
 
+        /// <summary>
+        /// Description of the live event.
+        /// </summary>
         [JsonProperty("description")]
         public string Description { get; private set; }
 
+        /// <summary>
+        /// Description of the live event in html.
+        /// </summary>
         [JsonProperty("description_html")]
         public string DescriptionHtml { get; private set; }
 
+        /// <summary>
+        /// Live event title.
+        /// </summary>
         [JsonProperty("title")]
         public string Title { get; private set; }
 
+        /// <summary>
+        /// Websocket URL for this live event.
+        /// </summary>
         [JsonProperty("websocket_uri")]
         public Uri WebsocketUri { get; private set; }
 
+        /// <summary>
+        /// Live event state.
+        /// </summary>
         [JsonProperty("state")]
         public string State { get; private set; }
 
+        /// <summary>
+        /// Returns true if this live event is marked not safe for work.
+        /// </summary>
         [JsonProperty("nsfw")]
         public bool NSFW { get; private set; }
 
+        /// <summary>
+        /// Number of people viewing this live event.
+        /// </summary>
         [JsonProperty("viewer_count")]
         public int? ViewerCount { get; private set; }
 
+        /// <summary>
+        /// Returns true if <see cref="ViewerCount"/> is fuzzed.
+        /// </summary>
         [JsonProperty("viewer_count_fuzzed")]
         public bool ViewerCountFuzzed { get; private set; }
 
+        /// <summary>
+        /// Resources markdown.
+        /// </summary>
         [JsonProperty("resources")]
         public string Resources { get; private set; }
 
+        /// <summary>
+        /// Name of the live event.
+        /// </summary>
         [JsonProperty]
         public string Name { get; private set; }
 
@@ -220,7 +265,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Invite a contributor to the live thread.
         /// </summary>
-        /// <param name="name">reddit username.</param>
+        /// <param name="userName">reddit username.</param>
         /// <param name="permissions">permissions.</param>
         public async Task<bool> InviteContributorAsync(string userName, LiveUpdateEventPermission permissions)
         {
@@ -251,7 +296,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Remove a contributor from the live thread.
         /// </summary>
-        /// <param name="name">RedditUser</param>
+        /// <param name="user">RedditUser</param>
         public async Task<bool> RemoveContributorAsync(RedditUser user)
         {
             if (Reddit.User == null)
@@ -275,7 +320,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Remove a contributor from the live thread.
         /// </summary>
-        /// <param name="name">reddit username.</param>
+        /// <param name="userName">reddit username.</param>
         public async Task<bool> RemoveContributorAsync(string userName)
         {
             var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
@@ -328,7 +373,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Revoke an outstanding contributor invite.
         /// </summary>
-        /// <param name="name">reddit username</param>
+        /// <param name="user">reddit user.</param>
         public async Task<bool> RevokeContributorInviteAsync(RedditUser user)
         {
             if (Reddit.User == null)
@@ -352,16 +397,16 @@ namespace RedditSharp.Things
         /// Revoke an outstanding contributor invite.
         /// </summary>
         /// <param name="name">reddit username</param>
-        public async Task<bool> RevokeContributorInviteAsync(string userName)
+        public async Task<bool> RevokeContributorInviteAsync(string name)
         {
-            var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
+            var user = await Reddit.GetUserAsync(name).ConfigureAwait(false);
             return await RevokeContributorInviteAsync(user).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Set contributor permissions on the live thread.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="user"></param>
         /// <param name="permissions">Reddit user</param>
         public async Task<bool> SetContributorPermissionsAsync(RedditUser user, LiveUpdateEventPermission permissions)
         {
@@ -371,7 +416,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Set contributor permissions on the live thread.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="userName"></param>
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetContributorPermissions(string userName, LiveUpdateEventPermission permissions)
         {
@@ -396,7 +441,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Set permissions on a contributor who has been invited but has not accepted.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="user"></param>
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetInvitedContributorPermissionsAsync(RedditUser user, LiveUpdateEventPermission permissions)
         {
@@ -406,7 +451,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Set permissions on a contributor who has been invited but has not accepted.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="userName"></param>
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetInvitedContributorPermissionsAsync(string userName, LiveUpdateEventPermission permissions)
         {

@@ -1,4 +1,5 @@
 ﻿#if !NET462
+#pragma warning disable 1591
 namespace System
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate)]
@@ -6,4 +7,5 @@ namespace System
     {
     }
 }
+#pragma warning restore 1591
 #endif

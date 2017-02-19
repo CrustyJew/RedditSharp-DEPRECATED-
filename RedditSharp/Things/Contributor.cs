@@ -1,14 +1,18 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A contributor to a subreddit.
+    /// </summary>
     public class Contributor : Thing
     {
+        #pragma warning disable 1591
         public Contributor(Reddit reddit, JToken json) : base(reddit, json) {
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Contributor name.

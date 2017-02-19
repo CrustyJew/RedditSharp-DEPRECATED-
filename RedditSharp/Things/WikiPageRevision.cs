@@ -1,15 +1,19 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A revision to a wiki page.
+    /// </summary>
     public class WikiPageRevision : Thing
     {
+        #pragma warning disable 1591
         protected internal WikiPageRevision(Reddit reddit, JToken json) : base(reddit, json) {
             Author = new RedditUser(Reddit, json["author"]);
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Revision id.

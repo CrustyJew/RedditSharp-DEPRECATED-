@@ -7,6 +7,9 @@ using System.Net;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Subreddit settings.
+    /// </summary>
     public class SubredditSettings : RedditObject
     {
         private const string SiteAdminUrl = "/api/site_admin";
@@ -18,6 +21,10 @@ namespace RedditSharp
         [JsonIgnore]
         public Subreddit Subreddit { get; private set; }
 
+        /// <summary>
+        /// Get the subreddit settings page.
+        /// </summary>
+        /// <param name="subreddit">A subreddit.</param>
         public SubredditSettings(Subreddit subreddit) : base(subreddit?.Reddit)
         {
             Subreddit = subreddit;
@@ -46,9 +53,7 @@ namespace RedditSharp
         /// Get the subreddit settings page.
         /// </summary>
         /// <param name="subreddit">A subreddit.</param>
-        /// <param name="reddit"></param>
         /// <param name="json"></param>
-        /// <param name="webAgent"></param>
         public SubredditSettings(Subreddit subreddit, JToken json) : this(subreddit)
         {
             var data = json["data"];
@@ -309,6 +314,9 @@ namespace RedditSharp
         }
     }
 
+    /// <summary>
+    /// Rules for editing the wiki.
+    /// </summary>
     public enum WikiEditMode
     {
         /// <summary>
@@ -325,6 +333,9 @@ namespace RedditSharp
         All
     }
 
+    /// <summary>
+    /// Type of Subreddit.
+    /// </summary>
     public enum SubredditType
     {
         /// <summary>
@@ -341,6 +352,9 @@ namespace RedditSharp
         Private
     }
 
+    /// <summary>
+    /// Content Options.
+    /// </summary>
     public enum ContentOptions
     {
         /// <summary>
@@ -357,6 +371,9 @@ namespace RedditSharp
         SelfOnly
     }
 
+    /// <summary>
+    /// Spam filter strength.
+    /// </summary>
     public enum SpamFilterStrength
     {
         /// <summary>

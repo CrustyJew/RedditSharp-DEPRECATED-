@@ -1,17 +1,19 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// An entry in the modlog.
+    /// </summary>
     public class ModAction : Thing
     {
+        #pragma warning disable 1591
         public ModAction(Reddit reddit, JToken json) : base(reddit, json) {
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Type of action.
@@ -113,6 +115,7 @@ namespace RedditSharp.Things
               return await Reddit.GetThingByFullnameAsync(TargetThingFullname).ConfigureAwait(false);
             }).Result ;
 
+        /// <inheritdoc />
         protected override JToken GetJsonData(JToken json) => json["data"];
    }
 }

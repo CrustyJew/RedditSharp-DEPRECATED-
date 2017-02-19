@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Authentication;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RedditSharp.Multi
 {
+    /// <summary>
+    /// A Multireddit.
+    /// </summary>
     public class Multi : RedditObject
     {
         #region Constant API URLs
@@ -22,8 +22,10 @@ namespace RedditSharp.Multi
         private const string CopyMultiUrl = "/api/multi/copy";
         #endregion
 
+        #pragma warning disable 1591
         public Multi(Reddit reddit) : base(reddit) {
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Retrieve a list of the Multis belonging to the currently authenticated user
@@ -227,13 +229,7 @@ namespace RedditSharp.Multi
         /// <summary>
         /// Create a new Multi for the authenticated user
         /// </summary>
-        /// <param name="description">Multi Description</param>
-        /// <param name="displayname">Multi Display Name</param>
-        /// <param name="iconname">Icon Name (must be one of the default values)</param>
-        /// <param name="keycolor">Hex Code for the desired color</param>
-        /// <param name="subreddits">Array of Subreddit names to add</param>
-        /// <param name="visibility">Visibility state for the Multi</param>
-        /// <param name="weightingscheme">Weighting Scheme for the Multi</param>
+        /// <param name="m">Multi Data</param>
         /// <param name="path">Desired URL path for the Multi</param>
         /// <returns>A string containing the information for the newly created Multi or a status of (409) if the Multi already exists</returns>
         public async Task<JToken> PostMultiAsync(MData m, string path)
@@ -268,13 +264,7 @@ namespace RedditSharp.Multi
         /// <summary>
         /// Create or update a  Multi for the authenticated user
         /// </summary>
-        /// <param name="description">Multi Description</param>
-        /// <param name="displayname">Multi Display Name</param>
-        /// <param name="iconname">Icon Name (must be one of the default values)</param>
-        /// <param name="keycolor">Hex Code for the desired color</param>
-        /// <param name="subreddits">Array of Subreddit names to add</param>
-        /// <param name="visibility">Visibility state for the Multi</param>
-        /// <param name="weightingscheme">Weighting Scheme for the Multi</param>
+        /// <param name="m">Multi Data</param>
         /// <param name="path">Desired URL path for the Multi</param>
         /// <returns>A string containing the information for the newly created or updated Multi or a status of (409) if the Multi already exists</returns>
         public async Task<string> PutMultiAsync(MData m, string path)

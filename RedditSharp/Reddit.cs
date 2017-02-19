@@ -77,30 +77,27 @@ namespace RedditSharp
             get { return Subreddit.GetRSlashAll(this); }
         }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+
+        #pragma warning disable 1591
         public Reddit()
             : this(true) { }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
         public Reddit(bool useSsl)
         {
             DefaultWebAgent defaultAgent = new DefaultWebAgent();
 
             JsonSerializer = JsonSerializer.Create(new JsonSerializerSettings {
-                    CheckAdditionalContent = false,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
-                });
+                CheckAdditionalContent = false,
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            });
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
         }
+        #pragma warning restore 1591
 
         /// <summary>
-        /// Constructor.
+        /// 
         /// </summary>
         /// <param name="limitMode">Rate limit</param>
         /// <param name="useSsl">use ssl.  Defaults to true.</param>
@@ -487,6 +484,12 @@ namespace RedditSharp
 
         #region Helpers
 
+        /// <summary>
+        /// Get a Thing.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <returns></returns>
         protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
         {
             var json = await WebAgent.Get(url).ConfigureAwait(false);

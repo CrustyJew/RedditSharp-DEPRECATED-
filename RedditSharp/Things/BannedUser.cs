@@ -1,14 +1,18 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A user that is banned in a subreddit.
+    /// </summary>
     public class BannedUser : Thing
     {
+        #pragma warning disable 1591
         public BannedUser(Reddit reddit, JToken json) : base(reddit, json) {
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Date the user was banned.

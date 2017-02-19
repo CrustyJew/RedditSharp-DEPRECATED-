@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// WebAgent supporting OAuth.
+    /// </summary>
     public class BotWebAgent : WebAgent
     {
         //private so it doesn't leak app secret to other code
@@ -25,9 +24,9 @@ namespace RedditSharp
         /// </summary>
         /// <param name="username">The username.</param>
         /// <param name="password">The user's password.</param>
-        /// <param name="clientId">Granted by reddit as part of app.</param>
+        /// <param name="clientID">Granted by reddit as part of app.</param>
         /// <param name="clientSecret">Granted by reddit as part of app.</param>
-        /// <param name="redirectUri">Selected as part of app. Reddit will send users back here.</param>
+        /// <param name="redirectURI">Selected as part of app. Reddit will send users back here.</param>
         public BotWebAgent(string username, string password, string clientID, string clientSecret, string redirectURI)
         {
             Username = username;

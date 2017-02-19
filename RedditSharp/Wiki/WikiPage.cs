@@ -5,9 +5,11 @@ using RedditSharp.Things;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// An individual wiki page.
+    /// </summary>
     public class WikiPage
     {
-
         /// <summary>
         /// May revise.
         /// </summary>
@@ -39,10 +41,12 @@ namespace RedditSharp
         [JsonIgnore]
         public RedditUser RevisionBy { get; private set; }
 
+        #pragma warning disable 1591
         protected internal WikiPage(Reddit reddit, JToken json)
         {
             RevisionBy = new RedditUser(reddit, json["revision_by"]);
             reddit.PopulateObject(json, this);
         }
+        #pragma warning restore 1591
     }
 }

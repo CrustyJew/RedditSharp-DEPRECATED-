@@ -2,8 +2,10 @@
 
 namespace RedditSharp
 {
+    /// <inheritdoc />
     public class ConsoleCaptchaSolver : ICaptchaSolver
     {
+        /// <inheritdoc />
         public CaptchaResponse HandleCaptcha(Captcha captcha)
         {
             Console.WriteLine("Captcha required! The captcha ID is {0}", captcha.Id);

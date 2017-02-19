@@ -3,12 +3,17 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Represents a moderator.
+    /// </summary>
     public class ModeratorUser
     {
+        #pragma warning disable 1591
         public ModeratorUser(Reddit reddit, JToken json)
         {
             reddit.PopulateObject(json, this);
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Moderator username.

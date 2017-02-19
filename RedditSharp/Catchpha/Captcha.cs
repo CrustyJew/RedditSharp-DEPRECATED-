@@ -2,6 +2,9 @@
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// A captcha challenge.
+    /// </summary>
     public struct Captcha
     {
         private const string UrlFormat = "http://www.reddit.com/captcha/{0}";

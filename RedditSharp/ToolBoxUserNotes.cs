@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿#pragma warning disable 1591
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -95,3 +96,4 @@ namespace RedditSharp
         }
     }
 }
+#pragma warning restore 1591

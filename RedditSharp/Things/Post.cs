@@ -12,6 +12,9 @@ using System.Threading;
 
 namespace RedditSharp.Things
 {
+    /// <summary>
+    /// A post.
+    /// </summary>
     public class Post : VotableThing
     {
         private const string CommentUrl = "/api/comment";
@@ -25,9 +28,11 @@ namespace RedditSharp.Things
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
+        #pragma warning disable 1591
         public Post(Reddit reddit, JToken json) : base(reddit, json)
         {
         }
+        #pragma warning restore 1591
 
         /// <summary>
         /// Author of this post.
@@ -279,6 +284,7 @@ namespace RedditSharp.Things
 
             return comments;
         }
+
         /// <summary>
         /// Returns a <see cref="List{T}"/> of <see cref="Thing"/> that contains <see cref="Comment"/> and <see cref="More"/>
         /// </summary>

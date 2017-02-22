@@ -78,14 +78,15 @@ namespace RedditSharp
         /// Set settings for the specified wiki page.
         /// </summary>
         /// <param name="name">wiki page</param>
-        /// <param name="settings">settings</param>
-        public async Task SetPageSettingsAsync(string name, WikiPageSettings settings)
+        /// <param name="listed">public listing or not</param>
+        /// <param name="editMode"><see cref="WikiEditMode"/>editing permissions</param>
+        public async Task SetPageSettingsAsync(string name, bool listed, WikiEditMode editMode)
         {
             await WebAgent.Post(WikiPageSettingsUrl(name), new
             {
                 page = name,
-                permlevel = settings.PermLevel,
-                listed = settings.Listed,
+                permlevel = editMode,
+                listed = listed,
                 uh = Reddit.User.Modhash
             }).ConfigureAwait(false);
         }

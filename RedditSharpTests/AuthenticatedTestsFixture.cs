@@ -8,17 +8,16 @@ namespace RedditSharpTests
     public class AuthenticatedTestsFixture
     {
         public IConfigurationRoot Config { get; private set; }
-        public RedditSharp.AuthProvider AuthProvider { get; private set; }
         public string AccessToken { get; private set; }
+        public RedditSharp.BotWebAgent WebAgent { get; set; }
         public string TestUserName { get; private set; }
         public AuthenticatedTestsFixture()
         {
             ConfigurationBuilder builder = new ConfigurationBuilder();
             builder.AddUserSecrets<AuthenticatedTestsFixture>();
             Config = builder.Build();
-
-            AuthProvider = new RedditSharp.AuthProvider(Config["RedditClientID"], Config["RedditClientSecret"], Config["RedditRedirectURI"]);
-            AccessToken = AuthProvider.GetOAuthTokenAsync(Config["TestUserRefreshToken"], isRefresh: true).Result;
+            WebAgent = new RedditSharp.BotWebAgent(Config["TestUserName"], Config["TestUserPassword"], Config["RedditClientID"], Config["RedditClientSecret"], Config["RedditRedirectURI"]);
+            AccessToken = WebAgent.AccessToken;
             TestUserName = Config["TestUserName"];
         }
     }

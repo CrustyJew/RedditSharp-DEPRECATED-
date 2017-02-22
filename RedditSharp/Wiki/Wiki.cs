@@ -79,15 +79,15 @@ namespace RedditSharp
         /// </summary>
         /// <param name="name">wiki page</param>
         /// <param name="listed">public listing or not</param>
-        /// <param name="editMode"><see cref="WikiEditMode"/>editing permissions</param>
-        public async Task SetPageSettingsAsync(string name, bool listed, WikiEditMode editMode)
+        /// <param name="editMode"><see cref="WikiPageSettings.WikiPagePermissionLevel"/>editing permissions</param>
+        public async Task SetPageSettingsAsync(string name, bool listed, WikiPageSettings.WikiPagePermissionLevel editMode)
         {
             await WebAgent.Post(WikiPageSettingsUrl(name), new
             {
                 page = name,
-                permlevel = editMode,
+                permlevel = (int)editMode,
                 listed = listed,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
         #endregion
@@ -126,7 +126,7 @@ namespace RedditSharp
             {
                 content = content,
                 page = page,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             };
             List<string> addParams = new List<string>();
             if (previous != null)

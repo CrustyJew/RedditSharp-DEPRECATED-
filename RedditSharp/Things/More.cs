@@ -13,11 +13,6 @@ namespace RedditSharp.Things
 	{
 		private const string MoreUrl = "/api/morechildren.json?link_id={0}&children={1}&api_type=json";
 
-		[JsonIgnore]
-		private Reddit Reddit { get; set; }
-
-		[JsonIgnore]
-		private IWebAgent WebAgent { get; set; }
 
 		[JsonProperty("children")]
 		public string[] Children { get; set; }

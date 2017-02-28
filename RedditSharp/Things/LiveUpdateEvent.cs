@@ -84,12 +84,6 @@ namespace RedditSharp.Things
         [JsonProperty]
         public string Name { get; set; }
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
         /// <summary>
         /// Accept an invite to be a live thread contributor.
         /// </summary>
@@ -545,7 +539,7 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
-        private void SimpleAction(string url)
+        private new void SimpleAction(string url)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");

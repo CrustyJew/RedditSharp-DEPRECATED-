@@ -7,7 +7,6 @@ namespace RedditSharp.Things
 {
     public class CreatedThing : Thing
     {
-        private Reddit Reddit { get; set; }
 
         /// <summary>
         /// Initialize

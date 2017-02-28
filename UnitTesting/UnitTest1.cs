@@ -9,10 +9,20 @@ namespace UnitTesting
     public class UnitTest1
     {
         [TestMethod]
-        public void getSubreddit()
+        public void GetSubreddit()
         { //Discovered a bug where reddit.getSubreddit() will produce a 403 forbidden if you're not logged in
             if (System.Text.RegularExpressions.Regex.Replace("/r/text", "(r/|/)", "") != "text")
                 throw new Exception("The regexes don't work!");
+        }
+        [TestMethod]
+        public void TestSpoilers()
+        {
+            Reddit reddit = new Reddit();
+            if(!reddit.GetSubreddit("talesfromtechsupport").SpoilersEnabled)
+            {
+                throw new Exception("The Spoilers must be found!");
+            }
+            
         }
     }
 }

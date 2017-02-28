@@ -36,7 +36,9 @@ namespace TestRedditSharp
                     try
                     {
                         Console.WriteLine("Logging in...");
+#pragma warning disable
                         reddit = new Reddit(username, password);
+#pragma warning restore
                         authenticated = reddit.User != null;
                     }
                     catch (AuthenticationException)

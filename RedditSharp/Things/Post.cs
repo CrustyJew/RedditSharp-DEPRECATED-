@@ -22,6 +22,8 @@ namespace RedditSharp.Things
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
+        private const string SpoilerUrl = "/api/spoiler";
+        private const string UnSpoilerUrl = "/api/unspoiler";
 
         /// <summary>
         /// Initialize
@@ -99,7 +101,11 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("is_self")]
         public bool IsSelfPost { get; set; }
-
+        /// <summary>
+        /// Returns true if post is marked as spoiler
+        /// </summary>
+        [JsonProperty("spoiler")]
+        public bool IsSpoiler { get; set; }
         /// <summary>
         /// Css class of the link flair.
         /// </summary>
@@ -235,7 +241,20 @@ namespace RedditSharp.Things
             var data = WebAgent.GetResponseString(response.GetResponseStream());
             return data;
         }
-
+        /// <summary>
+        /// Marks post as a spoiler
+        /// </summary>
+        public void Spoiler()
+        {
+            var data = SimpleAction(SpoilerUrl);
+        }
+        /// <summary>
+        /// Unmarks a post as being a spoiler
+        /// </summary>
+        public void UnSpoiler()
+        {
+            var data = SimpleAction(UnSpoilerUrl);
+        }
         /// <summary>
         /// Hide this post.
         /// </summary>
@@ -436,9 +455,8 @@ namespace RedditSharp.Things
                         Comment next = ((Comment)things.Current).PopulateComments(things);
                         yield return next;
                     }
-                    if (things.Current is More)
+                    if (things.Current is More more)
                     {
-                        More more = (More)things.Current;
                         if (more.ParentId != FullName) break;
                         things = more.Things().GetEnumerator();
                         things.MoveNext();

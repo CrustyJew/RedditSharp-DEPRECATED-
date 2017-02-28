@@ -13,9 +13,6 @@ namespace RedditSharp.Things
         private const string SetAsReadUrl = "/api/read_message";
         private const string CommentUrl = "/api/comment";
 
-        private Reddit Reddit { get; set; }
-        private IWebAgent WebAgent { get; set; }
-
         /// <summary>
         /// Message body markdown.
         /// </summary>

@@ -384,8 +384,6 @@ namespace RedditSharp
 
 
         /// <summary>
-        /// 
-
         /// Compose a private message.
         /// </summary>
         /// <param name="subject">message subject</param>

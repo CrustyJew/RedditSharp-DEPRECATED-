@@ -62,8 +62,9 @@ namespace RedditSharp.Things
             while (things.MoveNext() && (first is Comment || first is More))
             {
                 first = things.Current;
-                if (first is Comment comment)
+                if (first is Comment)
                 {
+                    var comment = (Comment)first;
                     comments[comment.FullName] = Tuple.Create<Comment, List<Comment>>(comment, new List<Comment>());
                     if (comments.ContainsKey(comment.ParentId))
                     {
@@ -75,8 +76,9 @@ namespace RedditSharp.Things
                         break;
                     }
                 }
-                else if (first is More more)
+                else if (first is More)
                 {
+                    var more = (More)first;
                     if (comments.ContainsKey(more.ParentId))
                     {
                         comments[more.ParentId].Item1.More = more;

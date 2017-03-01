@@ -455,8 +455,9 @@ namespace RedditSharp.Things
                         Comment next = ((Comment)things.Current).PopulateComments(things);
                         yield return next;
                     }
-                    if (things.Current is More more)
+                    if (things.Current is More)
                     {
+                        var more = (More)things.Current;
                         if (more.ParentId != FullName) break;
                         things = more.Things().GetEnumerator();
                         things.MoveNext();

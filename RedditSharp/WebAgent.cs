@@ -90,15 +90,10 @@ namespace RedditSharp
                   RateLimitRemaining = (int)double.Parse(values.First());
                 if (headers.TryGetValues("X-Ratelimit-Reset", out values))
                   RateLimitReset = int.Parse(values.First());
-                Console.WriteLine(RateLimitUsed.ToString());
-                Console.WriteLine(RateLimitRemaining.ToString());
-                Console.WriteLine(RateLimitReset.ToString());
               } finally {
                 rateLimitLock.Release();
               }
               tries++;
-              if (!response.IsSuccessStatusCode)
-                Console.WriteLine(response.ToString());
             } while(!response.IsSuccessStatusCode && tries < maxTries);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 

@@ -17,8 +17,7 @@ namespace UnitTesting
         [TestMethod]
         public void TestSpoilers()
         {
-            Reddit reddit = new Reddit();
-            if(!reddit.GetSubreddit("talesfromtechsupport").SpoilersEnabled)
+            if(!new Reddit().GetSubreddit("talesfromtechsupport").SpoilersEnabled)
             {
                 throw new Exception("The Spoilers must be found!");
             }

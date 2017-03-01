@@ -135,11 +135,10 @@ namespace RedditSharp
             }
         }
 
-#pragma warning disable 0693
-        private class ListingEnumerator<T> : IEnumerator<T> where T : Thing
+        private class ListingEnumerator<K> : IEnumerator<K> where K : Thing
         {
             private bool stream = false;
-            private Listing<T> Listing { get; set; }
+            private Listing<K> Listing { get; set; }
             private int CurrentPageIndex { get; set; }
             private string After { get; set; }
             private string Before { get; set; }
@@ -157,7 +156,7 @@ namespace RedditSharp
             /// <param name="limitPerRequest">The number of listings to be returned per request. -1 will exclude this parameter and use the Reddit default (25)</param>
             /// <param name="maximumLimit">The maximum number of listings to return, -1 will not add a limit</param>
             /// <param name="stream">yield new <see cref="Thing"/> as they are created</param>
-            public ListingEnumerator(Listing<T> listing, int limitPerRequest, int maximumLimit, bool stream = false)
+            public ListingEnumerator(Listing<K> listing, int limitPerRequest, int maximumLimit, bool stream = false)
             {
                 Listing = listing;
                 CurrentPageIndex = -1;
@@ -170,11 +169,11 @@ namespace RedditSharp
                 MaximumLimit = maximumLimit;
             }
 
-            public T Current
+            public K Current
             {
                 get
                 {
-                    return (T)CurrentPage[CurrentPageIndex];
+                    return (K)CurrentPage[CurrentPageIndex];
                 }
             }
 
@@ -297,7 +296,7 @@ namespace RedditSharp
                 for (int i = 0; i < children.Count; i++)
                 {
                     if (!stream)
-                        things.Add(Thing.Parse<T>(Listing.Reddit, children[i], Listing.WebAgent));
+                        things.Add(Thing.Parse<K>(Listing.Reddit, children[i], Listing.WebAgent));
                     else
                     {
                         var kind = children[i]["kind"].ValueOrDefault<string>();
@@ -313,7 +312,7 @@ namespace RedditSharp
                                 if (done.Contains(replyId))
                                     continue;
 
-                                things.Add(Thing.Parse<T>(Listing.Reddit, reply, Listing.WebAgent));
+                                things.Add(Thing.Parse<K>(Listing.Reddit, reply, Listing.WebAgent));
                                 done.Add(replyId);
                             }
                         }
@@ -321,7 +320,7 @@ namespace RedditSharp
                         if (String.IsNullOrEmpty(id) || done.Contains(id))
                             continue;
 
-                        things.Add(Thing.Parse<T>(Listing.Reddit, children[i], Listing.WebAgent));
+                        things.Add(Thing.Parse<K>(Listing.Reddit, children[i], Listing.WebAgent));
                         done.Add(id);
                     }
                 }
@@ -452,6 +451,5 @@ namespace RedditSharp
                 CurrentPage = new Thing[0];
             }
         }
-#pragma warning restore
     }
 }

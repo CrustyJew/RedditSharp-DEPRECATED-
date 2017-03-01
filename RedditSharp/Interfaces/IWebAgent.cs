@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using System;
 using System.Threading.Tasks;
 using System.Net.Http;
 
@@ -51,7 +52,7 @@ namespace RedditSharp
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task<JToken> ExecuteRequestAsync(HttpRequestMessage request);
+        Task<JToken> ExecuteRequestAsync(Func<HttpRequestMessage> request);
 
         /// <summary>
         /// Executes a web request against the reddit api.

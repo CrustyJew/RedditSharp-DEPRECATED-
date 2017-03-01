@@ -1,8 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
+using System.Reflection; using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Collections.Generic;
@@ -70,8 +69,10 @@ namespace RedditSharp
         }
 
         /// <inheritdoc />
-        public virtual async Task<JToken> ExecuteRequestAsync(HttpRequestMessage request)
+        public virtual async Task<JToken> ExecuteRequestAsync(Func<HttpRequestMessage> request)
         {
+            if (request == null)
+              throw new ArgumentNullException(nameof(request));
             const int maxTries = 20;
             HttpResponseMessage response;
             var tries = 0;
@@ -79,7 +80,7 @@ namespace RedditSharp
               if (RateLimitRemaining <= 0) {
                 await Task.Delay(RateLimitReset * 1000);
               }
-              response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+              response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
               await rateLimitLock.WaitAsync().ConfigureAwait(false);
               try {
                 IEnumerable<string> values;
@@ -180,26 +181,26 @@ namespace RedditSharp
         }
 
         /// <inheritdoc />
-        public async Task<JToken> Get(string url)
+        public Task<JToken> Get(string url) => ExecuteRequestAsync(() => CreateRequest(url, "GET"));
+
+        /// <inheritdoc />
+        public Task<JToken> Post(string url, object data, params string[] additionalFields)
         {
-            var request = CreateRequest(url, "GET");
-            return await ExecuteRequestAsync(request).ConfigureAwait(false);
+            return ExecuteRequestAsync(() => {
+                  var request = CreateRequest(url, "POST");
+                  WritePostBody(request, data, additionalFields);
+                  return request;
+                });
         }
 
         /// <inheritdoc />
-        public async Task<JToken> Post(string url, object data, params string[] additionalFields)
+        public Task<JToken> Put(string url, object data)
         {
-            var request = CreateRequest(url, "POST");
-            WritePostBody(request, data, additionalFields);
-            return await ExecuteRequestAsync(request).ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public async Task<JToken> Put(string url, object data)
-        {
-            var request = CreateRequest(url, "POST");
-            WritePostBody(request, data);
-            return await ExecuteRequestAsync(request).ConfigureAwait(false);
+            return ExecuteRequestAsync(() => {
+                  var request = CreateRequest(url, "PUT");
+                  WritePostBody(request, data);
+                  return request;
+                });
         }
 
         /// <inheritdoc />

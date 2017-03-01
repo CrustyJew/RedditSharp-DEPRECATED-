@@ -50,15 +50,6 @@ namespace RedditSharp
         /// </summary>
         public AuthenticatedUser User { get; set; }
 
-        /// <summary>
-        /// Sets the Rate Limiting Mode of the underlying WebAgent
-        /// </summary>
-        public DefaultWebAgent.RateLimitMode RateLimit
-        {
-            get { return DefaultWebAgent.RateLimit; }
-            set { DefaultWebAgent.RateLimit = value; }
-        }
-
         internal JsonSerializer JsonSerializer { get; }
 
         /// <summary>
@@ -91,23 +82,12 @@ namespace RedditSharp
                 DefaultValueHandling = DefaultValueHandling.Ignore
             });
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
+            DefaultWebAgent.UserAgent = "";
+            DefaultWebAgent.RootDomain = "www.reddit.com";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
         }
         #pragma warning restore 1591
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="limitMode">Rate limit</param>
-        /// <param name="useSsl">use ssl.  Defaults to true.</param>
-        public Reddit(DefaultWebAgent.RateLimitMode limitMode, bool useSsl = true)
-            : this(useSsl)
-        {
-            DefaultWebAgent.UserAgent = "";
-            DefaultWebAgent.RateLimit = limitMode;
-            DefaultWebAgent.RootDomain = "www.reddit.com";
-        }
 
         /// <summary>
         /// Constructor.

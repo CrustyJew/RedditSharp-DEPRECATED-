@@ -15,7 +15,6 @@ namespace RedditSharp
 
         private const string OAuthDomainUrl = "oauth.reddit.com";
         private static HttpClient _httpClient;
-        private static SemaphoreSlim rateLimitLock;
 
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
@@ -28,35 +27,6 @@ namespace RedditSharp
         public static string Protocol { get; set; }
 
         /// <summary>
-        /// It is strongly advised that you leave this set to Burst or Pace. Reddit bans excessive
-        /// requests with extreme predjudice.
-        /// </summary>
-        public static RateLimitMode RateLimit { get; set; }
-
-        /// <summary>
-        /// The method by which the WebAgent will limit request rate
-        /// </summary>
-        public enum RateLimitMode
-        {
-            /// <summary>
-            /// Limits requests to one every two seconds (one if OAuth)
-            /// </summary>
-            Pace,
-            /// <summary>
-            /// Restricts requests to five per ten seconds (ten if OAuth)
-            /// </summary>
-            SmallBurst,
-            /// <summary>
-            /// Restricts requests to thirty per minute (sixty if OAuth)
-            /// </summary>
-            Burst,
-            /// <summary>
-            /// Does not restrict request rate. ***NOT RECOMMENDED***
-            /// </summary>
-            None
-        }
-
-        /// <summary>
         /// The root domain RedditSharp uses to address Reddit.
         /// www.reddit.com by default
         /// </summary>
@@ -65,30 +35,12 @@ namespace RedditSharp
         /// <inheritdoc />
         public string AccessToken { get; set; }
 
-        private static DateTime _lastRequest;
-        private static DateTime _burstStart;
-        private static int _requestsThisBurst;
-        /// <summary>
-        /// UTC DateTime of last request made to Reddit API
-        /// </summary>
-        public DateTime LastRequest
-        {
-            get { return _lastRequest; }
-        }
-        /// <summary>
-        /// UTC DateTime of when the last burst started
-        /// </summary>
-        public DateTime BurstStart
-        {
-            get { return _burstStart; }
-        }
-        /// <summary>
-        /// Number of requests made during the current burst
-        /// </summary>
-        public int RequestsThisBurst
-        {
-            get { return _requestsThisBurst; }
-        }
+        private static SemaphoreSlim rateLimitLock;
+        // See https://github.com/reddit/reddit/wiki/API for more details.
+        public static int RateLimitUsed { get; set; }
+        public static int RateLimitRemaining { get; set; }
+        // Approximate seconds until the rate limit is reset.
+        public static int RateLimitReset { get; set;}
 
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
@@ -100,7 +52,7 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public WebAgent() {
         }
@@ -112,13 +64,42 @@ namespace RedditSharp
         public WebAgent( string accessToken ) {
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
+            RateLimitUsed = 0;
+            RateLimitReset = 60;
+            RateLimitRemaining = IsOAuth() ? 60 : 30;
         }
 
         /// <inheritdoc />
         public virtual async Task<JToken> ExecuteRequestAsync(HttpRequestMessage request)
         {
-            await EnforceRateLimit().ConfigureAwait(false);
-            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            const int maxTries = 20;
+            HttpResponseMessage response;
+            var tries = 0;
+            do {
+              if (RateLimitRemaining <= 0) {
+                await Task.Delay(RateLimitReset * 1000);
+              }
+              response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+              await rateLimitLock.WaitAsync().ConfigureAwait(false);
+              try {
+                IEnumerable<string> values;
+                var headers = response.Headers;
+                if (headers.TryGetValues("X-Ratelimit-Used", out values))
+                  RateLimitUsed = int.Parse(values.First());
+                if (headers.TryGetValues("X-Ratelimit-Remaining", out values))
+                  RateLimitRemaining = (int)double.Parse(values.First());
+                if (headers.TryGetValues("X-Ratelimit-Reset", out values))
+                  RateLimitReset = int.Parse(values.First());
+                Console.WriteLine(RateLimitUsed.ToString());
+                Console.WriteLine(RateLimitRemaining.ToString());
+                Console.WriteLine(RateLimitReset.ToString());
+              } finally {
+                rateLimitLock.Release();
+              }
+              tries++;
+              if (!response.IsSuccessStatusCode)
+                Console.WriteLine(response.ToString());
+            } while(!response.IsSuccessStatusCode && tries < maxTries);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             JToken json;
@@ -156,59 +137,6 @@ namespace RedditSharp
                 json = JToken.Parse("{'method':'" + response.RequestMessage.Method + "','uri':'" + response.RequestMessage.RequestUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
             }
             return json;
-        }
-
-        /// <summary>
-        /// Enforce the api throttle.
-        /// </summary>
-        protected virtual async Task EnforceRateLimit()
-        {
-            await rateLimitLock.WaitAsync().ConfigureAwait(false);
-            var limitRequestsPerMinute = IsOAuth() ? 60.0 : 30.0;
-            try {
-              switch (RateLimit)
-              {
-                  case RateLimitMode.Pace:
-                      while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
-                          await Task.Delay(250).ConfigureAwait(false);
-                      _lastRequest = DateTime.UtcNow;
-                      break;
-                  case RateLimitMode.SmallBurst:
-                      if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
-                      {
-                          _burstStart = DateTime.UtcNow;
-                          _requestsThisBurst = 0;
-                      }
-                      if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
-                      {
-                          while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
-                              await Task.Delay(250).ConfigureAwait(false);
-                          _burstStart = DateTime.UtcNow;
-                          _requestsThisBurst = 0;
-                      }
-                      _lastRequest = DateTime.UtcNow;
-                      _requestsThisBurst++;
-                      break;
-                  case RateLimitMode.Burst:
-                      if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
-                      {
-                          _burstStart = DateTime.UtcNow;
-                          _requestsThisBurst = 0;
-                      }
-                      if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
-                      {
-                          while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
-                              await Task.Delay(250).ConfigureAwait(false);
-                          _burstStart = DateTime.UtcNow;
-                          _requestsThisBurst = 0;
-                      }
-                      _lastRequest = DateTime.UtcNow;
-                      _requestsThisBurst++;
-                      break;
-              }
-            } finally {
-              rateLimitLock.Release();
-            }
         }
 
         /// <inheritdoc />
@@ -307,5 +235,6 @@ namespace RedditSharp
         }
 
         private static bool IsOAuth() => RootDomain == "oauth.reddit.com";
+
     }
 }

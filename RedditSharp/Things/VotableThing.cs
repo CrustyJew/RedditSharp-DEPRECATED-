@@ -547,9 +547,10 @@ namespace RedditSharp.Things
                     if (child.Type != JTokenType.Array || child.Children().Count() != 2)
                         continue;
 
-                    var report = new Report();
-                    report.Reason = child.First.Value<string>();
-
+                    var report = new Report()
+                    {
+                        Reason = child.First.Value<string>()
+                    };
                     if (child.Last.Type == JTokenType.String)
                     {
                         report.ModeratorName = child.Last.Value<string>();

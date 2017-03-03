@@ -22,7 +22,8 @@ namespace RedditSharp.Things
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
-
+        private const string SpoilerUrl = "/api/spoiler";
+        private const string UnSpoilerUrl = "/api/unspoiler";
         /// <summary>
         /// Initialize
         /// </summary>
@@ -87,7 +88,11 @@ namespace RedditSharp.Things
                 return ListComments().ToArray();
             }
         }
-
+        /// <summary>
+        /// Returns true if post is marekd as spoiler
+        /// </summary>
+        [JsonProperty("spoiler")]
+        public bool IsSpoiler { get; set; }
         /// <summary>
         /// Domain of this post.
         /// </summary>
@@ -117,7 +122,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("num_comments")]
         public int CommentCount { get; set; }
-        
+
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
@@ -206,6 +211,20 @@ namespace RedditSharp.Things
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
             return new Comment().Init(Reddit, json["json"]["data"]["things"][0], WebAgent, this);
+        }
+        /// <summary>
+        /// Marks post as spoiler
+        /// </summary>
+        public void Spoiler()
+        {
+            var data = SimpleAction(SpoilerUrl);
+        }
+        /// <summary>
+        /// Unmarks a post as being a spoiler
+        /// </summary>
+        public void UnSpoiler()
+        {
+            var data = SimpleAction(UnSpoilerUrl);
         }
 
         private string SimpleActionToggle(string endpoint, bool value, bool requiresModAction = false)

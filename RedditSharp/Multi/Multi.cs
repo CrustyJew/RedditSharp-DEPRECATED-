@@ -152,8 +152,10 @@ namespace RedditSharp.Multi
              }
             var request = WebAgent.CreatePut(string.Format(PutSubMultiUrl,path,subName));
             var stream = request.GetRequestStream();
-            JObject modelData = new JObject();
-            modelData.Add("name", subName);
+            JObject modelData = new JObject
+            {
+                { "name", subName }
+            };
             WebAgent.WritePostBody(stream, new
             {
                 model = modelData,
@@ -182,8 +184,10 @@ namespace RedditSharp.Multi
             }
             var request = WebAgent.CreatePut(string.Format(GetMultiDescriptionPathUrl, path));
             var stream = request.GetRequestStream();
-            JObject modelData = new JObject();
-            modelData.Add("body_md", description);
+            JObject modelData = new JObject
+            {
+                { "body_md", description }
+            };
             WebAgent.WritePostBody(stream, new
                 {
                     model = modelData,
@@ -296,16 +300,20 @@ namespace RedditSharp.Multi
             }
             var request = WebAgent.CreatePost(string.Format(GetMultiPathUrl,path));
             var stream = request.GetRequestStream();
-            JObject modelData = new JObject();
-            modelData.Add("description_md",m.DescriptionMD);
-            modelData.Add("display_name",m.DisplayName);
-            modelData.Add("icon_name",m.IconName);
-            modelData.Add("key_color",m.KeyColor);
+            JObject modelData = new JObject
+            {
+                { "description_md", m.DescriptionMD },
+                { "display_name", m.DisplayName },
+                { "icon_name", m.IconName },
+                { "key_color", m.KeyColor }
+            };
             JArray subData = new JArray();
             foreach(var s in m.Subreddits)
             {
-                JObject sub = new JObject();
-                sub.Add("name",s.Name);
+                JObject sub = new JObject
+                {
+                    { "name", s.Name }
+                };
                 subData.Add(sub);
             }
             modelData.Add("subreddits",subData);
@@ -344,16 +352,20 @@ namespace RedditSharp.Multi
             }
             var request = WebAgent.CreatePut(string.Format(GetMultiPathUrl, path));
             var stream = request.GetRequestStream();
-            JObject modelData = new JObject();
-            modelData.Add("description_md", m.DescriptionMD);
-            modelData.Add("display_name", m.DisplayName);
-            modelData.Add("icon_name", m.IconName);
-            modelData.Add("key_color", m.KeyColor);
+            JObject modelData = new JObject
+            {
+                { "description_md", m.DescriptionMD },
+                { "display_name", m.DisplayName },
+                { "icon_name", m.IconName },
+                { "key_color", m.KeyColor }
+            };
             JArray subData = new JArray();
             foreach (var s in m.Subreddits)
             {
-                JObject sub = new JObject();
-                sub.Add("name", s.Name);
+                JObject sub = new JObject
+                {
+                    { "name", s.Name }
+                };
                 subData.Add(sub);
             }
             modelData.Add("subreddits", subData);

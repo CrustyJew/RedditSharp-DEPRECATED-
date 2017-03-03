@@ -54,11 +54,6 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
-        [JsonIgnore]
-        protected Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        protected IWebAgent WebAgent { get; set; }
 
         /// <summary>
         /// Reddit username.

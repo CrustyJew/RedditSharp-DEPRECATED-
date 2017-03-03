@@ -47,12 +47,6 @@ namespace RedditSharp.Things
         private const string BannedUsersUrl = "/r/{0}/about/banned.json";
         private const string ModmailUrl = "/r/{0}/message/moderator/inbox.json";
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
         /// <summary>
         /// Subreddit Wiki
         /// </summary>
@@ -101,7 +95,11 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("over_18")]
         public bool NSFW { get; set; }
-
+        /// <summary>
+        /// Retunrs true if subreddit has spoilers enabled
+        /// </summary>
+        [JsonProperty("spoilers_enabled")]
+        public bool SpoilersEnabled { get; set; }
         /// <summary>
         /// Public description of the subreddit.
         /// </summary>

@@ -36,7 +36,9 @@ namespace TestRedditSharp
                     try
                     {
                         Console.WriteLine("Logging in...");
+#pragma warning disable 0618 // Method is obsolete
                         reddit = new Reddit(username, password);
+#pragma warning restore 0618 // Method is obsolete
                         authenticated = reddit.User != null;
                     }
                     catch (AuthenticationException)

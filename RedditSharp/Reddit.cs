@@ -251,10 +251,7 @@ namespace RedditSharp
         #region Obsolete Getter Methods
 
         [Obsolete("Use User property instead")]
-        public AuthenticatedUser GetMe()
-        {
-            return User;
-        }
+        public AuthenticatedUser GetMe() => User;
 
         #endregion Obsolete Getter Methods
 
@@ -384,8 +381,6 @@ namespace RedditSharp
 
 
         /// <summary>
-        /// 
-
         /// Compose a private message.
         /// </summary>
         /// <param name="subject">message subject</param>
@@ -404,7 +399,7 @@ namespace RedditSharp
             if (!string.IsNullOrWhiteSpace(fromSubReddit))
             {
                 var subReddit = this.GetSubreddit(fromSubReddit);
-                var modNameList = subReddit.Moderators.Select(b => b.Name).ToList();
+                var modNameList = subReddit.Moderators.Select(b => b.Name);
 
                 if (!modNameList.Contains(User.Name))
                     throw new AuthenticationException(

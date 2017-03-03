@@ -51,17 +51,18 @@ namespace RedditSharp
                     foreach (JToken note in x["ns"].Children())
                     {
 
-                        TBUserNote uNote = new TBUserNote();
-                        uNote.AppliesToUsername = user.Key;
-                        uNote.SubName = subName;
-                        uNote.SubmitterIndex = note["m"].Value<int>();
-                        uNote.Submitter = mods[uNote.SubmitterIndex];
-                        uNote.NoteTypeIndex = note["w"].Value<int>();
-                        uNote.NoteType = warnings[uNote.NoteTypeIndex];
-                        uNote.Message = note["n"].Value<string>();
-                        uNote.Timestamp = UnixTimeStamp.UnixTimeStampToDateTime(note["t"].Value<long>());
-                        uNote.Url = UnsquashLink(subName, note["l"].ValueOrDefault<string>());
-
+                        TBUserNote uNote = new TBUserNote()
+                        {
+                            AppliesToUsername = user.Key,
+                            SubName = subName,
+                            SubmitterIndex = note["m"].Value<int>(),
+                            Submitter = mods[note["m"].Value<int>()],
+                            NoteTypeIndex = note["w"].Value<int>(),
+                            NoteType = warnings[note["w"].Value<int>()],
+                            Message = note["n"].Value<string>(),
+                            Timestamp = UnixTimeStamp.UnixTimeStampToDateTime(note["t"].Value<long>()),
+                            Url = UnsquashLink(subName, note["l"].ValueOrDefault<string>()),
+                        };
                         toReturn.Add(uNote);
                     }
                 }

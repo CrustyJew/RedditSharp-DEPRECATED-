@@ -1,7 +1,8 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
-using System.Reflection; using System.Threading;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Collections.Generic;
@@ -36,10 +37,10 @@ namespace RedditSharp
 
         private static SemaphoreSlim rateLimitLock;
         // See https://github.com/reddit/reddit/wiki/API for more details.
-        public static int RateLimitUsed { get; set; }
-        public static int RateLimitRemaining { get; set; }
+        public static int RateLimitUsed { get; private set; }
+        public static int RateLimitRemaining { get; private set; }
         // Approximate seconds until the rate limit is reset.
-        public static int RateLimitReset { get; set;}
+        public static DateTimeOffset RateLimitReset { get; private set;}
 
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
@@ -64,7 +65,7 @@ namespace RedditSharp
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
             RateLimitUsed = 0;
-            RateLimitReset = 60;
+            RateLimitReset = DateTimeOffset.UtcNow;
             RateLimitRemaining = IsOAuth() ? 60 : 30;
         }
 
@@ -77,12 +78,12 @@ namespace RedditSharp
             HttpResponseMessage response;
             var tries = 0;
             do {
-              if (RateLimitRemaining <= 0) {
-                await Task.Delay(RateLimitReset * 1000);
-              }
-              response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
               await rateLimitLock.WaitAsync().ConfigureAwait(false);
               try {
+                if (RateLimitRemaining <= 0 && DateTime.UtcNow < RateLimitReset) {
+                  await Task.Delay(RateLimitReset - DateTime.UtcNow);
+                }
+                response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
                 IEnumerable<string> values;
                 var headers = response.Headers;
                 if (headers.TryGetValues("X-Ratelimit-Used", out values))
@@ -90,11 +91,11 @@ namespace RedditSharp
                 if (headers.TryGetValues("X-Ratelimit-Remaining", out values))
                   RateLimitRemaining = (int)double.Parse(values.First());
                 if (headers.TryGetValues("X-Ratelimit-Reset", out values))
-                  RateLimitReset = int.Parse(values.First());
+                  RateLimitReset = DateTime.UtcNow + TimeSpan.FromSeconds(int.Parse(values.First()));
               } finally {
                 rateLimitLock.Release();
+                tries++;
               }
-              tries++;
             } while(!response.IsSuccessStatusCode && tries < maxTries);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 

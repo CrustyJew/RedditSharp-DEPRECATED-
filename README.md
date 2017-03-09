@@ -1,4 +1,4 @@
-[![redditsharp MyGet Build Status](https://www.myget.org/BuildSource/Badge/redditsharp?identifier=038d3763-6401-4c84-b579-f5134e1c8efd)](https://www.myget.org/) [![NuGet version](https://badge.fury.io/nu/redditsharp.svg)](https://badge.fury.io/nu/redditsharp)
+[![redditsharp MyGet Build Status](https://www.myget.org/BuildSource/Badge/redditsharp?identifier=038d3763-6401-4c84-b579-f5134e1c8efd)](https://www.myget.org/) [![NuGet version](https://badge.fury.io/nu/redditsharp.svg)](https://badge.fury.io/nu/redditsharp) [![API Testing](https://img.shields.io/badge/API%20Test-RapidAPI-blue.svg)](https://rapidapi.com/package/Reddit/functions?utm_source=RedditGithub&utm_medium=button&utm_content=Vender_GitHub)
 
 **This is a hard fork and IS maintained**. 
 

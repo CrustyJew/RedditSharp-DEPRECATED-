@@ -100,7 +100,7 @@ namespace RedditSharp.Multi
                 display_name = displayName,
                 from = pathFrom,
                 to = pathTo,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -125,7 +125,7 @@ namespace RedditSharp.Multi
                 model = modelData,
                 multipath = path,
                 srname = subName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
@@ -151,7 +151,7 @@ namespace RedditSharp.Multi
                 {
                     model = modelData,
                     multipath = path,
-                    uh = Reddit.User.Modhash
+                    uh = Reddit.User?.Modhash
                 });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
@@ -176,7 +176,7 @@ namespace RedditSharp.Multi
                 display_name = displayName,
                 from = pathFrom,
                 to = pathTo,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -197,7 +197,7 @@ namespace RedditSharp.Multi
                 {
                     multipath = path,
                     srname = subname,
-                    uh = Reddit.User.Modhash
+                    uh = Reddit.User?.Modhash
                 });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
@@ -219,7 +219,7 @@ namespace RedditSharp.Multi
             WebAgent.WritePostBody(request, new
             {
                 multipath = path,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
@@ -257,7 +257,7 @@ namespace RedditSharp.Multi
                 {
                     model = modelData,
                     multipath = path,
-                    uh = Reddit.User.Modhash
+                    uh = Reddit.User?.Modhash
                 }).ConfigureAwait(false);
         }
 
@@ -293,7 +293,7 @@ namespace RedditSharp.Multi
             {
                 model = modelData,
                 multipath = path,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);

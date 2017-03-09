@@ -275,7 +275,7 @@ namespace RedditSharp
                 sr = Subreddit.FullName,
                 title = Title,
                 type,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 wiki_edit_age = WikiEditAge,
                 wiki_edit_karma = WikiEditKarma,
                 wikimode,
@@ -293,7 +293,7 @@ namespace RedditSharp
         {
             await WebAgent.Post(DeleteHeaderImageUrl, new
             {
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Subreddit.Name
             }).ConfigureAwait(false);
         }

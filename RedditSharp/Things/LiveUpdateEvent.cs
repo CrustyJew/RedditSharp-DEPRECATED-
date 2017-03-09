@@ -160,7 +160,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 id = update.FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -279,7 +279,7 @@ namespace RedditSharp.Things
                 name = userName,
                 permissions = perms,
                 type = "liveupdate_contributor_invite",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -307,7 +307,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 id = user.Kind + "_" + user.Id,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response  = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
@@ -360,7 +360,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 type = reason,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
@@ -384,7 +384,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 id = user.Kind + "_" + user.Id,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -429,7 +429,7 @@ namespace RedditSharp.Things
                 name = userName,
                 type = "liveupdate_contributor",
                 permissions = GetPermissionsString(permissions),
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -464,7 +464,7 @@ namespace RedditSharp.Things
                 name = userName,
                 type = "liveupdate_contributor_invite",
                 permissions = GetPermissionsString(permissions),
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -495,7 +495,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 id = fullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -517,7 +517,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 body = markdown,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)

@@ -340,7 +340,7 @@ namespace RedditSharp.Things
             {
                 name = Reddit.User.Name,
                 r = Name,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             var choices = json["choices"];
             var list = new List<UserFlairTemplate>();
@@ -470,7 +470,7 @@ namespace RedditSharp.Things
             {
                 action = "sub",
                 sr = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             });
             //Disposes and discards
         }
@@ -486,7 +486,7 @@ namespace RedditSharp.Things
             {
                 action = "unsub",
                 sr = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             //Dispose and discard
         }
@@ -500,7 +500,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(ClearFlairTemplatesUrl, new
             {
                 flair_type = flairType == FlairType.Link ? "LINK_FLAIR" : "USER_FLAIR",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name
             }).ConfigureAwait(false);
         }
@@ -520,7 +520,7 @@ namespace RedditSharp.Things
                 flair_type = flairType == FlairType.Link ? "LINK_FLAIR" : "USER_FLAIR",
                 text = text,
                 text_editable = userEditable,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 api_type = "json"
             }).ConfigureAwait(false);
@@ -559,7 +559,7 @@ namespace RedditSharp.Things
             {
                 css_class = cssClass,
                 text = text,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 name = user
             }).ConfigureAwait(false);
@@ -578,7 +578,7 @@ namespace RedditSharp.Things
             formData.AddDynamic(new
             {
                 name,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 formid = "image-upload",
                 img_type = imageType == ImageType.PNG ? "png" : "jpg",
@@ -601,7 +601,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(AddModeratorUrl, new
             {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 type = "moderator",
                 name = user
@@ -617,7 +617,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(AddModeratorUrl, new
             {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 type = "moderator",
                 name = user.Name
@@ -632,7 +632,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(AcceptModeratorInviteUrl, new
             {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name
             }).ConfigureAwait(false);
         }
@@ -646,7 +646,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(LeaveModerationUrl, new
             {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 type = "moderator",
                 id
@@ -665,7 +665,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(AddContributorUrl, new
             {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 type = "contributor",
                 name = user
@@ -680,7 +680,7 @@ namespace RedditSharp.Things
         {
             await WebAgent.Post(LeaveModerationUrl, new {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 type = "contributor",
                 id
@@ -700,7 +700,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(BanUserUrl, new
             {
                 api_type = "json",
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 container = FullName,
                 type = "banned",
@@ -727,7 +727,7 @@ namespace RedditSharp.Things
         {
             await WebAgent.Post(UnBanUserUrl, new
             {
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = Name,
                 type = "banned",
                 container = FullName,
@@ -743,7 +743,7 @@ namespace RedditSharp.Things
             var json = await WebAgent.Post(SubmitLinkUrl, data).ConfigureAwait(false);
 
             ICaptchaSolver solver = Reddit.CaptchaSolver;
-            if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "BAD_CAPTCHA"
+            if (json["errors"].Any() && json["errors"][0][0].ToString() == "BAD_CAPTCHA"
                 && solver != null)
             {
                 data.Iden = json["json"]["captcha"].ToString();
@@ -757,12 +757,12 @@ namespace RedditSharp.Things
                 data.Captcha = captchaResponse.Answer;
                 return await SubmitAsync(data).ConfigureAwait(false);
             }
-            else if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "ALREADY_SUB")
+            else if (json["errors"].Any() && json["errors"][0][0].ToString() == "ALREADY_SUB")
             {
-                throw new DuplicateLinkException($"Post failed when submitting.  The following link has already been submitted: {SubmitLinkUrl}");
+                throw new DuplicateLinkException($"Post failed when submitting.  The following link has already been submitted: {((LinkData)data).URL}");
             }
 
-            return new Post(Reddit, json["json"]);
+            return new Post(Reddit, json["data"]);
         }
         /// <summary>
         /// Submits a link post in the current subreddit using the logged-in user
@@ -777,7 +777,7 @@ namespace RedditSharp.Things
             return await SubmitAsync(new LinkData
                     {
                         Subreddit = Name,
-                        UserHash = Reddit.User.Modhash,
+                        UserHash = Reddit.User?.Modhash,
                         Title = title,
                         URL = url,
                         Resubmit = resubmit,
@@ -798,7 +798,7 @@ namespace RedditSharp.Things
             return await SubmitAsync(new TextData
                     {
                         Subreddit = Name,
-                        UserHash = Reddit.User.Modhash,
+                        UserHash = Reddit.User?.Modhash,
                         Title = title,
                         Text = text,
                         Iden = captchaId,

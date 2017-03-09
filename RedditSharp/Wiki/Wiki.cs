@@ -153,7 +153,7 @@ namespace RedditSharp
             {
                 page = page,
                 revision = revision,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -168,7 +168,7 @@ namespace RedditSharp
             {
                 page = page,
                 revision = revision,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -184,7 +184,7 @@ namespace RedditSharp
             {
                 page = page,
                 username = username,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 

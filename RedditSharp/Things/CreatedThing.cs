@@ -15,7 +15,7 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json["data"];
+        protected override JToken GetJsonData(JToken json) => json["data"] == null ? json : json["data"];
 
         /// <summary>
         /// DateTime when the item was created.

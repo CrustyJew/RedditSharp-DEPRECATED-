@@ -55,7 +55,7 @@ namespace RedditSharp
             {
                 op = "save",
                 stylesheet_contents = CSS,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 api_type = "json",
                 r = Subreddit.Name
             }).ConfigureAwait(false);
@@ -74,7 +74,7 @@ namespace RedditSharp
             formData.AddDynamic(new
                 {
                     name,
-                    uh = Reddit.User.Modhash,
+                    uh = Reddit.User?.Modhash,
                     r = Subreddit.Name,
                     formid = "image-upload",
                     img_type = imageType == ImageType.PNG ? "png" : "jpg",

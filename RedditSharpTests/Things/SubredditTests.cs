@@ -26,5 +26,16 @@ namespace RedditSharpTests.Things
             Assert.NotEmpty(contribs);
             Assert.Contains<string>(authFixture.TestUserName.ToLower(), contribs.Select(c => c.Name.ToLower()));
         }
+
+        [Fact]
+        public async Task SubmitPost()
+        {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent,true);
+
+            var sub = await reddit.GetSubredditAsync(authFixture.Config["TestSubreddit"]);
+            var post = await sub.SubmitPostAsync("ThisIsASubmittedPost", "https://github.com/CrustyJew/RedditSharp/issues/76");
+            Assert.NotNull(post);
+        }
     }
 }

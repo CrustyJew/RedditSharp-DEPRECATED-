@@ -160,7 +160,7 @@ namespace RedditSharp.Things
             return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
     }

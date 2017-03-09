@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Xunit;
 
-[assembly: UserSecretsId("aspnet-RedditSharpTests-20170213104014")]
 namespace RedditSharpTests
 {
     public class AuthenticatedTestsFixture

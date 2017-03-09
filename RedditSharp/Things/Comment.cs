@@ -199,7 +199,7 @@ namespace RedditSharp.Things
                 {
                     text = message,
                     thing_id = FullName,
-                    uh = Reddit.User.Modhash,
+                    uh = Reddit.User?.Modhash,
                     api_type = "json"
                     //r = Subreddit
                 }).ConfigureAwait(false);
@@ -227,7 +227,7 @@ namespace RedditSharp.Things
                 api_type = "json",
                 text = newText,
                 thing_id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
@@ -243,7 +243,7 @@ namespace RedditSharp.Things
             return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -255,7 +255,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(SetAsReadUrl, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 api_type = "json"
             }).ConfigureAwait(false);
         }

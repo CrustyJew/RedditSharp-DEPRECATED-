@@ -144,7 +144,7 @@ namespace RedditSharp.Things
             {
                 text = message,
                 thing_id = FullName,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 api_type = "json"
             }).ConfigureAwait(false);
             if (json["json"]["ratelimit"] != null)
@@ -171,7 +171,7 @@ namespace RedditSharp.Things
             {
                 id = FullName,
                 state = value,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -223,7 +223,7 @@ namespace RedditSharp.Things
                 api_type = "json",
                 text = newText,
                 thing_id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
@@ -253,7 +253,7 @@ namespace RedditSharp.Things
                 link = FullName,
                 name = Reddit.User.Name,
                 text = flairText,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             LinkFlairText = flairText;
         }

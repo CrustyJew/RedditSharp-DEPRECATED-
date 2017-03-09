@@ -163,7 +163,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(SetAsReadUrl, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 api_type = "json"
             }).ConfigureAwait(false);
         }
@@ -180,7 +180,7 @@ namespace RedditSharp.Things
             {
                 text = message,
                 thing_id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
     }

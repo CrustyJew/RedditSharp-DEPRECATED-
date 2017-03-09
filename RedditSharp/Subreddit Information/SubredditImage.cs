@@ -78,7 +78,7 @@ namespace RedditSharp
             await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = SubredditStyle.Subreddit.Name
             }).ConfigureAwait(false);
             SubredditStyle.Images.Remove(this);
@@ -93,7 +93,7 @@ namespace RedditSharp
             await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
-                uh = Reddit.User.Modhash,
+                uh = Reddit.User?.Modhash,
                 r = SubredditStyle.Subreddit.Name
             }).ConfigureAwait(false);
             SubredditStyle.Images.Remove(this);

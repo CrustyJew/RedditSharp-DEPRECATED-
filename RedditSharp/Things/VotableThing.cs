@@ -245,7 +245,7 @@ namespace RedditSharp.Things
             {
                 dir = (int)type,
                 id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
 
             if (Liked == true) Upvotes--;
@@ -267,7 +267,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(SaveUrl, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             Saved = true;
         }
@@ -280,7 +280,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(UnsaveUrl, new
             {
                 id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             Saved = false;
         }
@@ -295,7 +295,7 @@ namespace RedditSharp.Things
             {
                 dir = 0,
                 id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -330,7 +330,7 @@ namespace RedditSharp.Things
                 reason = reportReason,
                 other_reason = otherReason ?? "",
                 thing_id = FullName,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
 
@@ -363,7 +363,7 @@ namespace RedditSharp.Things
             {
                 how,
                 id = Id,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");
@@ -403,7 +403,7 @@ namespace RedditSharp.Things
             {
                 id = FullName,
                 spam = spam,
-                uh = Reddit.User.Modhash
+                uh = Reddit.User?.Modhash
             }).ConfigureAwait(false);
         }
         #pragma warning restore 1591

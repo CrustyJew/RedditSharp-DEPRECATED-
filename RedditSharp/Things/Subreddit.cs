@@ -47,17 +47,13 @@ namespace RedditSharp.Things
         private const string BannedUsersUrl = "/r/{0}/about/banned.json";
         private const string ModmailUrl = "/r/{0}/message/moderator/inbox.json";
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
-
         /// <summary>
         /// Subreddit Wiki
         /// </summary>
         [JsonIgnore]
         public Wiki Wiki { get; private set; }
+        [JsonProperty("spoilers_enabled")]
+        public bool SpoilersEnabled { get; set; }
 
         /// <summary>
         /// Date the subreddit was created.

@@ -55,9 +55,10 @@ namespace RedditSharp.Things
         public Comment PopulateComments(IEnumerator<Thing> things)
         {
             Thing first = things.Current;
-            Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>();
-            comments[this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>());
-
+            Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>
+            {
+                [this.FullName] = Tuple.Create(this, new List<Comment>())
+            };
             while (things.MoveNext() && (first is Comment || first is More))
             {
                 first = things.Current;

@@ -37,11 +37,6 @@ namespace RedditSharp.Things
         [JsonProperty("stricken")]
         public bool IsStricken { get; set; }
 
-        [JsonIgnore]
-        private Reddit Reddit { get; set; }
-
-        [JsonIgnore]
-        private IWebAgent WebAgent { get; set; }
 
         public void Strike()
         {
@@ -74,7 +69,7 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
-        public void SimpleAction(string url)
+        public new void SimpleAction(string url)
         {
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");

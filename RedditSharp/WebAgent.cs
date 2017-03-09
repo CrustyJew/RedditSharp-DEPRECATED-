@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Collections.Generic;
 
 namespace RedditSharp
@@ -42,6 +43,9 @@ namespace RedditSharp
         // Approximate seconds until the rate limit is reset.
         public static DateTimeOffset RateLimitReset { get; private set;}
 
+        private static readonly bool IsMono = Type.GetType("Mono.Runtime") != null;
+        private static bool IsOAuth => RootDomain == "oauth.reddit.com";
+
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
             rateLimitLock = new SemaphoreSlim(1, 1);
@@ -66,7 +70,7 @@ namespace RedditSharp
             AccessToken = accessToken;
             RateLimitUsed = 0;
             RateLimitReset = DateTimeOffset.UtcNow;
-            RateLimitRemaining = IsOAuth() ? 60 : 30;
+            RateLimitRemaining = IsOAuth ? 60 : 30;
         }
 
         /// <inheritdoc />
@@ -97,6 +101,8 @@ namespace RedditSharp
                 tries++;
               }
             } while(!response.IsSuccessStatusCode && tries < maxTries);
+            if (!response.IsSuccessStatusCode)
+              throw new RedditHttpException(response.StatusCode);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             JToken json;
@@ -131,7 +137,7 @@ namespace RedditSharp
             }
             else
             {
-                json = JToken.Parse("{'method':'" + response.RequestMessage.Method + "','uri':'" + response.RequestMessage.RequestUri.AbsoluteUri + "','status':'" + response.StatusCode.ToString() + "'}");
+                json = JToken.Parse($"{{'method':'{response.RequestMessage.Method}','uri':'{response.RequestMessage.RequestUri.AbsoluteUri}','status':'{response.StatusCode.ToString()}'}}");
             }
             return json;
         }
@@ -141,29 +147,18 @@ namespace RedditSharp
         {
             bool prependDomain;
             // IsWellFormedUristring returns true on Mono for some reason when using a string like "/api/me"
-            if (Type.GetType("Mono.Runtime") != null)
+            if (IsMono)
                 prependDomain = !url.StartsWith("http://") && !url.StartsWith("https://");
             else
                 prependDomain = !Uri.IsWellFormedUriString(url, UriKind.Absolute);
 
-            HttpRequestMessage request = new HttpRequestMessage();
+            Uri uri;
             if (prependDomain)
-            {
-                request.RequestUri = new Uri(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
-            }
+                uri = new Uri(string.Format("{0}://{1}{2}", Protocol, RootDomain, url));
             else
-            {
-                request.RequestUri = new Uri(url);
-            }
+                uri = new Uri(url);
 
-            if (IsOAuth())// use OAuth
-            {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
-            }
-
-            request.Method = new HttpMethod(method);
-            request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by meepster23");
-            return request;
+            return CreateRequest(uri, method);
         }
 
         /// <inheritdoc />
@@ -171,10 +166,8 @@ namespace RedditSharp
         {
             var request = new HttpRequestMessage();
             request.RequestUri = uri;
-            if (IsOAuth())// use OAuth
-            {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
-            }
+            if (IsOAuth)// use OAuth
+                request.Headers.Authorization = new AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
 
             request.Method = new HttpMethod(method);
             request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by /u/meepster23");
@@ -231,7 +224,6 @@ namespace RedditSharp
           return _httpClient.SendAsync(message);
         }
 
-        private static bool IsOAuth() => RootDomain == "oauth.reddit.com";
 
     }
 }

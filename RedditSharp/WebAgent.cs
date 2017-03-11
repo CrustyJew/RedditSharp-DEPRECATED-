@@ -4,9 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Collections.Generic;
+using System.Net.Http; using System.Net.Http.Headers; using System.Collections.Generic;
 
 namespace RedditSharp
 {
@@ -88,10 +86,7 @@ namespace RedditSharp
                   await Task.Delay(RateLimitReset - DateTime.UtcNow);
                 }
                 response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
-                IEnumerable<string> values;
-                var headers = response.Headers;
-                if (headers.TryGetValues("X-Ratelimit-Used", out values))
-                  RateLimitUsed = int.Parse(values.First());
+                IEnumerable<string> values; var headers = response.Headers; if (headers.TryGetValues("X-Ratelimit-Used", out values)) RateLimitUsed = int.Parse(values.First());
                 if (headers.TryGetValues("X-Ratelimit-Remaining", out values))
                   RateLimitRemaining = (int)double.Parse(values.First());
                 if (headers.TryGetValues("X-Ratelimit-Reset", out values))
@@ -170,7 +165,8 @@ namespace RedditSharp
                 request.Headers.Authorization = new AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
 
             request.Method = new HttpMethod(method);
-            request.Headers.UserAgent.ParseAdd(UserAgent + " - with RedditSharp by /u/meepster23");
+            //request.Headers.UserAgent.ParseAdd(UserAgent);
+            request.Headers.TryAddWithoutValidation("User-Agent", $"{UserAgent} - with RedditSharp by meepster23");
             return request;
         }
 

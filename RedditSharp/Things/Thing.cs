@@ -40,7 +40,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Base36 id.
         /// </summary>
-        public string Id { get; private set; }
+        public string Id { get; internal set; }
 
         /// <summary>
         /// reddit full name.  Kind_Base36 id.  Example.  t1_a1b2c3
@@ -50,7 +50,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Thing kind.  t1, t2, t3 etc
         /// </summary>
-        public string Kind { get; private set; }
+        public string Kind { get; internal set; }
 
         /// <summary>
         /// The time at which this object was fetched from reddit servers.

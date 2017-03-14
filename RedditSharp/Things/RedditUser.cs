@@ -31,7 +31,7 @@ namespace RedditSharp.Things
         /// Reddit username.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; private set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Returns true if the user has reddit gold.

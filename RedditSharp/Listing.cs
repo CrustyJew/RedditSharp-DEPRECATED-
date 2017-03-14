@@ -109,10 +109,12 @@ namespace RedditSharp
         /// </summary>
         /// <param name="reddit"></param>
         /// <param name="url"></param>
-        internal Listing(Reddit reddit, string url) : base(reddit)
+        /// <param name="maxLimit"></param>
+        /// <param name="limitPerRequest">Number of </param>
+        internal Listing(Reddit reddit, string url, int maxLimit = -1, int limitPerRequest = -1) : base(reddit)
         {
-            LimitPerRequest = DefaultListingPerRequest;
-            MaximumLimit = -1;
+            LimitPerRequest = limitPerRequest;
+            MaximumLimit = maxLimit;
             Stream = false;
             Url = url;
         }

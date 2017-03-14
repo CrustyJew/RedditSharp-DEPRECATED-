@@ -157,17 +157,7 @@ namespace RedditSharp.Things
             if (Reddit.User == null)
                 throw new AuthenticationException("No user logged in.");
 
-            var mods = await Subreddit.GetModeratorsAsync().ConfigureAwait(false);
-            var modNameList = mods.Select(b => b.Name).ToList();
-
-            if (requiresModAction && !modNameList.Contains(Reddit.User.Name))
-                throw new AuthenticationException(
-                    string.Format(
-                        @"User {0} is not a moderator of subreddit {1}.",
-                        Reddit.User.Name,
-                        this.Subreddit.Name));
-
-            return await WebAgent.Post(endpoint, new
+             return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
                 state = value,

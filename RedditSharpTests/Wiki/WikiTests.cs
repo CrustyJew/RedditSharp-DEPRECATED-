@@ -21,19 +21,19 @@ namespace RedditSharpTests.Wiki
             reddit = new RedditSharp.Reddit(agent);
             sub = reddit.GetSubredditAsync(authFixture.Config["TestSubreddit"]).Result;
 
-            var names = sub.Wiki.GetPageNamesAsync().Result;
+            var names = sub.GetWiki.GetPageNamesAsync().Result;
             if (!names.Select(n => n.ToLower()).Contains(WIKI_PAGE_NAME))
             {
-                sub.Wiki.EditPageAsync(WIKI_PAGE_NAME, "**test** content ***up*** in *hur*").Wait();
+                sub.GetWiki.EditPageAsync(WIKI_PAGE_NAME, "**test** content ***up*** in *hur*").Wait();
             }
         }
 
         [Fact]
         public async Task ChangeWikiPageSettings()
         {
-            await sub.Wiki.SetPageSettingsAsync(WIKI_PAGE_NAME, true, RedditSharp.WikiPageSettings.WikiPagePermissionLevel.Contributors);
+            await sub.GetWiki.SetPageSettingsAsync(WIKI_PAGE_NAME, true, RedditSharp.WikiPageSettings.WikiPagePermissionLevel.Contributors);
 
-            var settings = await sub.Wiki.GetPageSettingsAsync(WIKI_PAGE_NAME);
+            var settings = await sub.GetWiki.GetPageSettingsAsync(WIKI_PAGE_NAME);
 
             Assert.NotNull(settings);
             Assert.Equal(true, settings.Listed);

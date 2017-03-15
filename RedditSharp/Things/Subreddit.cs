@@ -14,18 +14,31 @@ namespace RedditSharp.Things
     /// </summary>
     public class Subreddit : Thing
     {
+        /// <summary>
+        /// Sorting for posts in a a subreddit.
+        /// </summary>
+        #pragma warning disable 1591
+        public enum Sort
+        {
+            New,
+            Rising,
+            Hot,
+            Top,
+            Controversial
+        }
+        #pragma warning restore 1591
+
         #pragma warning disable 1591
         public Subreddit(Reddit reddit, JToken json) : base(reddit, json) {
             SetName();
-            Wiki = new Wiki(this);
         }
         #pragma warning restore 1591
 
         private string SubredditPostUrl => $"/r/{Name}.json";
         private string SubredditNewUrl => $"/r/{Name}/new.json?sort=new";
-        private string SubredditHotUrl => $"/r/{Name}/hot.json";
+        private string SubredditHotUrl => $"/r/{Name}/hot.json"; // this is the default sort?
         private string SubredditRisingUrl => $"/r/{Name}/rising.json";
-        private string SubredditTopUrl(string from) => $"/r/{Name}/top.json?t={from}";
+        private string SubredditTopUrl => $"/r/{Name}/top.json";
         private string SubredditControversialUrl => $"/r/{Name}/controversial.json";
         private string SubredditGildedUrl => $"/r/{Name}/gilded.json";
         private const string SubscribeUrl = "/api/subscribe";
@@ -60,10 +73,10 @@ namespace RedditSharp.Things
         private string ModmailUrl => $"/r/{Name}/message/moderator/inbox.json";
 
         /// <summary>
-        /// Subreddit Wiki
+        /// Get the subreddit Wiki
         /// </summary>
         [JsonIgnore]
-        public Wiki Wiki { get; private set; }
+        public Wiki GetWiki => new Wiki(this);
 
         /// <summary>
         /// Date the subreddit was created.
@@ -165,120 +178,151 @@ namespace RedditSharp.Things
         public string Name { get; private set; }
 
         /// <summary>
-        /// Top of the subreddit at a timeperiod
+        /// Top of the subreddit.
         /// </summary>
-        /// <param name="timePeriod">Timeperiod you want to start at <seealso cref="FromTime"/></param>
+        /// <param name="max">Maximum number of records to return.</param>
         /// <returns>The top of the subreddit from a specific time</returns>
-        public Listing<Post> GetTop(FromTime timePeriod)
+        private Listing<Post> GetTop(int max = -1)
         {
-            var period = timePeriod.ToString("g").ToLower();
             if (Name == "/")
-            {
-                return new Listing<Post>(Reddit, "/top.json?t=" + period);
-            }
-            return new Listing<Post>(Reddit, SubredditTopUrl(period));
+                return Listing<Post>.Create(Reddit, "/top.json", max, 100);
+
+            return Listing<Post>.Create(Reddit, SubredditTopUrl, max, 100);
         }
 
         /// <summary>
-        /// All posts on a subredit
+        /// Top of the subreddit from a particular time.
         /// </summary>
-        public Listing<Post> Posts
+        /// <param name="timePeriod">Timeperiod you want to start at <seealso cref="FromTime"/></param>
+        /// <param name="max">Maximum number of records to return.</param>
+        /// <returns>The top of the subreddit from a specific time</returns>
+        public Listing<Post> GetTop(FromTime timePeriod, int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, SubredditPostUrl);
-            }
+            var period = timePeriod.ToString("g").ToLower();
+            if (Name == "/")
+                return Listing<Post>.Create(Reddit, "/top.json?t=" + period, max, 100);
+
+            return Listing<Post>.Create(Reddit, $"{SubredditTopUrl}?t={period}", max, 100);
         }
 
         /// <summary>
         /// Comments for a subreddit, all of them, irrespective of replies and what it is replying to
         /// </summary>
-        public Listing<Comment> Comments
+        public Listing<Comment> GetComments(int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Comment>(Reddit, "/comments.json");
-                return new Listing<Comment>(Reddit, CommentsUrl);
-            }
+            if (Name == "/")
+                return Listing<Comment>.Create(Reddit, "/comments.json", max, 100);
+
+            return Listing<Comment>.Create(Reddit, CommentsUrl, max, 100);
         }
 
         /// <summary>
         /// Posts on the subreddit/new
         /// </summary>
-        public Listing<Post> New
+        /// <param name="max">Maximum number of records to return.</param>
+        private Listing<Post> GetNew(int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Post>(Reddit, "/new.json");
-                return new Listing<Post>(Reddit, SubredditNewUrl);
-            }
+            if (Name == "/")
+                return Listing<Post>.Create(Reddit, "/new.json", max, 100);
+
+            return Listing<Post>.Create(Reddit, SubredditNewUrl, max, 100);
         }
 
         /// <summary>
         /// Posts on the front page of the subreddits
         /// </summary>
-        public Listing<Post> Hot
+        /// <param name="max">Maximum number of records to return.</param>
+        private Listing<Post> GetHot(int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, SubredditHotUrl);
-            }
+            if (Name == "/")
+                return Listing<Post>.Create(Reddit, "/.json", max, 100);
+
+            return Listing<Post>.Create(Reddit, SubredditHotUrl, max, 100);
         }
 
         /// <summary>
         /// List of rising posts
         /// </summary>
-        public Listing<Post> Rising
+        /// <param name="max">Maximum number of records to return.</param>
+        private Listing<Post> GetRising(int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, SubredditRisingUrl);
-            }
+            if (Name == "/")
+                return Listing<Post>.Create(Reddit, "/.json", max, 100);
+
+            return Listing<Post>.Create(Reddit, SubredditRisingUrl, max, 100);
         }
 
         /// <summary>
         /// List of Controversial posts
         /// </summary>
-        public Listing<Post> Controversial
+        /// <param name="max">Maximum number of records to return.</param>
+        private Listing<Post> GetControversial(int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<Post>(Reddit, "/.json");
-                return new Listing<Post>(Reddit, SubredditControversialUrl);
-            }
+            if (Name == "/")
+                return Listing<Post>.Create(Reddit, "/.json", max, 100);
+
+            return Listing<Post>.Create(Reddit, SubredditControversialUrl, max, 100);
         }
+
+        /// <summary>
+        /// All posts on a subreddit.
+        /// </summary>
+        /// /// <param name="max">Maximum number of records to return. -1 for unlimited.</param>
+        public Listing<Post> GetPosts(int max = -1)
+        {
+            if (Name == "/")
+                return Listing<Post>.Create(Reddit, "/.json", max, 100);
+
+            return Listing<Post>.Create(Reddit, SubredditPostUrl, max, 100);
+        }
+
+        /// <summary>
+        /// Get posts on a subreddit.
+        /// </summary>
+        /// <param name="sort">How to sort the results.</param>
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Post> GetPosts(Sort sort, int max = -1)
+        {
+            switch (sort)
+            {
+                case Sort.New:
+                    return GetNew(max);
+                case Sort.Rising:
+                    return GetRising(max);
+                case Sort.Hot:
+                    return GetHot(max);
+                case Sort.Top:
+                    return GetTop(max);
+                case Sort.Controversial:
+                    return GetControversial(max);
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// List of gilded things
         /// </summary>
-        public Listing<VotableThing> Gilded
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<VotableThing> GetGilded(int max = -1)
         {
-            get
-            {
-                if (Name == "/")
-                    return new Listing<VotableThing>(Reddit, "/.json");
-                return new Listing<VotableThing>(Reddit, SubredditGildedUrl);
-            }
+            if (Name == "/")
+                return Listing<VotableThing>.Create(Reddit, "/.json", max, 100);
+
+            return Listing<VotableThing>.Create(Reddit, SubredditGildedUrl, max, 100);
         }
 
         /// <summary>
         /// List of items in the mod queue
         /// </summary>
-        public Listing<VotableThing> ModQueue => new Listing<VotableThing>(Reddit, ModqueueUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<VotableThing> GetModQueue(int max = -1) => Listing<VotableThing>.Create(Reddit, ModqueueUrl, max, 100);
 
         /// <summary>
         /// Links a moderator hasn't checked
         /// </summary>
-        public Listing<Post> UnmoderatedLinks => new Listing<Post>(Reddit, UnmoderatedUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Post> GetUnmoderatedLinks(int max = -1) => Listing<Post>.Create(Reddit, UnmoderatedUrl, max, 100);
 
         /// <summary>
         /// Search using specific terms from a specified time to now
@@ -286,13 +330,14 @@ namespace RedditSharp.Things
         /// <param name="terms">Terms you want to search for</param>
         /// <param name="sortE">Sort the way you want to, see <see cref="Sorting"/></param>
         /// <param name="timeE">Time sorting you want to see</param>
+        /// <param name="max">Number of records to return.  -1 for unliminted.</param>
         /// <returns>A list of posts</returns>
-        public Listing<Post> Search(string terms, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All)
+        public Listing<Post> Search(string terms, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All, int max = -1)
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, SearchUrl(Uri.EscapeUriString(terms), sort, time));
+            return Listing<Post>.Create(Reddit, SearchUrl(Uri.EscapeUriString(terms), sort, time), max, 100);
         }
 
         /// <summary>
@@ -301,14 +346,15 @@ namespace RedditSharp.Things
         /// <param name="from">Time to begin search</param>
         /// <param name="to">Time to end search at</param>
         /// <param name="sortE">Sort of the objects you want to have it in</param>
+        /// <param name="max">Number of records to return.  -1 for unliminted.</param>
         /// <returns>A list of posts in the range of time/dates in a specific order</returns>
-        public Listing<Post> Search(DateTime from, DateTime to, Sorting sortE = Sorting.New)
+        public Listing<Post> Search(DateTime from, DateTime to, Sorting sortE = Sorting.New, int max = -1)
         {
             string sort = sortE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit,
+            return Listing<Post>.Create(Reddit,
                 SearchUrlDate(from.DateTimeToUnixTimestamp(),
-                  to.DateTimeToUnixTimestamp(), sort));
+                  to.DateTimeToUnixTimestamp(), sort), max, 100);
         }
 
         /// <summary>
@@ -390,26 +436,23 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of contributors.
         /// </summary>
-        public Listing<Contributor> Contributors => new Listing<Contributor>(Reddit, ContributorsUrl);
+        public Listing<Contributor> GetContributors(int max = -1) => Listing<Contributor>.Create(Reddit, ContributorsUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of banned users.
         /// </summary>
-        public Listing<BannedUser> BannedUsers => new Listing<BannedUser>(Reddit, BannedUsersUrl);
+        public Listing<BannedUser> GetBannedUsers(int max = -1) => Listing<BannedUser>.Create(Reddit, BannedUsersUrl, max, 100);
 
         /// <summary>
         /// Subreddit modmail.
         /// <para/>
         ///  When calling <see cref="System.Linq.Enumerable.Take{T}"/> make sure to take replies into account!
         /// </summary>
-        public Listing<PrivateMessage> Modmail
+        public Listing<PrivateMessage> GetModmail()
         {
-            get
-            {
-                if (Reddit.User == null)
-                    throw new AuthenticationException("No user logged in.");
-                return new Listing<PrivateMessage>(Reddit, ModmailUrl);
-            }
+            if (Reddit.User == null)
+                throw new AuthenticationException("No user logged in.");
+            return new Listing<PrivateMessage>(Reddit, ModmailUrl);
         }
 
         /// <inheritdoc />
@@ -529,6 +572,12 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get the flair text of a user.
         /// </summary>
+        /// <param name="max">Maximum number of records to return.</param>
+        public Listing<RedditUser> GetUserFlairList(int max = -1) => Listing<RedditUser>.Create(Reddit, FlairListUrl, max, 1000);
+
+        /// <summary>
+        /// Get the flair text of a user.
+        /// </summary>
         /// <param name="user">user name.</param>
         public async Task<string> GetFlairTextAsync(string user)
         {
@@ -605,22 +654,6 @@ namespace RedditSharp.Things
                 r = Name,
                 type = "moderator",
                 name = user
-            }).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Adds a moderator
-        /// </summary>
-        /// <param name="user">User to add</param>
-        public async Task AddModerator(RedditUser user)
-        {
-            await WebAgent.Post(AddModeratorUrl, new
-            {
-                api_type = "json",
-                uh = Reddit.User?.Modhash,
-                r = Name,
-                type = "moderator",
-                name = user.Name
             }).ConfigureAwait(false);
         }
 
@@ -809,29 +842,41 @@ namespace RedditSharp.Things
         /// <summary>
         /// Gets the moderation log of the current subreddit
         /// </summary>
-        public Listing<ModAction> GetModerationLog() => new Listing<ModAction>(Reddit, ModLogUrl);
+        public Listing<ModAction> GetModerationLog(int max = -1) => Listing<ModAction>.Create(Reddit, ModLogUrl, max, 500);
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken
         /// </summary>
         /// <param name="action">ModActionType of action performed</param>
-        public Listing<ModAction> GetModerationLog(ModActionType action) => new Listing<ModAction>(Reddit, ModLogUrl
-            + $"?type={ModActionTypeConverter.GetRedditParamName(action)}");
+        /// <param name="max">Maximum number of records to return.</param>
+        public Listing<ModAction> GetModerationLog(ModActionType action, int max = -1)
+        {
+            var url = $"{ModLogUrl}?type={ModActionTypeConverter.GetRedditParamName(action)}";
+            return Listing<ModAction>.Create(Reddit, url, max, 500);
+        }
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by moderator(s) who performed the action
         /// </summary>
         /// <param name="mods">String array of mods to filter by</param>
-        public Listing<ModAction> GetModerationLog(string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl +
-            $"?mod={string.Join(",", mods)}");
+        /// <param name="max">Maximum number of records to return.</param>
+        public Listing<ModAction> GetModerationLog(IEnumerable<string> mods, int max = -1)
+        {
+            var url = $"{ModLogUrl}?mod={string.Join(",", mods)}";
+            return Listing<ModAction>.Create(Reddit, url, max, 500);
+        }
 
         /// <summary>
         /// Gets the moderation log of the current subreddit filtered by the action taken and moderator(s) who performed the action
         /// </summary>
-        /// <param name="action">ModActionType of action performed</param>
-        /// <param name="mods">String array of mods to filter by</param>
+        /// <param name="action">ModActionType of action performed.</param>
+        /// <param name="mods">String array of mods to filter by.</param>
+        /// <param name="max">Maximum number of records to return.</param>
         /// <returns></returns>
-        public Listing<ModAction> GetModerationLog(ModActionType action, string[] mods) => new Listing<ModAction>(Reddit, ModLogUrl +
-            $"?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}");
+        public Listing<ModAction> GetModerationLog(ModActionType action, IEnumerable<string> mods, int max = -1)
+        {
+            var url = $"{ModLogUrl}?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}";
+            return Listing<ModAction>.Create(Reddit, url, max, 500);
+        }
     }
 }

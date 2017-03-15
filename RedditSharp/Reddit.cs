@@ -416,12 +416,13 @@ namespace RedditSharp
         /// <param name="query">string to query</param>
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
         /// <returns></returns>
-        public Listing<T> Search<T>(string query, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
+        public Listing<T> Search<T>(string query, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All, int max  = -1) where T : Thing
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-            return new Listing<T>(this, string.Format(SearchUrl, query, sort, time));
+            return Listing<T>.Create(this, string.Format(SearchUrl, query, sort, time), max, 100);
         }
 
         /// <summary>
@@ -434,8 +435,9 @@ namespace RedditSharp
         /// <param name="subreddit">subreddit in which to search</param>
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
         /// <returns></returns>
-        public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
+        public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All, int max = -1) where T : Thing
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
@@ -444,7 +446,7 @@ namespace RedditSharp
             var toUnix = (to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
 
             string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
-            return new Listing<T>(this, string.Format(SearchUrl, searchQuery, sort, time));
+            return Listing<T>.Create(this, string.Format(SearchUrl, searchQuery, sort, time), max, 100);
         }
 
 
@@ -453,32 +455,32 @@ namespace RedditSharp
         /// <summary>
         /// Returns a Listing of newly created subreddits.
         /// </summary>
-        /// <returns></returns>
-        public Listing<Subreddit> GetNewSubreddits() => new Listing<Subreddit>(this, NewSubredditsUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Subreddit> GetNewSubreddits(int max = -1) => Listing<Subreddit>.Create(this, NewSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns a Listing of the most popular subreddits.
         /// </summary>
-        /// <returns></returns>
-        public Listing<Subreddit> GetPopularSubreddits() => new Listing<Subreddit>(this, PopularSubredditsUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Subreddit> GetPopularSubreddits(int max = -1) => Listing<Subreddit>.Create(this, PopularSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns a Listing of Gold-only subreddits. This endpoint will not return anything if the authenticated Reddit account does not currently have gold.
         /// </summary>
-        /// <returns></returns>
-        public Listing<Subreddit> GetGoldSubreddits() => new Listing<Subreddit>(this, GoldSubredditsUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Subreddit> GetGoldSubreddits(int max = -1) => Listing<Subreddit>.Create(this, GoldSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns the Listing of default subreddits.
         /// </summary>
-        /// <returns></returns>
-        public Listing<Subreddit> GetDefaultSubreddits() => new Listing<Subreddit>(this, DefaultSubredditsUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Subreddit> GetDefaultSubreddits(int max = -1) => Listing<Subreddit>.Create(this, DefaultSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns the Listing of subreddits related to a query.
         /// </summary>
-        /// <returns></returns>
-        public Listing<Subreddit> SearchSubreddits(string query) => new Listing<Subreddit>(this, string.Format(SearchSubredditsUrl, query));
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Subreddit> SearchSubreddits(string query, int max = -1) => Listing<Subreddit>.Create(this, string.Format(SearchSubredditsUrl, query), max, 100);
 
         #endregion SubredditSearching
 

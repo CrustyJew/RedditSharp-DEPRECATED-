@@ -23,19 +23,20 @@ namespace RedditSharp
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of posts made for this domain.
         /// </summary>
-        public Listing<Post> Posts => new Listing<Post>(Reddit, DomainPostUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Post> GetPosts(int max = -1) => Listing<Post>.Create(Reddit, DomainPostUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of posts made for this domain that are in the new queue.
         /// </summary>
-        public Listing<Post> New => new Listing<Post>(Reddit, DomainNewUrl);
+        public Listing<Post> GetNew(int max = -1) => Listing<Post>.Create(Reddit, DomainNewUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of posts made for this domain that are in the hot queue.
         /// </summary>
-        public Listing<Post> Hot => new Listing<Post>(Reddit, DomainHotUrl);
+        public Listing<Post> GetHot(int max = -1) => Listing<Post>.Create(Reddit, DomainHotUrl, max, 100);
 
-        #pragma warning disable 1591
+#pragma warning disable 1591
         protected internal Domain(Reddit reddit, Uri domain) : base(reddit)
         {
             Name = domain.Host;

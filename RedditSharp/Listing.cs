@@ -108,13 +108,31 @@ namespace RedditSharp
         /// Creates a new Listing instance
         /// </summary>
         /// <param name="reddit"></param>
-        /// <param name="url"></param>
-        internal Listing(Reddit reddit, string url) : base(reddit)
+        /// <param name="url">Endpoint</param>
+        /// <param name="maxLimit">Maximum number of records to retrieve from reddit.</param>
+        /// <param name="limitPerRequest">Maximum number of records to return per request.  This number is endpoint specific.</param>
+        internal Listing(Reddit reddit, string url, int maxLimit = -1, int limitPerRequest = -1) : base(reddit)
         {
-            LimitPerRequest = DefaultListingPerRequest;
-            MaximumLimit = -1;
+            LimitPerRequest = limitPerRequest;
+            MaximumLimit = maxLimit;
             Stream = false;
             Url = url;
+        }
+
+        /// <summary>
+        /// Create a listing with the specified limits. 
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="url">Endpoint</param>
+        /// <param name="max">Maximum number of records to retrieve from reddit.</param>
+        /// <param name="perRequest">Maximum number of records to return per request.  This number is endpoint specific.</param>
+        /// <returns></returns>
+        internal static Listing<T> Create(Reddit reddit, string url, int max, int perRequest)
+        {
+            if (max > 0 && max <= perRequest)
+                perRequest = max;
+
+            return new Listing<T>(reddit, url, max, perRequest);
         }
 
         /// <summary>

@@ -104,13 +104,6 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Comment author user name.
-        /// </summary>
-        [JsonIgnore]
-        [Obsolete("Use AuthorName instead.", false)]
-        public string Author => base.AuthorName;
-
-        /// <summary>
         /// Comment body markdown.
         /// </summary>
         [JsonProperty("body")]

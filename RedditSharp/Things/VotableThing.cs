@@ -150,13 +150,6 @@ namespace RedditSharp.Things
         /// <summary>
         /// Number of reports on this item.
         /// </summary>
-        [JsonIgnore]
-        [Obsolete("Use ReportCount instead.", false)]
-        public int? NumReports => ReportCount;
-
-        /// <summary>
-        /// Number of reports on this item.
-        /// </summary>
         [JsonProperty("num_reports")]
         public int? ReportCount { get; private set; }
 
@@ -211,7 +204,7 @@ namespace RedditSharp.Things
                     default: return VoteType.None;
                 }
             }
-            set
+            private set
             {
                 Task.Run(async () => { await SetVoteAsync(value).ConfigureAwait(false); });
             }

@@ -41,6 +41,12 @@ namespace RedditSharp.Things
         public string Page { get; private set; }
 
         /// <summary>
+        /// Username of the user who made this revision.
+        /// </summary>
+        [JsonIgnore]
+        public string AuthorName => Author.Name;
+
+        /// <summary>
         /// User who made the revision.
         /// </summary>
         [JsonIgnore]

@@ -35,6 +35,8 @@ namespace RedditSharp.Things
         private const string SetAsReadUrl = "/api/read_message";
         private const string CommentUrl = "/api/comment";
 
+        private Listing<PrivateMessage> thread;
+
         /// <summary>
         /// Message body markdown.
         /// </summary>
@@ -116,39 +118,36 @@ namespace RedditSharp.Things
         public PrivateMessage[] Replies { get; private set; }
 
         /// <summary>
-        /// Original message
+        /// Get the Original message.
         /// </summary>
-        [JsonIgnore]
-        public PrivateMessage Parent
+        public PrivateMessage GetParent()
         {
-            get
+            if (this.thread == null)
             {
-                var listing = Thread;
-                if (listing == null)
-                  return null;
-                //TODO: Convert this into an async function
-                var firstPage = listing.First();
-                firstPage.Wait();
-                var firstMessage = firstPage.Result;
-                if (firstMessage?.FullName == ParentID)
-                    return firstMessage;
-                else
-                    return firstMessage.Replies.First(x => x.FullName == ParentID);
+                this.thread = GetThread();
+                if (this.thread == null)
+                    return null;
             }
+            //TODO: Convert this into an async function
+            var firstPage = thread.First();
+            firstPage.Wait();
+            var firstMessage = firstPage.Result;
+            if (firstMessage?.FullName == ParentID)
+                return firstMessage;
+            else
+                return firstMessage.Replies.First(x => x.FullName == ParentID);
         }
 
         /// <summary>
         /// The thread of messages
         /// </summary>
-        public Listing<PrivateMessage> Thread
+        public Listing<PrivateMessage> GetThread()
         {
-            get
-            {
-                if (string.IsNullOrEmpty(ParentID))
-                    return null;
-                var id = ParentID.Remove(0, 3);
-                return new Listing<PrivateMessage>(Reddit, $"/message/messages/{id}.json");
-            }
+            if (string.IsNullOrEmpty(ParentID))
+                return null;
+            var id = ParentID.Remove(0, 3);
+            this.thread = new Listing<PrivateMessage>(Reddit, $"/message/messages/{id}.json");
+            return this.thread;
         }
         // Awaitables don't have to be called asynchronously
 

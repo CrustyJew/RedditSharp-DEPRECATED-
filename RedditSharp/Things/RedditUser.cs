@@ -31,7 +31,7 @@ namespace RedditSharp.Things
         /// Reddit username.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; private set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Returns true if the user has reddit gold.
@@ -67,32 +67,32 @@ namespace RedditSharp.Things
         /// <summary>
         /// Return the users overview.
         /// </summary>
-        public Listing<VotableThing> Overview => new Listing<VotableThing>(Reddit, OverviewUrl);
+        public Listing<VotableThing> GetOverview(int max = -1) => Listing<VotableThing>.Create(Reddit, OverviewUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts liked by the logged in user.
         /// </summary>
-        public Listing<Post> LikedPosts => new Listing<Post>(Reddit,LikedUrl);
+        public Listing<Post> GetLikedPosts(int max = -1) => Listing<Post>.Create(Reddit,LikedUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts disliked by the logged in user.
         /// </summary>
-        public Listing<Post> DislikedPosts => new Listing<Post>(Reddit, DislikedUrl);
+        public Listing<Post> GetDislikedPosts(int max = -1) => Listing<Post>.Create(Reddit, DislikedUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of comments made by the user.
         /// </summary>
-        public Listing<Comment> Comments => new Listing<Comment>(Reddit, CommentsUrl);
+        public Listing<Comment> GetComments(int max = -1) => Listing<Comment>.Create(Reddit, CommentsUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts made by the user.
         /// </summary>
-        public Listing<Post> Posts => new Listing<Post>(Reddit, LinksUrl);
+        public Listing<Post> GetPosts(int max = -1) => Listing<Post>.Create(Reddit, LinksUrl, max, 100);
 
         /// <summary>
         /// Return a list of subscribed subreddits for the logged in user.
         /// </summary>
-        public Listing<Subreddit> SubscribedSubreddits => new Listing<Subreddit>(Reddit, SubscribedSubredditsUrl);
+        public Listing<Subreddit> GetSubscribedSubreddits(int max = -1) => Listing<Subreddit>.Create(Reddit, SubscribedSubredditsUrl, max, 100);
 
         static string QueryString(Sort sort, int limit, FromTime time) =>
           $"?sort={sort.ToString("g")}&limit={limit}&t={time.ToString("g")}";

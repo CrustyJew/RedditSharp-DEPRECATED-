@@ -40,7 +40,8 @@ namespace RedditSharp
         /// <summary>
         /// Get a list of revisions for this wiki.
         /// </summary>
-        public Listing<WikiPageRevision> Revisions => new Listing<WikiPageRevision>(Reddit, WikiRevisionsUrl);
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<WikiPageRevision> GetRevisions(int max = -1) => Listing<WikiPageRevision>.Create(Reddit, WikiRevisionsUrl, max, 100);
 
         #pragma warning disable 1591
         protected internal Wiki(Subreddit subreddit)
@@ -98,8 +99,8 @@ namespace RedditSharp
         /// Get a list of revisions for a give wiki page.
         /// </summary>
         /// <param name="page">wiki page</param>
-        /// <returns></returns>
-        public Listing<WikiPageRevision> GetPageRevisions(string page) => new Listing<WikiPageRevision>(Reddit, WikiPageRevisionsUrl(page));
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<WikiPageRevision> GetPageRevisions(string page, int max = -1) =>  Listing<WikiPageRevision>.Create(Reddit, WikiPageRevisionsUrl(page), max, 100);
 
         #endregion
 
@@ -109,8 +110,8 @@ namespace RedditSharp
         /// Get a list of discussions about this wiki page.
         /// </summary>
         /// <param name="page"></param>
-        /// <returns></returns>
-        public Listing<Post> GetPageDiscussions(string page) => new Listing<Post>(Reddit, WikiPageDiscussionsUrl(page));
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        public Listing<Post> GetPageDiscussions(string page, int max = -1) => Listing<Post>.Create(Reddit, WikiPageDiscussionsUrl(page), max, 100);
         #endregion
 
         /// <summary>

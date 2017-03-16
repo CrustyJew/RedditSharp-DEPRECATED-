@@ -9,10 +9,10 @@ namespace RedditSharp.Things
     /// </summary>
     public class AuthenticatedUser : RedditUser
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public AuthenticatedUser(Reddit reddit, JToken json) : base (reddit, json) {
         }
-        #pragma warning restore 1591
+#pragma warning restore 1591
 
         private const string ModeratorUrl = "/reddits/mine/moderator.json";
         private const string UnreadMessagesUrl = "/message/unread.json?mark=true&limit=25";
@@ -31,47 +31,42 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of subreddits moderated by the logged in user.
         /// </summary>
-        public Listing<Subreddit> ModeratorSubreddits => new Listing<Subreddit>(Reddit, ModeratorUrl);
+        public Listing<Subreddit> GetModeratorSubreddits(int max = -1) => Listing<Subreddit>.Create(Reddit, ModeratorUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unread messages.
         /// </summary>
-        public Listing<Thing> UnreadMessages => new Listing<Thing>(Reddit, UnreadMessagesUrl);
+        public Listing<Thing> GetUnreadMessages(int max = -1) => Listing<Thing>.Create(Reddit, UnreadMessagesUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of items in the Moderation Queue.
         /// </summary>
-        public Listing<VotableThing> ModerationQueue => new Listing<VotableThing>(Reddit, ModQueueUrl);
+        public Listing<VotableThing> GetModerationQueue(int max = -1) => Listing<VotableThing>.Create(Reddit, ModQueueUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unmoderated Posts.
         /// </summary>
-        public Listing<Post> UnmoderatedLinks => new Listing<Post>(Reddit, UnmoderatedUrl);
+        public Listing<Post> GetUnmoderatedLinks(int max = -1) => Listing<Post>.Create(Reddit, UnmoderatedUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of (old style) modmail.
         /// </summary>
-        public Listing<PrivateMessage> ModMail => new Listing<PrivateMessage>(Reddit, ModMailUrl);
+        public Listing<PrivateMessage> GetModMail(int max = -1) => Listing<PrivateMessage>.Create(Reddit, ModMailUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of private messages.
         /// </summary>
-        public Listing<PrivateMessage> PrivateMessages => new Listing<PrivateMessage>(Reddit, MessagesUrl);
+        public Listing<PrivateMessage> GetPrivateMessages(int max = -1) => Listing<PrivateMessage>.Create(Reddit, MessagesUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of messages in the inbox.
         /// </summary>
-        public Listing<PrivateMessage> Inbox => new Listing<PrivateMessage>(Reddit, InboxUrl);
+        public Listing<PrivateMessage> GetInbox(int max = -1) => Listing<PrivateMessage>.Create(Reddit, InboxUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of sent messages.
         /// </summary>
-        public Listing<PrivateMessage> Sent => new Listing<PrivateMessage>(Reddit, SentUrl);
-
-        /// <summary>
-        /// Get a <see cref="Listing{T}"/> of unmoderated links.
-        /// </summary>
-        public Listing<Post> GetUnmoderatedLinks() => new Listing<Post>(Reddit, UnmoderatedUrl);
+        public Listing<PrivateMessage> GetSent(int max = -1) => Listing<PrivateMessage>.Create(Reddit, SentUrl, max, 100);
 
         /// <summary>
         /// User modhash.

@@ -37,6 +37,7 @@ namespace RedditSharp.Things
         [JsonProperty("note")]
         public string Note { get; private set; }
 
+        /// <summary>
         /// This will always return 0 for BannedUsers
         /// </summary>
         [JsonIgnore]

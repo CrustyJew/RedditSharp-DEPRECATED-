@@ -109,8 +109,8 @@ namespace RedditSharp
         /// </summary>
         /// <param name="reddit"></param>
         /// <param name="url">Endpoint</param>
-        /// <param name="max">Maximum number of records to retrieve from reddit.</param>
-        /// <param name="perRequest">Maximum number of records to return per request.  This number is endpoint specific.</param>
+        /// <param name="maxLimit">Maximum number of records to retrieve from reddit.</param>
+        /// <param name="limitPerRequest">Maximum number of records to return per request.  This number is endpoint specific.</param>
         internal Listing(Reddit reddit, string url, int maxLimit = -1, int limitPerRequest = -1) : base(reddit)
         {
             LimitPerRequest = limitPerRequest;

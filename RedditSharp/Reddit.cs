@@ -479,6 +479,7 @@ namespace RedditSharp
         /// <summary>
         /// Returns the Listing of subreddits related to a query.
         /// </summary>
+        /// <param name="query">Search query</param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
         public Listing<Subreddit> SearchSubreddits(string query, int max = -1) => Listing<Subreddit>.Create(this, string.Format(SearchSubredditsUrl, query), max, 100);
 

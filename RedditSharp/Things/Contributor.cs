@@ -28,7 +28,7 @@ namespace RedditSharp.Things
         /// Contributor name.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; private set; }
+        public new string Name { get; private set; }
 
         /// <summary>
         /// Date contributor was added.
@@ -37,6 +37,7 @@ namespace RedditSharp.Things
         [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime DateAdded { get; private set; }
 
+        /// <summary>
         /// This will always return 0 for Contributors
         /// </summary>
         [JsonIgnore]

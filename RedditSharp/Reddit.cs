@@ -91,14 +91,12 @@ namespace RedditSharp
                 DefaultValueHandling = DefaultValueHandling.Ignore
             });
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
-            DefaultWebAgent.UserAgent = "";
-            DefaultWebAgent.RootDomain = "www.reddit.com";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
         }
         #pragma warning restore 1591
 
-        /// </summary>
+        /// <summary>
         ///
         /// </summary>
         /// <param name="limitMode">Rate limit</param>

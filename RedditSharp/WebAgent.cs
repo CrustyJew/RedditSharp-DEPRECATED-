@@ -80,7 +80,6 @@ namespace RedditSharp
             if (!response.IsSuccessStatusCode)
               throw new RedditHttpException(response.StatusCode);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            //Console.WriteLine(result);
 
             JToken json;
             if (!string.IsNullOrEmpty(result))

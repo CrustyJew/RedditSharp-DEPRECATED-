@@ -1,10 +1,11 @@
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Net.Http; using System.Net.Http.Headers; using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace RedditSharp
 {
@@ -31,25 +32,20 @@ namespace RedditSharp
         /// </summary>
         public static string RootDomain { get; set; }
 
+        public static RateLimitManager RateLimit { get; private set; }
+
         /// <inheritdoc />
         public string AccessToken { get; set; }
-
-        private static SemaphoreSlim rateLimitLock;
-        // See https://github.com/reddit/reddit/wiki/API for more details.
-        public static int RateLimitUsed { get; private set; }
-        public static int RateLimitRemaining { get; private set; }
-        // Approximate seconds until the rate limit is reset.
-        public static DateTimeOffset RateLimitReset { get; private set;}
 
         private static readonly bool IsMono = Type.GetType("Mono.Runtime") != null;
         private static bool IsOAuth => RootDomain == "oauth.reddit.com";
 
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
-            rateLimitLock = new SemaphoreSlim(1, 1);
             UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
+            RateLimit = new RateLimitManager();
             _httpClient = new HttpClient();
         }
 
@@ -66,9 +62,6 @@ namespace RedditSharp
         public WebAgent( string accessToken ) {
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
-            RateLimitUsed = 0;
-            RateLimitReset = DateTimeOffset.UtcNow;
-            RateLimitRemaining = IsOAuth ? 60 : 30;
         }
 
         /// <inheritdoc />
@@ -80,25 +73,14 @@ namespace RedditSharp
             HttpResponseMessage response;
             var tries = 0;
             do {
-              await rateLimitLock.WaitAsync().ConfigureAwait(false);
-              try {
-                if (RateLimitRemaining <= 0 && DateTime.UtcNow < RateLimitReset) {
-                  await Task.Delay(RateLimitReset - DateTime.UtcNow);
-                }
-                response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
-                IEnumerable<string> values; var headers = response.Headers; if (headers.TryGetValues("X-Ratelimit-Used", out values)) RateLimitUsed = int.Parse(values.First());
-                if (headers.TryGetValues("X-Ratelimit-Remaining", out values))
-                  RateLimitRemaining = (int)double.Parse(values.First());
-                if (headers.TryGetValues("X-Ratelimit-Reset", out values))
-                  RateLimitReset = DateTime.UtcNow + TimeSpan.FromSeconds(int.Parse(values.First()));
-              } finally {
-                rateLimitLock.Release();
-                tries++;
-              }
+              await RateLimit.CheckRateLimitAsync().ConfigureAwait(false);
+              response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
+              await RateLimit.ReadHeadersAsync(response);
             } while(!response.IsSuccessStatusCode && tries < maxTries);
             if (!response.IsSuccessStatusCode)
               throw new RedditHttpException(response.StatusCode);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            //Console.WriteLine(result);
 
             JToken json;
             if (!string.IsNullOrEmpty(result))

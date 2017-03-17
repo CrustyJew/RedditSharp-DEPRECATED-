@@ -73,7 +73,7 @@ namespace RedditSharp
             HttpResponseMessage response;
             var tries = 0;
             do {
-              await RateLimit.CheckRateLimitAsync().ConfigureAwait(false);
+              await RateLimit.CheckRateLimitAsync(IsOAuth).ConfigureAwait(false);
               response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
               await RateLimit.ReadHeadersAsync(response);
             } while(!response.IsSuccessStatusCode && tries < maxTries);

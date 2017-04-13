@@ -41,7 +41,9 @@ namespace RedditSharp
         LockPost, //actual value is "Lock" but it's a reserved word
         Unlock,
         MuteUser,
-        UnMuteUser
+        UnMuteUser,
+        SpamComment,
+        SpamLink
     }
 
     public class ModActionTypeConverter : JsonConverter

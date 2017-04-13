@@ -851,7 +851,7 @@ namespace RedditSharp.Things
         /// <param name="max">Maximum number of records to return.</param>
         public Listing<ModAction> GetModerationLog(ModActionType action, int max = -1)
         {
-            var url = $"{ModLogUrl}?type={ModActionTypeConverter.GetRedditParamName(action)}";
+            var url = $"{ModLogUrl}?type={action.ToString("g").ToLower()}";
             return Listing<ModAction>.Create(Reddit, url, max, 500);
         }
 
@@ -875,7 +875,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public Listing<ModAction> GetModerationLog(ModActionType action, IEnumerable<string> mods, int max = -1)
         {
-            var url = $"{ModLogUrl}?type={ModActionTypeConverter.GetRedditParamName(action)}&mod={string.Join(",", mods)}";
+            var url = $"{ModLogUrl}?type={action}";
             return Listing<ModAction>.Create(Reddit, url, max, 500);
         }
     }

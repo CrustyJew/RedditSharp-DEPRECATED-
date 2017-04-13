@@ -19,7 +19,6 @@ namespace RedditSharp.Things
         /// Type of action.
         /// </summary>
         [JsonProperty("action")]
-        [JsonConverter(typeof(ModActionTypeConverter))]
         public ModActionType Action { get; private set; }
 
         /// <summary>

@@ -43,6 +43,7 @@ namespace RedditSharp
         internal ListingStream(Listing<T> listing)
         {
             Listing = listing;
+            Listing.IsStream = true;
             _observers = new List<IObserver<T>>();
         }
 
@@ -54,7 +55,7 @@ namespace RedditSharp
             return new Unsubscriber(_observers, observer);
         }
 
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public async Task Enumerate()
         {
             await Listing.ForEachAsync(thing =>
@@ -66,7 +67,7 @@ namespace RedditSharp
 
             });
         }
-        #pragma warning restore 1591
+#pragma warning restore 1591
 
         private class Unsubscriber : IDisposable
         {
@@ -115,7 +116,7 @@ namespace RedditSharp
         {
             LimitPerRequest = limitPerRequest;
             MaximumLimit = maxLimit;
-            Stream = false;
+            IsStream = false;
             Url = url;
         }
 
@@ -148,7 +149,7 @@ namespace RedditSharp
         /// <summary>
         /// Returns true is this a ListingStream.
         /// </summary>
-        public bool Stream { get; set; }
+        internal bool IsStream { get; set; }
 
         /// <summary>
         /// Returns an enumerator that iterates through a collection, using the specified number of listings per
@@ -166,15 +167,17 @@ namespace RedditSharp
         /// <inheritdoc/>
         public IAsyncEnumerator<T> GetEnumerator()
         {
-            return GetEnumerator(LimitPerRequest,MaximumLimit,Stream);
+            return GetEnumerator(LimitPerRequest,MaximumLimit,IsStream);
         }
 
-        #pragma warning disable 1591
-        public ListingStream<T> GetListingStream()
+        /// <summary>
+        /// Poll the listing for new items.
+        /// </summary>
+        /// <returns></returns>
+        public ListingStream<T> Stream()
         {
             return new ListingStream<T>(this);
         }
-        #pragma warning restore 1591
 
 #pragma warning disable 0693
         private class ListingEnumerator : IAsyncEnumerator<T>
@@ -281,7 +284,6 @@ namespace RedditSharp
                 }
                 url = AppendCommonParams(url);
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
-                json = json.Last();
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
                 Parse(json);
@@ -330,7 +332,7 @@ namespace RedditSharp
 
                 CurrentPage = new ReadOnlyCollection<T>(things);
                 // Increase the total count of items returned
-                
+
 
                 After = json["data"]["after"].Value<string>();
                 Before = json["data"]["before"].Value<string>();
@@ -394,17 +396,19 @@ namespace RedditSharp
 
             private async Task<bool> MoveNextForwardAsync()
             {
+                CurrentIndex++;
                 int tries = 0;
                 while (true)
                 {
+                    tries++;
+
                     if (MaximumLimit != -1 && Count >= MaximumLimit)
                         return false;
 
-                    tries++;
-                    // Get the next page
                     try
                     {
                         await FetchNextPageAsync().ConfigureAwait(false);
+                        CurrentIndex = 0;
                     }
                     catch (Exception ex)
                     {
@@ -412,18 +416,14 @@ namespace RedditSharp
                         await Sleep(tries, ex).ConfigureAwait(false);
                     }
 
-                    if (CurrentPage.Count == 0)
-                    {
-                        // No listings were returned in the page
-                        // sleep for a while
-                        await Sleep(tries).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        tries = 0;
+                    // the page is only populated if there are *new* items to yielded from the listing.
+                    if (CurrentPage.Count > 0)
                         break;
-                    }
+
+                    // No listings were returned in the page.
+                    await Sleep(tries).ConfigureAwait(false);
                 }
+                Count++;
                 return true;
             }
 

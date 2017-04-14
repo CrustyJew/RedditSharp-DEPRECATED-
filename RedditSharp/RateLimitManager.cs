@@ -5,7 +5,8 @@ using System.Threading;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace RedditSharp {
+namespace RedditSharp
+{
 
     /// <summary>;
     /// The method by which the WebAgent will limit request rate
@@ -36,7 +37,7 @@ namespace RedditSharp {
         public int Used { get; private set; }
         public int Remaining { get; private set; }
         // Approximate seconds until the rate limit is reset.
-        public DateTimeOffset Reset { get; private set;}
+        public DateTimeOffset Reset { get; private set; }
 
         /// </summary>
         /// It is strongly advised that you leave this set to Burst or Pace. Reddit bans excessive
@@ -59,7 +60,8 @@ namespace RedditSharp {
 
         private SemaphoreSlim rateLimitLock;
 
-        public RateLimitManager(RateLimitMode mode = RateLimitMode.Pace) {
+        public RateLimitManager(RateLimitMode mode = RateLimitMode.Burst)
+        {
             rateLimitLock = new SemaphoreSlim(1, 1);
             Reset = DateTimeOffset.UtcNow;
             Mode = mode;
@@ -67,16 +69,22 @@ namespace RedditSharp {
 
         public async Task CheckRateLimitAsync(bool oauth)
         {
-              await rateLimitLock.WaitAsync().ConfigureAwait(false);
-              try {
-                if (Remaining <= 0 && DateTime.UtcNow < Reset) {
+            await rateLimitLock.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (Remaining <= 0 && DateTime.UtcNow < Reset)
+                {
                     await Task.Delay(Reset - DateTime.UtcNow).ConfigureAwait(false);
-                } else {
-                  await EnforceRateLimit(oauth);
                 }
-              } finally {
+                else
+                {
+                    await EnforceRateLimit(oauth);
+                }
+            }
+            finally
+            {
                 rateLimitLock.Release();
-              }
+            }
         }
 
         /// <summary>
@@ -89,27 +97,27 @@ namespace RedditSharp {
             switch (Mode)
             {
                 case RateLimitMode.Pace:
-                   await Task.Delay(
-                       TimeSpan.FromSeconds(60 / limitRequestsPerMinute) -
-                       (DateTime.UtcNow - LastRequest)).ConfigureAwait(false);
-                   break;
+                    TimeSpan delayAmount = TimeSpan.FromSeconds(60 / limitRequestsPerMinute) - (DateTime.UtcNow - LastRequest);
+                    delayAmount = delayAmount.TotalMilliseconds < 0 ? new TimeSpan(0) : delayAmount;
+                    await Task.Delay(delayAmount).ConfigureAwait(false);
+                    break;
                 case RateLimitMode.SmallBurst:
-                   //this is first request OR the burst expired
-                   if (RequestsThisBurst <= 0 || (DateTime.UtcNow - BurstStart).TotalSeconds >= 10)
-                   {
-                       BurstStart = DateTime.UtcNow;
-                       RequestsThisBurst = 0;
-                   }
-                   //limit has been reached
-                   if (RequestsThisBurst >= limitRequestsPerMinute / 6.0)
-                   {
-                       await Task.Delay(DateTime.UtcNow - BurstStart - TimeSpan.FromSeconds(10)).ConfigureAwait(false);
-                       BurstStart = DateTime.UtcNow;
-                       RequestsThisBurst = 0;
-                   }
-                   RequestsThisBurst++;
-                   break;
-                 case RateLimitMode.Burst:
+                    //this is first request OR the burst expired
+                    if (RequestsThisBurst <= 0 || (DateTime.UtcNow - BurstStart).TotalSeconds >= 10)
+                    {
+                        BurstStart = DateTime.UtcNow;
+                        RequestsThisBurst = 0;
+                    }
+                    //limit has been reached
+                    if (RequestsThisBurst >= limitRequestsPerMinute / 6.0)
+                    {
+                        await Task.Delay(DateTime.UtcNow - BurstStart - TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                        BurstStart = DateTime.UtcNow;
+                        RequestsThisBurst = 0;
+                    }
+                    RequestsThisBurst++;
+                    break;
+                case RateLimitMode.Burst:
                     //this is first request OR the burst expired
                     if (RequestsThisBurst <= 0 || (DateTime.UtcNow - BurstStart).TotalSeconds >= 60)
                     {
@@ -124,36 +132,46 @@ namespace RedditSharp {
                     }
                     RequestsThisBurst++;
                     break;
-             }
-             LastRequest = requestTime;
-         }
+            }
+            LastRequest = requestTime;
+        }
 
-        public async Task ReadHeadersAsync(HttpResponseMessage response) {
-              await rateLimitLock.WaitAsync().ConfigureAwait(false);
-              try {
+        public async Task ReadHeadersAsync(HttpResponseMessage response)
+        {
+            await rateLimitLock.WaitAsync().ConfigureAwait(false);
+            try
+            {
                 IEnumerable<string> values; var headers = response.Headers;
                 int used, remaining;
-                if (headers.TryGetValues("X-Ratelimit-Used", out values)) {
-                  used = int.Parse(values.First());
-                } else {
-                  return;
+                if (headers.TryGetValues("X-Ratelimit-Used", out values))
+                {
+                    used = int.Parse(values.First());
                 }
-                if (headers.TryGetValues("X-Ratelimit-Remaining", out values)) {
-                  remaining = (int)double.Parse(values.First());
-                } else {
-                  return;
+                else
+                {
+                    return;
+                }
+                if (headers.TryGetValues("X-Ratelimit-Remaining", out values))
+                {
+                    remaining = (int)double.Parse(values.First());
+                }
+                else
+                {
+                    return;
                 }
                 // Do not update values if they the limit has not been reset and
                 // the show an impossible reduction in usage
                 if (DateTime.UtcNow < Reset && (used < Used || remaining > Remaining))
-                  return;
+                    return;
                 Used = used;
                 Remaining = remaining;
                 if (headers.TryGetValues("X-Ratelimit-Reset", out values))
-                  Reset = DateTime.UtcNow + TimeSpan.FromSeconds(int.Parse(values.First()));
-              } finally {
+                    Reset = DateTime.UtcNow + TimeSpan.FromSeconds(int.Parse(values.First()));
+            }
+            finally
+            {
                 rateLimitLock.Release();
-              }
+            }
 
         }
 

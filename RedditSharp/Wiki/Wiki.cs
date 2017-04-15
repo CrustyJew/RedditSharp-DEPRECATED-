@@ -24,6 +24,9 @@ namespace RedditSharp
         private const string WikiPageRevisionsUrl = "/r/{0}/wiki/revisions/{1}.json";
         private const string WikiPageDiscussionsUrl = "/r/{0}/wiki/discussions/{1}.json";
 
+        /// <summary>
+        /// Get a list of wiki page names for this subreddit.
+        /// </summary>
         public IEnumerable<string> PageNames
         {
             get
@@ -35,6 +38,9 @@ namespace RedditSharp
             }
         }
 
+        /// <summary>
+        /// Get a list of revisions for this wiki.
+        /// </summary>
         public Listing<WikiPageRevision> Revisions
         {
             get
@@ -43,6 +49,7 @@ namespace RedditSharp
             }
         }
 
+
         protected internal Wiki(Reddit reddit, Subreddit subreddit, IWebAgent webAgent)
         {
             Reddit = reddit;
@@ -50,6 +57,12 @@ namespace RedditSharp
             WebAgent = webAgent;
         }
 
+        /// <summary>
+        /// Get a wiki page
+        /// </summary>
+        /// <param name="page">wiki page name</param>
+        /// <param name="version">page version</param>
+        /// <returns></returns>
         public WikiPage GetPage(string page, string version = null)
         {
             var request = WebAgent.CreateGet(string.Format(GetWikiPageUrl, Subreddit.Name, page, version));
@@ -60,6 +73,12 @@ namespace RedditSharp
         }
 
         #region Settings
+
+        /// <summary>
+        /// Get wiki settings for specified wiki page.
+        /// </summary>
+        /// <param name="name">wiki page</param>
+        /// <returns></returns>
         public WikiPageSettings GetPageSettings(string name)
         {
             var request = WebAgent.CreateGet(string.Format(WikiPageSettingsUrl, Subreddit.Name, name));
@@ -69,6 +88,11 @@ namespace RedditSharp
             return result;
         }
 
+        /// <summary>
+        /// Set settings for the specified wiki page.
+        /// </summary>
+        /// <param name="name">wiki page</param>
+        /// <param name="settings">settings</param>
         public void SetPageSettings(string name, WikiPageSettings settings)
         {
             var request = WebAgent.CreatePost(string.Format(WikiPageSettingsUrl, Subreddit.Name, name));
@@ -80,11 +104,17 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
         #endregion
 
         #region Revisions
 
+        /// <summary>
+        /// Get a list of revisions for a give wiki page.
+        /// </summary>
+        /// <param name="page">wiki page</param>
+        /// <returns></returns>
         public Listing<WikiPageRevision> GetPageRevisions(string page)
         {
             return new Listing<WikiPageRevision>(Reddit, string.Format(WikiPageRevisionsUrl, Subreddit.Name, page), WebAgent);
@@ -92,12 +122,25 @@ namespace RedditSharp
         #endregion
 
         #region Discussions
+        
+        /// <summary>
+        /// Get a list of discussions about this wiki page.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
         public Listing<Post> GetPageDiscussions(string page)
         {
             return new Listing<Post>(Reddit, string.Format(WikiPageDiscussionsUrl, Subreddit.Name, page), WebAgent);
         }
         #endregion
 
+        /// <summary>
+        /// Edit a wiki page.
+        /// </summary>
+        /// <param name="page">wiki page</param>
+        /// <param name="content">new content</param>
+        /// <param name="previous">previous</param>
+        /// <param name="reason">reason for edit</param>
         public void EditPage(string page, string content, string previous = null, string reason = null)
         {
             var request = WebAgent.CreatePost(string.Format(WikiPageEditUrl, Subreddit.Name));
@@ -120,8 +163,14 @@ namespace RedditSharp
             }
             WebAgent.WritePostBody(request.GetRequestStream(), param,addParams.ToArray());
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Hide the specified wiki page.
+        /// </summary>
+        /// <param name="page">wiki page.</param>
+        /// <param name="revision">reason for revision.</param>
         public void HidePage(string page, string revision)
         {
             var request = WebAgent.CreatePost(string.Format(HideWikiPageUrl, Subreddit.Name));
@@ -132,8 +181,14 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Revert a page to a specific version.
+        /// </summary>
+        /// <param name="page">wiki page</param>
+        /// <param name="revision">page version</param>
         public void RevertPage(string page, string revision)
         {
             var request = WebAgent.CreatePost(string.Format(RevertWikiPageUrl, Subreddit.Name));
@@ -144,8 +199,15 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Set the page editor for a given page.
+        /// </summary>
+        /// <param name="page">wiki page</param>
+        /// <param name="username"></param>
+        /// <param name="allow"></param>
         public void SetPageEditor(string page, string username, bool allow)
         {
             var request = WebAgent.CreatePost(string.Format(allow ? WikiPageAllowEditorAddUrl : WikiPageAllowEditorDelUrl, Subreddit.Name));
@@ -156,6 +218,7 @@ namespace RedditSharp
                 uh = Reddit.User.Modhash
             });
             var response = request.GetResponse();
+            var data = WebAgent.GetResponseString(response.GetResponseStream());
         }
 
         #region Obsolete Getter Methods

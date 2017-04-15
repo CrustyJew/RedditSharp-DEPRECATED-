@@ -14,8 +14,19 @@ namespace RedditSharp
         private string Username;
         private string Password;
 
+        /// <summary>
+        /// DateTime the token expires.
+        /// </summary>
         public DateTime TokenValidTo { get; set; }
 
+        /// <summary>
+        /// A web agent using reddit's OAuth interface.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The user's password.</param>
+        /// <param name="clientId">Granted by reddit as part of app.</param>
+        /// <param name="clientSecret">Granted by reddit as part of app.</param>
+        /// <param name="redirectUri">Selected as part of app. Reddit will send users back here.</param>
         public BotWebAgent(string username, string password, string clientID, string clientSecret, string redirectURI)
         {
             Username = username;
@@ -27,6 +38,7 @@ namespace RedditSharp
             GetNewToken();
         }
 
+        /// <inheritdoc/>
         public override HttpWebRequest CreateRequest(string url, string method)
         {
             //add 5 minutes for clock skew to ensure requests succeed 
@@ -37,6 +49,7 @@ namespace RedditSharp
             return base.CreateRequest(url, method);
         }
 
+        /// <inheritdoc/>
         protected override HttpWebRequest CreateRequest(Uri uri, string method)
         {
             //add 5 minutes for clock skew to ensure requests succeed

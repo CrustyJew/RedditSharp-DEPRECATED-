@@ -8,13 +8,37 @@ namespace RedditSharp
     [Flags]
     public enum ModeratorPermission
     {
+        /// <summary>
+        /// No permissions.
+        /// </summary>
         None   = 0x00,
+        /// <summary>
+        /// access permissions.
+        /// </summary>
         Access = 0x01,
+        /// <summary>
+        /// Subreddit config.
+        /// </summary>
         Config = 0x02,
+        /// <summary>
+        /// Flair management.
+        /// </summary>
         Flair  = 0x04,
+        /// <summary>
+        /// Modmail.
+        /// </summary>
         Mail   = 0x08,
+        /// <summary>
+        /// Moderate posts.
+        /// </summary>
         Posts  = 0x10,
+        /// <summary>
+        /// Edit / view protected wiki paes.
+        /// </summary>
         Wiki   = 0x20,
+        /// <summary>
+        /// All permissions.
+        /// </summary>
         All    = Access | Config | Flair | Mail | Posts | Wiki
     }
 

@@ -17,6 +17,13 @@ namespace RedditSharp.Things
 
         private const int MAX_LIMIT = 100;
 
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns>A reddit user</returns>
         public async Task<RedditUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
@@ -24,6 +31,14 @@ namespace RedditSharp.Things
                 reddit.JsonSerializerSettings);
             return this;
         }
+
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="json"></param>
+        /// <param name="webAgent"></param>
+        /// <returns>A reddit user</returns>
         public RedditUser Init(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
@@ -31,6 +46,7 @@ namespace RedditSharp.Things
                 reddit.JsonSerializerSettings);
             return this;
         }
+
         private void CommonInit(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             base.Init(json);
@@ -38,31 +54,47 @@ namespace RedditSharp.Things
             WebAgent = webAgent;
         }
 
-        [JsonIgnore]
-        protected Reddit Reddit { get; set; }
 
-        [JsonIgnore]
-        protected IWebAgent WebAgent { get; set; }
-
+        /// <summary>
+        /// Reddit username.
+        /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; }
-
+        
+        /// <summary>
+        /// Returns true if the user has reddit gold.
+        /// </summary>
         [JsonProperty("is_gold")]
         public bool HasGold { get; set; }
 
+        /// <summary>
+        /// Returns true if the user is a moderator of any subreddit.
+        /// </summary>
         [JsonProperty("is_mod")]
         public bool IsModerator { get; set; }
 
+        /// <summary>
+        /// Total link karma of the user.
+        /// </summary>
         [JsonProperty("link_karma")]
         public int LinkKarma { get; set; }
 
+        /// <summary>
+        /// Total comment karma of the user.
+        /// </summary>
         [JsonProperty("comment_karma")]
         public int CommentKarma { get; set; }
 
+        /// <summary>
+        /// Date the user was created.
+        /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTime Created { get; set; }
 
+        /// <summary>
+        /// Return the users overview.
+        /// </summary>
         public Listing<VotableThing> Overview
         {
             get
@@ -71,6 +103,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of posts liked by the logged in user.
+        /// </summary>
         public Listing<Post> LikedPosts
         {
             get
@@ -79,6 +114,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of posts disliked by the logged in user.
+        /// </summary>
         public Listing<Post> DislikedPosts
         {
             get
@@ -87,6 +125,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of comments made by the user.
+        /// </summary>
         public Listing<Comment> Comments
         {
             get
@@ -95,6 +136,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of posts made by the user.
+        /// </summary>
         public Listing<Post> Posts
         {
             get
@@ -103,6 +147,9 @@ namespace RedditSharp.Things
             }
         }
 
+        /// <summary>
+        /// Return a list of subscribed subreddits for the logged in user.
+        /// </summary>
         public Listing<Subreddit> SubscribedSubreddits
         {
             get
@@ -183,6 +230,7 @@ namespace RedditSharp.Things
             return new Listing<VotableThing>(Reddit, savedUrl, WebAgent);
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return Name;

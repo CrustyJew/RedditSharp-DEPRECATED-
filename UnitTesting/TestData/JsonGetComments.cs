@@ -1,0 +1,167 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+
+namespace UnitTesting.TestData
+{
+	public static class JsonGetComments
+	{
+		public static JArray GetComments()
+		{
+			
+			return JArray.Parse(JsonComments());
+		}
+		public static String JsonComments()
+		{
+			#region return
+			return @"
+[
+	{
+
+		""kind"": ""Listing"",
+		""data"": {
+				""modhash"": """",
+			""children"": [
+				{
+					""kind"": ""t3"",
+					""data"": {
+						""author"": ""anauthor"",
+						""name"": ""t3_post"",
+						""id"": ""post""
+					}
+}
+			],
+			""after"": null,
+			""before"": null
+		}
+	},
+	{
+
+		""kind"": ""Listing"",
+		""data"": {
+
+			""modhash"": """",
+
+			""children"": [
+
+				{
+					""kind"": ""t1"",
+					""data"": {
+						""author"": ""somone"",
+						""id"": ""1"",
+						""name"": ""t1_1"",
+						""link_id"": ""0"",
+						""replies"": {
+							""kind"": ""Listing"",
+							""data"": {
+								""modhash"": """",
+								""children"": [
+									{
+										""kind"": ""t1"",
+										""data"": {
+											""author"": ""someperson"",
+											""id"": ""1-1"",
+											""name"": ""t1_1-1"",
+											""link_id"": ""0"",
+											""replies"": {
+												""kind"": ""Listing"",
+												""data"": {
+													""modhash"": """",
+													""children"": [
+														{
+															""kind"": ""t1"",
+															""data"":{
+																""author"": ""someotherperson"",
+																""id"": ""1-1-1"",
+																""name"": ""t1_1-1-1"",
+																""link_id"": ""0"",
+																""replies"": {
+																	""kind"": ""Listing"",
+																	""data"": {
+																		""modhash"": """",
+																		""children"": [
+																			{
+																				""kind"": ""more"",
+																				""data"": {
+																					""count"": ""4"",
+																					""parent_id"": ""post"",
+																					""children"": [ ""1-1-1-1"", ""1-1-1-1-1"", ""1-1-1-2"", ""1-1-1-2-more"" ],
+																					""id"": ""1-1-1-more"",
+																					""name"": ""t1_1-1-1-more""
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													]
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+
+				{
+					""kind"": ""t1"",
+					""data"": {
+						""author"": ""user"",
+						""id"": ""2"",
+						""name"": ""t1_2"",
+						""link_id"": ""0"",
+						""replies"": {
+							""kind"": ""Listing"",
+							""data"": {
+								""modhash"": """",
+								""children"": [
+									{
+										""kind"": ""more"",
+										""data"": {
+											""count"": 1,
+											""parent_id"": ""t1_2"",
+											""children"": [ ""2-1"" ]
+										},
+										""id"": ""2-more"",
+										""name"": ""t1_2-more""
+									}
+								]
+							}
+						}
+
+					}
+				},
+				{
+					""kind"": ""more"",
+					""data"": {
+						""count"": 3,
+						""parent_id"": ""post"",
+						""children"": [
+						""3"",""3-1"",""3-1-more"",
+							""4"",
+							""5"",""5-1"",""5-1-1"",""5-1-more""
+						]
+					},
+					""id"": ""1-more"",
+					""name"": ""t1_1-more""
+				}
+			]
+
+		}
+	}
+
+
+		]
+
+";
+#endregion
+		}
+		
+	}
+}

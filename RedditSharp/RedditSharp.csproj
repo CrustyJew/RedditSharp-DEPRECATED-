@@ -32,12 +32,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Release\RedditSharp.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\HtmlAgilityPack.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -52,7 +50,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotWebAgent.cs" />
+    <Compile Include="Flairs\FlairTemplate.cs" />
+    <Compile Include="Things\LiveUpdateEvent.cs" />
+    <Compile Include="Things\LiveUpdate.cs" />
     <Compile Include="Moderator Actions\ModActionType.cs" />
+    <Compile Include="Multi\MData.cs" />
+    <Compile Include="Multi\Multi.cs" />
+    <Compile Include="Multi\MultiData.cs" />
+    <Compile Include="Multi\MultiSubs.cs" />
     <Compile Include="Things\BannedUser.cs" />
     <Compile Include="Things\Contributor.cs" />
     <Compile Include="Things\ModAction.cs" />
@@ -70,7 +75,6 @@
     <Compile Include="Things\Comment.cs" />
     <Compile Include="Things\CreatedThing.cs" />
     <Compile Include="Extensions\Extensions.cs" />
-    <Compile Include="Flairs\FlairTemplate.cs" />
     <Compile Include="Interfaces\IWebAgent.cs" />
     <Compile Include="Data\LinkData.cs" />
     <Compile Include="Listing.cs" />

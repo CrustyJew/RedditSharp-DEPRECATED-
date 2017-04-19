@@ -566,8 +566,8 @@ namespace RedditSharp
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
 
-            var fromUnix = (from - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
-            var toUnix = (to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            var fromUnix = (long)(from - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            var toUnix = (long)(to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
 
             string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
             return new Listing<T>(this, string.Format(SearchUrl, searchQuery, sort, time), WebAgent);

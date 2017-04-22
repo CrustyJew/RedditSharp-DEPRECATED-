@@ -554,8 +554,8 @@ namespace RedditSharp
         /// Return a <see cref="Listing{T}"/> of items matching search with a given time period.
         /// </summary>
         /// <typeparam name="T"><see cref="Thing"/></typeparam>
-        /// <param name="from">DateTime when to begin. With DateTimeKind.Utc</param>
-        /// <param name="to">DateTime when to end. With DateTimeKind.Utc</param>
+        /// <param name="from">DateTime when to begin. </param>
+        /// <param name="to">DateTime when to end. </param>
         /// <param name="query">string to query</param>
         /// <param name="subreddit">subreddit in which to search</param>
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
@@ -563,15 +563,10 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
-            if(from.Kind != DateTimeKind.Utc || to.Kind != DateTimeKind.Utc)
-            {
-                throw new ArgumentException("from and to must be DateTimeKind.Utc.");
-            }
-
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-            DateTimeOffset fromDto = new DateTimeOffset(from, TimeSpan.Zero);
-            DateTimeOffset toDto = new DateTimeOffset(to, TimeSpan.Zero);
+            DateTimeOffset fromDto = new DateTimeOffset(from);
+            DateTimeOffset toDto = new DateTimeOffset(to);
                         
             var fromUnix = fromDto.ToUnixTimeSeconds();
             var toUnix = toDto.ToUnixTimeSeconds();

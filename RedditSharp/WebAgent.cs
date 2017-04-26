@@ -32,7 +32,9 @@ namespace RedditSharp
         /// </summary>
         public static string RootDomain { get; set; }
 
-        public static RateLimitManager RateLimit { get; private set; }
+        public static RateLimitManager DefaultRateLimiter { get; private set; }
+
+        public RateLimitManager RateLimiter { get; set; }
 
         /// <inheritdoc />
         public string AccessToken { get; set; }
@@ -45,7 +47,7 @@ namespace RedditSharp
             UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
-            RateLimit = new RateLimitManager();
+            DefaultRateLimiter = new RateLimitManager();
             _httpClient = new HttpClient();
         }
 
@@ -56,12 +58,17 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// Intializes a WebAgent with a specified access token and sets the default url to the oauth api address
+        /// Intializes a WebAgent with a specified access token and optional <see cref="RateLimitManager"/>. Sets the default url to the oauth api address
         /// </summary>
         /// <param name="accessToken">Valid access token</param>
-        public WebAgent( string accessToken ) {
+        /// <param name="rateLimiter"><see cref="RateLimitManager"/> that controls the rate limit for this instance of the WebAgent. Defaults to the shared, static rate limiter.</param>
+        public WebAgent( string accessToken, RateLimitManager rateLimiter = null ) {
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
+            if(rateLimiter == null)
+            {
+                rateLimiter = WebAgent.DefaultRateLimiter;
+            }
         }
 
         /// <inheritdoc />
@@ -73,10 +80,15 @@ namespace RedditSharp
             HttpResponseMessage response;
             var tries = 0;
             do {
-              await RateLimit.CheckRateLimitAsync(IsOAuth).ConfigureAwait(false);
+              await RateLimiter.CheckRateLimitAsync(IsOAuth).ConfigureAwait(false);
               response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
-              await RateLimit.ReadHeadersAsync(response);
-            } while(!response.IsSuccessStatusCode && tries < maxTries);
+              await RateLimiter.ReadHeadersAsync(response);
+            } while( 
+            //only retry if 500 or 503
+                (response.StatusCode == System.Net.HttpStatusCode.InternalServerError || 
+                 response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                && tries < maxTries
+            );
             if (!response.IsSuccessStatusCode)
               throw new RedditHttpException(response.StatusCode);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

@@ -55,8 +55,8 @@ namespace RedditSharp
         /// </summary>
         public RateLimitMode RateLimit
         {
-            get { return DefaultWebAgent.RateLimit.Mode; }
-            set { DefaultWebAgent.RateLimit.Mode = value; }
+            get { return DefaultWebAgent.RateLimiter.Mode; }
+            set { DefaultWebAgent.RateLimiter.Mode = value; }
         }
 
         internal JsonSerializer JsonSerializer { get; }
@@ -105,7 +105,7 @@ namespace RedditSharp
             : this(useSsl)
         {
             DefaultWebAgent.UserAgent = "";
-            DefaultWebAgent.RateLimit.Mode = limitMode;
+            DefaultWebAgent.RateLimiter.Mode = limitMode;
             DefaultWebAgent.RootDomain = "www.reddit.com";
         }
 

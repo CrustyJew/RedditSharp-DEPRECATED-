@@ -32,12 +32,13 @@ namespace RedditSharp
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("username cannot be null or empty");
 
             var uwa = userWebAgents.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
-            
-            if(uwa == null)
+
+            if (uwa == null)
             {
-                if(!string.IsNullOrWhiteSpace(refreshToken))
+                if (!string.IsNullOrWhiteSpace(refreshToken))
                 {
-                    uwa = new UserWebAgent() {
+                    uwa = new UserWebAgent()
+                    {
                         Username = username,
                         AccessToken = accessToken,
                         TokenExpires = accessTokenExpires ?? DateTime.UtcNow.AddMinutes(45),
@@ -47,15 +48,60 @@ namespace RedditSharp
 
                     userWebAgents.Add(uwa);
                     var agent = new RefreshTokenWebAgent(refreshToken, ClientID, ClientSecret, RedirectURI, uwa.AccessToken, uwa.TokenExpires, new RateLimitManager(DefaultRateLimitMode));
-                    activeAgentsCache.Set(uwa.WebAgentID, agent );
+                    activeAgentsCache.Set(uwa.WebAgentID, agent, new MemoryCacheEntryOptions() { SlidingExpiration = new TimeSpan(0, SlidingExpirationMinutes, 0) });
                     return agent;
                 }
                 return null;
             }
-            activeAgentsCache;
+            var toReturn = activeAgentsCache.GetOrCreate(uwa.WebAgentID, (i) =>
+            {
+                i.SlidingExpiration = new TimeSpan(0, SlidingExpirationMinutes, 0);
+                var agent = new RefreshTokenWebAgent(refreshToken, ClientID, ClientSecret, RedirectURI, uwa.AccessToken, uwa.TokenExpires, new RateLimitManager(DefaultRateLimitMode));
+                return agent;
+            });
+            return toReturn;
         }
 
+        //Dont think I like how this is working
+        public void UpdateWebAgent(string username, string accessToken, DateTime? accessTokenExpires, string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("username cannot be null or empty");
+            if (string.IsNullOrWhiteSpace(refreshToken)) throw new ArgumentException("refreshToken cannot be null or empty");
+
+            var uwa = userWebAgents.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
+
+            if (uwa == null)
+            {
+                uwa = new UserWebAgent()
+                {
+                    Username = username,
+                    AccessToken = accessToken,
+                    TokenExpires = accessTokenExpires ?? DateTime.UtcNow.AddMinutes(45),
+                    RefreshToken = refreshToken,
+                    WebAgentID = new Guid()
+                };
+
+                userWebAgents.Add(uwa);
+                var agent = new RefreshTokenWebAgent(refreshToken, ClientID, ClientSecret, RedirectURI, uwa.AccessToken, uwa.TokenExpires, new RateLimitManager(DefaultRateLimitMode));
+                activeAgentsCache.Set(uwa.WebAgentID, agent, new MemoryCacheEntryOptions() { SlidingExpiration = new TimeSpan(0, SlidingExpirationMinutes, 0) });
+
+            }
+            var existing = activeAgentsCache.Get<RefreshTokenWebAgent>(uwa.WebAgentID);
+            if(existing == null)
+            {
+                existing = new RefreshTokenWebAgent(refreshToken, ClientID, ClientSecret, RedirectURI, accessToken, accessTokenExpires, new RateLimitManager(DefaultRateLimitMode));
+            }
+            else
+            {
+                existing.AccessToken = accessToken;
+                existing.SetRefreshToken(refreshToken);
+                existing.TokenValidTo = accessTokenExpires ?? new DateTime().ToUniversalTime() ;
+            }
+            return toReturn;
+        }
     }
+
+
 
     internal class UserWebAgent
     {

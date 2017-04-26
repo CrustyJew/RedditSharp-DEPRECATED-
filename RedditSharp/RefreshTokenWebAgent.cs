@@ -40,6 +40,10 @@ namespace RedditSharp
             TokenProvider = new AuthProvider(clientID, clientSecret, redirectURI, this);
         }
 
+        public void SetRefreshToken(string refreshToken)
+        {
+            RefreshToken = refreshToken;
+        }
         /// <inheritdoc/>
         public override HttpRequestMessage CreateRequest(string url, string method)
         {

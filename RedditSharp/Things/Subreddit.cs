@@ -5,7 +5,7 @@ using System.Security.Authentication;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RedditSharp.Extensions.DateTimeExtensions;
+
 
 namespace RedditSharp.Things
 {
@@ -293,7 +293,7 @@ namespace RedditSharp.Things
         {
             string sort = sortE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, from.DateTimeToUnixTimestamp(), to.DateTimeToUnixTimestamp(), sort), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, new DateTimeOffset(from).ToUnixTimeSeconds(), new DateTimeOffset(to).ToUnixTimeSeconds(), sort), WebAgent);
         }
         /// <summary>
         /// Settings of the subreddit, as best as possible

@@ -554,8 +554,8 @@ namespace RedditSharp
         /// Return a <see cref="Listing{T}"/> of items matching search with a given time period.
         /// </summary>
         /// <typeparam name="T"><see cref="Thing"/></typeparam>
-        /// <param name="from">DateTime from</param>
-        /// <param name="to">DateTime to</param>
+        /// <param name="from">DateTime when to begin. </param>
+        /// <param name="to">DateTime when to end. </param>
         /// <param name="query">string to query</param>
         /// <param name="subreddit">subreddit in which to search</param>
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
@@ -565,9 +565,11 @@ namespace RedditSharp
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-
-            var fromUnix = (from - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
-            var toUnix = (to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            DateTimeOffset fromDto = new DateTimeOffset(from);
+            DateTimeOffset toDto = new DateTimeOffset(to);
+                        
+            var fromUnix = fromDto.ToUnixTimeSeconds();
+            var toUnix = toDto.ToUnixTimeSeconds();
 
             string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
             return new Listing<T>(this, string.Format(SearchUrl, searchQuery, sort, time), WebAgent);

@@ -19,7 +19,7 @@ namespace RedditSharp
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
         /// </summary>
-        public static string UserAgent { get; set; }
+        public static string DefaultUserAgent { get; set; }
 
         /// <summary>
         /// web protocol "http", "https"
@@ -39,12 +39,17 @@ namespace RedditSharp
         /// <inheritdoc />
         public string AccessToken { get; set; }
 
+        /// <summary>
+        /// String to override default useragent for this instance
+        /// </summary>
+        public string UserAgent { get; set; }
+
         private static readonly bool IsMono = Type.GetType("Mono.Runtime") != null;
         private static bool IsOAuth => RootDomain == "oauth.reddit.com";
 
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
-            UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
+            DefaultUserAgent = string.IsNullOrWhiteSpace( DefaultUserAgent ) ? "" : DefaultUserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
             DefaultRateLimiter = new RateLimitManager();
@@ -52,9 +57,20 @@ namespace RedditSharp
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
-        public WebAgent() {
+        /// <param name="userAgent">Optional userAgent string to override default UserAgent</param>
+        /// /// <param name="rateLimiter"><see cref="RateLimitManager"/> that controls the rate limit for this instance of the WebAgent. Defaults to the shared, static rate limiter.</param>
+        public WebAgent(string userAgent = "") {
+            if (string.IsNullOrEmpty(userAgent))
+            {
+                UserAgent = DefaultUserAgent;
+            }
+            else
+            {
+                UserAgent = userAgent;
+            }
+            RateLimiter = WebAgent.DefaultRateLimiter;
         }
 
         /// <summary>
@@ -62,12 +78,25 @@ namespace RedditSharp
         /// </summary>
         /// <param name="accessToken">Valid access token</param>
         /// <param name="rateLimiter"><see cref="RateLimitManager"/> that controls the rate limit for this instance of the WebAgent. Defaults to the shared, static rate limiter.</param>
-        public WebAgent( string accessToken, RateLimitManager rateLimiter = null ) {
+        /// <param name="userAgent">Optional userAgent string to override default UserAgent</param>
+        public WebAgent( string accessToken, RateLimitManager rateLimiter = null, string userAgent = "") {
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
             if(rateLimiter == null)
             {
-                rateLimiter = WebAgent.DefaultRateLimiter;
+                RateLimiter = WebAgent.DefaultRateLimiter;
+            }
+            else
+            {
+                RateLimiter = rateLimiter;
+            }
+            if (string.IsNullOrEmpty(userAgent))
+            {
+                UserAgent = DefaultUserAgent;
+            }
+            else
+            {
+                UserAgent = userAgent;
             }
         }
 
@@ -159,7 +188,7 @@ namespace RedditSharp
 
             request.Method = new HttpMethod(method);
             //request.Headers.UserAgent.ParseAdd(UserAgent);
-            request.Headers.TryAddWithoutValidation("User-Agent", $"{UserAgent} - with RedditSharp by meepster23");
+            request.Headers.TryAddWithoutValidation("User-Agent", $"{DefaultUserAgent} - with RedditSharp by meepster23");
             return request;
         }
 

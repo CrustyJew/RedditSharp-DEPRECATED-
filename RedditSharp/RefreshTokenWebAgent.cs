@@ -15,7 +15,7 @@ namespace RedditSharp
         public int RenewTokenThreshold { get; set; }
         //private so it doesn't leak app secret to other code
         private AuthProvider TokenProvider;
-        private string RefreshToken;
+        internal string RefreshToken { get; set; }
 
         /// <summary>
         /// DateTime the token expires.
@@ -30,7 +30,7 @@ namespace RedditSharp
         /// <param name="clientID">Granted by reddit as part of app.</param>
         /// <param name="clientSecret">Granted by reddit as part of app.</param>
         /// <param name="redirectURI">Selected as part of app. Reddit will send users back here.</param>
-        public RefreshTokenWebAgent(string refreshToken, string clientID, string clientSecret, string redirectURI, string accessToken = "", DateTime? validTo = null, RateLimitManager rateLimiter = null):base(accessToken,rateLimiter)
+        public RefreshTokenWebAgent(string refreshToken, string clientID, string clientSecret, string redirectURI, string userAgentString = "", string accessToken = "", DateTime? validTo = null, RateLimitManager rateLimiter = null):base(accessToken,rateLimiter,userAgentString)
         {
             RefreshToken = refreshToken;
             AccessToken = accessToken;
@@ -39,11 +39,7 @@ namespace RedditSharp
             RenewTokenThreshold = 5;
             TokenProvider = new AuthProvider(clientID, clientSecret, redirectURI, this);
         }
-
-        public void SetRefreshToken(string refreshToken)
-        {
-            RefreshToken = refreshToken;
-        }
+        
         /// <inheritdoc/>
         public override HttpRequestMessage CreateRequest(string url, string method)
         {
@@ -64,7 +60,36 @@ namespace RedditSharp
             return base.CreateRequest(uri, method);
         }
 
-        private async Task GetNewTokenAsync()
+        /// <summary>
+        /// Set the current refresh token for this web agent. Recommended to call <see cref="GetNewTokenAsync"/> afterwards.
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        public virtual void SetRefreshToken(string refreshToken)
+        {
+            RefreshToken = refreshToken;
+        }
+
+        /// <summary>
+        /// This will permanently revoke the OAuth Refresh Token that is currently assigned to this web agent.
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task<bool> RevokeRefreshTokenAsync()
+        {
+            try
+            {
+                await TokenProvider.RevokeTokenAsync(RefreshToken, true);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        /// <summary>
+        /// Forces the web agent to get a new access token using the refresh token.
+        /// </summary>
+        /// <returns></returns>
+        public async Task GetNewTokenAsync()
         {
             AccessToken = await TokenProvider.GetOAuthTokenAsync(RefreshToken,true).ConfigureAwait(false);
             TokenValidTo = DateTime.UtcNow.AddHours(1);

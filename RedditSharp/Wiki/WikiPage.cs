@@ -44,7 +44,9 @@ namespace RedditSharp
         #pragma warning disable 1591
         protected internal WikiPage(Reddit reddit, JToken json)
         {
-            RevisionBy = new RedditUser(reddit, json["revision_by"]);
+            if (json["revision_by"].HasValues) {
+                RevisionBy = new RedditUser(reddit, json["revision_by"]);
+            }
             reddit.PopulateObject(json, this);
         }
         #pragma warning restore 1591

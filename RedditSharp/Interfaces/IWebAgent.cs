@@ -68,5 +68,10 @@ namespace RedditSharp
         /// <param name="data">post body.</param>
         /// <param name="additionalFields">additional fields to pass.</param>
         void WritePostBody(HttpRequestMessage request, object data, params string[] additionalFields);
+
+        /// <summary>
+        /// <see cref="RateLimitManager"/> for this instance of IWebAgent
+        /// </summary>
+        RateLimitManager RateLimiter { get; set; }
     }
 }

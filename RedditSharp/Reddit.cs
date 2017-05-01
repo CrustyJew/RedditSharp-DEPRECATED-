@@ -55,8 +55,8 @@ namespace RedditSharp
         /// </summary>
         public RateLimitMode RateLimit
         {
-            get { return DefaultWebAgent.DefaultRateLimiter.Mode; }
-            set { DefaultWebAgent.DefaultRateLimiter.Mode = value; }
+            get { return WebAgent.RateLimiter.Mode; }
+            set { WebAgent.RateLimiter.Mode = value; }
         }
 
         internal JsonSerializer JsonSerializer { get; }

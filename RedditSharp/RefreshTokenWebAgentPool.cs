@@ -1,0 +1,137 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Extensions.Caching.Memory;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace RedditSharp
+{
+    public class RefreshTokenWebAgentPool
+    {
+        public int SlidingExpirationMinutes { get; set; }
+        public string DefaultUserAgent { get; set; }
+        public RateLimitMode DefaultRateLimitMode { get; set; }
+
+        private List<RefreshTokenPoolEntry> poolEntries = new List<RefreshTokenPoolEntry>();
+        private MemoryCache activeAgentsCache = new MemoryCache(new MemoryCacheOptions() { CompactOnMemoryPressure = true });
+
+        private string ClientID;
+        private string ClientSecret;
+        private string RedirectURI;
+
+        public RefreshTokenWebAgentPool(string clientID, string clientSecret, string redirectURI)
+        {
+            ClientID = clientID;
+            ClientSecret = clientSecret;
+            RedirectURI = redirectURI;
+            SlidingExpirationMinutes = 15;
+        }
+        /// <summary>
+        /// Return <see cref="IWebAgent"/> from cache, or creates a <see cref="RefreshTokenWebAgent"/>, adds it to the cache, and returns it
+        /// </summary>
+        /// <param name="username">Username of Reddit user attached to WebAgent</param>
+        /// <returns></returns>
+        public IWebAgent GetWebAgent(string username)
+        {
+            var poolEnt = poolEntries.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
+            IWebAgent toReturn = null;
+            if (poolEnt != null)
+            {
+                toReturn = activeAgentsCache.GetOrCreate(poolEnt.WebAgentID, (i) =>
+                {
+                    i.RegisterPostEvictionCallback(UpdateAgentInfoOnCacheRemove);
+                    i.SlidingExpiration = new TimeSpan(0, SlidingExpirationMinutes, 0);
+                    var agent = new RefreshTokenWebAgent(poolEnt.RefreshToken, ClientID, ClientSecret, RedirectURI, poolEnt.UserAgentString, poolEnt.AccessToken, poolEnt.TokenExpires, new RateLimitManager(poolEnt.RateLimiterMode));
+                    return agent;
+                });
+            }
+            return toReturn;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IWebAgent"/> corresponding to the current user, or creates one if it doesn't exist.
+        /// </summary>
+        /// <param name="username">Username of Reddit user of <see cref="IWebAgent"/></param>
+        /// <param name="createAsync">Async function to return a new <see cref="RefreshTokenPoolEntry"/>. Parameters (<see cref="string"/> username, <see cref="string"/> default useragent, <see cref="RateLimitMode"/> default rate limit mode)</param>
+        /// <returns></returns>
+        public async Task<IWebAgent> GetOrCreateWebAgentAsync(string username, Func<string, string, RateLimitMode, Task<RefreshTokenPoolEntry>> createAsync)
+        {
+            if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("username cannot be null or empty");
+
+            var poolEnt = poolEntries.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
+
+            if (poolEnt == null)
+            {
+                poolEnt = await createAsync(username, DefaultUserAgent, DefaultRateLimitMode);
+                poolEntries.Add(poolEnt);
+            }
+            var toReturn = activeAgentsCache.GetOrCreate(poolEnt.WebAgentID, (i) =>
+            {
+                i.SlidingExpiration = new TimeSpan(0, SlidingExpirationMinutes, 0);
+                i.RegisterPostEvictionCallback(UpdateAgentInfoOnCacheRemove);
+                var agent = new RefreshTokenWebAgent(poolEnt.RefreshToken, ClientID, ClientSecret, RedirectURI, poolEnt.UserAgentString, poolEnt.AccessToken, poolEnt.TokenExpires, new RateLimitManager(DefaultRateLimitMode));
+                return agent;
+            });
+            return toReturn;
+        }
+
+        /// <summary>
+        /// Sets the cache entry for an ID (if it exists it overwrites it meaning current rate limit etc is lost).
+        /// If <paramref name="agent"/> is an instance of <see cref="RefreshTokenWebAgent"/> and expries, it will try and update the data to be able to recreate the <see cref="IWebAgent"/> as specified by this method call.
+        /// </summary>
+        /// <param name="agentID"><see cref="Guid"/> id of entry to set</param>
+        /// <param name="agent"><see cref="IWebAgent"/> to set as value</param>
+        /// <param name="absoluteExpiration"><see cref="DateTime"/> that if provided will set an absolute expiration date of cache object</param>
+        /// <param name="noSlidingExpiration">If false, cache entry will exist until <paramref name="absoluteExpiration"/> or permanently if none is provided. If true, uses <see cref="SlidingExpirationMinutes"/> as sliding expiration time</param>
+        public void SetWebAgentCache(Guid agentID, IWebAgent agent, DateTimeOffset? absoluteExpiration = null, bool noSlidingExpiration = false)
+        {
+            var opts = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = absoluteExpiration,
+                SlidingExpiration = noSlidingExpiration ? null : new Nullable<TimeSpan>(new TimeSpan(0, SlidingExpirationMinutes, 0)),
+
+            }.RegisterPostEvictionCallback(UpdateAgentInfoOnCacheRemove);
+            activeAgentsCache.Set(agentID, agent, opts);
+        }
+        /// <summary>
+        /// Removes all traces of agent and cache for <paramref name="username"/>. If <paramref name="revokeRefreshToken"/> is true, will first revoke the Refresh Token currently assigned to the user's <see cref="RefreshTokenWebAgent"/>.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="revokeRefreshToken"></param>
+        /// <returns></returns>
+        public async Task RemoveWebAgentAsync(string username, bool revokeRefreshToken = false)
+        {
+            var poolEnt = poolEntries.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
+            if(poolEnt != null)
+            {
+                poolEntries.Remove(poolEnt);
+                if (revokeRefreshToken)
+                {
+                    var agent = await GetOrCreateWebAgentAsync(username, (uname, uagent, rl) => { return Task.FromResult(poolEnt); }) as RefreshTokenWebAgent;
+                    await agent.RevokeRefreshTokenAsync();
+                }
+                activeAgentsCache.Remove(poolEnt.WebAgentID);
+                
+            }
+        }
+
+        private void UpdateAgentInfoOnCacheRemove(object key, object value, EvictionReason reason, object state)
+        {
+            Guid webAgentID = (Guid)key;
+            var poolEnt = poolEntries.SingleOrDefault(a => a.WebAgentID == webAgentID);
+            RefreshTokenWebAgent agent = value as RefreshTokenWebAgent;
+            if (agent == null || poolEnt == null) return;
+
+            poolEnt.TokenExpires = agent.TokenValidTo;
+            poolEnt.AccessToken = agent.AccessToken;
+            poolEnt.UserAgentString = agent.UserAgent;
+            poolEnt.RefreshToken = agent.RefreshToken;
+            poolEnt.RateLimiterMode = agent.RateLimiter.Mode;
+        }
+    }
+
+
+
+
+}

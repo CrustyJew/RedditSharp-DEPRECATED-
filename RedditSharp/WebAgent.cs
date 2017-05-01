@@ -19,7 +19,7 @@ namespace RedditSharp
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
         /// </summary>
-        public static string UserAgent { get; set; }
+        public static string DefaultUserAgent { get; set; }
 
         /// <summary>
         /// web protocol "http", "https"
@@ -32,36 +32,63 @@ namespace RedditSharp
         /// </summary>
         public static string RootDomain { get; set; }
 
-        public static RateLimitManager RateLimit { get; private set; }
+        public static RateLimitManager DefaultRateLimiter { get; private set; }
+
+        public RateLimitManager RateLimiter { get; set; }
 
         /// <inheritdoc />
         public string AccessToken { get; set; }
+
+        /// <summary>
+        /// String to override default useragent for this instance
+        /// </summary>
+        public string UserAgent { get; set; }
 
         private static readonly bool IsMono = Type.GetType("Mono.Runtime") != null;
         private static bool IsOAuth => RootDomain == "oauth.reddit.com";
 
         static WebAgent() {
             //Static constructors are dumb, no likey -Meepster23
-            UserAgent = string.IsNullOrWhiteSpace( UserAgent ) ? "" : UserAgent ;
+            DefaultUserAgent = string.IsNullOrWhiteSpace( DefaultUserAgent ) ? "" : DefaultUserAgent ;
             Protocol = string.IsNullOrWhiteSpace(Protocol) ? "https" : Protocol;
             RootDomain = string.IsNullOrWhiteSpace(RootDomain) ? "www.reddit.com" : RootDomain;
-            RateLimit = new RateLimitManager();
+            DefaultRateLimiter = new RateLimitManager();
             _httpClient = new HttpClient();
         }
 
         /// <summary>
-        ///
+        /// Creates WebAgent with default rate limiter and default useragent.
         /// </summary>
         public WebAgent() {
+            UserAgent = DefaultUserAgent;
+            RateLimiter = WebAgent.DefaultRateLimiter;
         }
 
         /// <summary>
-        /// Intializes a WebAgent with a specified access token and sets the default url to the oauth api address
+        /// Intializes a WebAgent with a specified access token and optional <see cref="RateLimitManager"/>. Sets the default url to the oauth api address
         /// </summary>
         /// <param name="accessToken">Valid access token</param>
-        public WebAgent( string accessToken ) {
+        /// <param name="rateLimiter"><see cref="RateLimitManager"/> that controls the rate limit for this instance of the WebAgent. Defaults to the shared, static rate limiter.</param>
+        /// <param name="userAgent">Optional userAgent string to override default UserAgent</param>
+        public WebAgent( string accessToken, RateLimitManager rateLimiter = null, string userAgent = "") {
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
+            if(rateLimiter == null)
+            {
+                RateLimiter = WebAgent.DefaultRateLimiter;
+            }
+            else
+            {
+                RateLimiter = rateLimiter;
+            }
+            if (string.IsNullOrEmpty(userAgent))
+            {
+                UserAgent = DefaultUserAgent;
+            }
+            else
+            {
+                UserAgent = userAgent;
+            }
         }
 
         /// <inheritdoc />
@@ -73,10 +100,15 @@ namespace RedditSharp
             HttpResponseMessage response;
             var tries = 0;
             do {
-              await RateLimit.CheckRateLimitAsync(IsOAuth).ConfigureAwait(false);
+              await RateLimiter.CheckRateLimitAsync(IsOAuth).ConfigureAwait(false);
               response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
-              await RateLimit.ReadHeadersAsync(response);
-            } while(!response.IsSuccessStatusCode && tries < maxTries);
+              await RateLimiter.ReadHeadersAsync(response);
+            } while( 
+            //only retry if 500 or 503
+                (response.StatusCode == System.Net.HttpStatusCode.InternalServerError || 
+                 response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                && tries < maxTries
+            );
             if (!response.IsSuccessStatusCode)
               throw new RedditHttpException(response.StatusCode);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -147,7 +179,7 @@ namespace RedditSharp
 
             request.Method = new HttpMethod(method);
             //request.Headers.UserAgent.ParseAdd(UserAgent);
-            request.Headers.TryAddWithoutValidation("User-Agent", $"{UserAgent} - with RedditSharp by meepster23");
+            request.Headers.TryAddWithoutValidation("User-Agent", $"{DefaultUserAgent} - with RedditSharp by meepster23");
             return request;
         }
 

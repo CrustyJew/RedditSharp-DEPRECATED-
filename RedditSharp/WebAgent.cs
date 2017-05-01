@@ -57,19 +57,10 @@ namespace RedditSharp
         }
 
         /// <summary>
-        /// 
+        /// Creates WebAgent with default rate limiter and default useragent.
         /// </summary>
-        /// <param name="userAgent">Optional userAgent string to override default UserAgent</param>
-        /// /// <param name="rateLimiter"><see cref="RateLimitManager"/> that controls the rate limit for this instance of the WebAgent. Defaults to the shared, static rate limiter.</param>
-        public WebAgent(string userAgent = "") {
-            if (string.IsNullOrEmpty(userAgent))
-            {
-                UserAgent = DefaultUserAgent;
-            }
-            else
-            {
-                UserAgent = userAgent;
-            }
+        public WebAgent() {
+            UserAgent = DefaultUserAgent;
             RateLimiter = WebAgent.DefaultRateLimiter;
         }
 

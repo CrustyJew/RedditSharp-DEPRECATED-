@@ -11,6 +11,57 @@ Due to the project being abandoned and the previous owner's refusal to transfer 
 A partial implementation of the [Reddit](http://reddit.com) API. Includes support for many API endpoints, as well as
 LINQ-style paging of results.
 
+Reddit rate limits requests by "user". Users can be either the script itself, or a specific user's login info/token. To handle multiple users and their different rate limits, the best solution is to use a "pool" of connections to track it.
+
+`RefreshTokenWebAgentPool` supplies methods to store and retrieve `IWebAgent`s for users by implementing a cache of `RefreshTokenWebAgent`s that automatically get a new access token when the current one expires.
+
+Recently used `IWebAgent`s are stored in an in-memory cache that uses a GUID as a key, and the `IWebAgent` as the object. The default is to have a sliding expiration set so that if a user isn't actively being used, it will expire the `IWebAgent` out of memory, but still have the details it needs to re-create it when it is next needed.
+
+All details to create a new `IWebAgent` that isn't in the cache, but has been used before, are stored in a private array for the pool so it can easily recreate WebAgents as needed.
+
+It can likely be used in a standard .NET application so long as you use a static variable to store the refernce, but below is the recommended method of usage in a .NET CORE application.
+
+```csharp
+
+public class Startup {
+	...
+	public void ConfigureServices( IServiceCollection services ){
+		...
+		//Configuration object should be defined and loaded already
+		var webAgentPool = new RedditSharp.RefreshTokenWebAgentPool(Configuration["RedditClientID"], Configuration["RedditClientSecret"], Configuration["RedditRedirectURI"])
+            {
+                DefaultRateLimitMode = RedditSharp.RateLimitMode.Burst,
+                DefaultUserAgent = "SnooNotes (by Meepster23)"
+            };
+		services.AddSingleton(webAgentPool); //Important to add as Singleton so multiple instances aren't created
+	}
+}
+
+public class SomeController {
+	private RedditSharp.RefreshTokenWebAgentPool agentPool;
+	
+	public void SomeController( RedditSharp.RefreshTokenWebAgentPool webAgentPool){
+		agentPool = webAgentPool;
+	}
+	
+	public async Task DoSomething(string username){
+		var webAgent =  await agentPool.GetOrCreateWebAgentAsync(user.BannedBy, (uname, uagent, rlimit) =>
+            {
+				//string refreshToken = await usermanager call to get identity and retrieve refresh token;
+				//uname = username for webagent being created
+				//uagent = default useragent for webagent being created
+				//rlimit = default rate limit mode for webagent being created
+				return Task.FromResult<RedditSharp.RefreshTokenPoolEntry>(new RedditSharp.RefreshTokenPoolEntry(uname, refreshToken, rlimit, uagent));
+            }
+		);
+		var reddit = new RedditSharp.Reddit(webAgent, true);
+		//use reddit to make calls as user
+	}
+}
+```
+
+A `BotWebAgent` uses a "script" type app and automatically renew access tokens using a username and password
+
 ```csharp
 var webAgent = new BotWebAgent("BotUsername", "BotPass", "ClientID", "ClientSecret", "RedirectUri");
 //This will check if the access token is about to expire before each request and automatically request a new one for you

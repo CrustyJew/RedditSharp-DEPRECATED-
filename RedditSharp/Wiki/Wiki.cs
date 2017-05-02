@@ -8,24 +8,22 @@ namespace RedditSharp
     /// <summary>
     /// A subreddit wiki.
     /// </summary>
-    public class Wiki
+    public class Wiki : RedditObject
     {
-        private Subreddit Subreddit { get; set; }
-        private Reddit Reddit => Subreddit?.Reddit;
-        private IWebAgent WebAgent => Reddit?.WebAgent;
+        private string SubredditName { get; set; }
 
         #region constants
-        private string GetWikiPageUrl(string page, string version) => $"/r/{Subreddit.Name}/wiki/{page}.json?v={version}";
-        private string GetWikiPagesUrl => $"/r/{Subreddit.Name}/wiki/pages.json";
-        private string WikiPageEditUrl => $"/r/{Subreddit.Name}/api/wiki/edit";
-        private string HideWikiPageUrl => $"/r/{Subreddit.Name}/api/wiki/hide";
-        private string RevertWikiPageUrl => $"/r/{Subreddit.Name}/api/wiki/revert";
-        private string WikiPageAllowEditorAddUrl => $"/r/{Subreddit.Name}/api/wiki/alloweditor/add";
-        private string WikiPageAllowEditorDelUrl => $"/r/{Subreddit.Name}/api/wiki/alloweditor/del";
-        private string WikiPageSettingsUrl(string page) => $"/r/{Subreddit.Name}/wiki/settings/{page}.json";
-        private string WikiRevisionsUrl => $"/r/{Subreddit.Name}/wiki/revisions.json";
-        private string WikiPageRevisionsUrl(string page) => $"/r/{Subreddit.Name}/wiki/revisions/{page}.json";
-        private string WikiPageDiscussionsUrl(string page) => $"/r/{Subreddit.Name}/wiki/discussions/{page}.json";
+        private string GetWikiPageUrl(string page, string version) => $"/r/{SubredditName}/wiki/{page}.json?v={version}";
+        private string GetWikiPagesUrl => $"/r/{SubredditName}/wiki/pages.json";
+        private string WikiPageEditUrl => $"/r/{SubredditName}/api/wiki/edit";
+        private string HideWikiPageUrl => $"/r/{SubredditName}/api/wiki/hide";
+        private string RevertWikiPageUrl => $"/r/{SubredditName}/api/wiki/revert";
+        private string WikiPageAllowEditorAddUrl => $"/r/{SubredditName}/api/wiki/alloweditor/add";
+        private string WikiPageAllowEditorDelUrl => $"/r/{SubredditName}/api/wiki/alloweditor/del";
+        private string WikiPageSettingsUrl(string page) => $"/r/{SubredditName}/wiki/settings/{page}.json";
+        private string WikiRevisionsUrl => $"/r/{SubredditName}/wiki/revisions.json";
+        private string WikiPageRevisionsUrl(string page) => $"/r/{SubredditName}/wiki/revisions/{page}.json";
+        private string WikiPageDiscussionsUrl(string page) => $"/r/{SubredditName}/wiki/discussions/{page}.json";
         #endregion
 
         /// <summary>
@@ -41,14 +39,19 @@ namespace RedditSharp
         /// Get a list of revisions for this wiki.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<WikiPageRevision> GetRevisions(int max = -1) => Listing<WikiPageRevision>.Create(Reddit, WikiRevisionsUrl, max, 100);
+        public Listing<WikiPageRevision> GetRevisions(int max = -1) => Listing<WikiPageRevision>.Create(WebAgent, WikiRevisionsUrl, max, 100);
 
-        #pragma warning disable 1591
-        protected internal Wiki(Subreddit subreddit)
+        /// <summary>
+        /// Creates a new refrence to a subreddit's Wiki.
+        /// </summary>
+        /// <param name="agent"></param>
+        /// <param name="subredditName"></param>
+        public Wiki(IWebAgent agent, string subredditName):base(agent)
         {
-            Subreddit = subreddit;
+            subredditName = System.Text.RegularExpressions.Regex.Replace(subredditName, "(r/|/)", "");
+            SubredditName = subredditName;
         }
-        #pragma warning restore 1591
+
 
         /// <summary>
         /// Get a wiki page
@@ -59,7 +62,7 @@ namespace RedditSharp
         public async Task<WikiPage> GetPageAsync(string page, string version = null)
         {
             var json = await WebAgent.Get(GetWikiPageUrl(page, version)).ConfigureAwait(false);
-            return new WikiPage(Reddit, json["data"]);
+            return new WikiPage(WebAgent, json["data"]);
         }
 
         #region Settings
@@ -72,7 +75,7 @@ namespace RedditSharp
         public async Task<WikiPageSettings> GetPageSettingsAsync(string name)
         {
             var json = await WebAgent.Get(WikiPageSettingsUrl(name)).ConfigureAwait(false);
-            return new WikiPageSettings(Reddit, json["data"]);
+            return new WikiPageSettings(WebAgent, json["data"]);
         }
 
         /// <summary>
@@ -87,8 +90,7 @@ namespace RedditSharp
             {
                 page = name,
                 permlevel = (int)editMode,
-                listed = listed,
-                uh = Reddit.User?.Modhash
+                listed = listed
             }).ConfigureAwait(false);
         }
         #endregion
@@ -100,7 +102,7 @@ namespace RedditSharp
         /// </summary>
         /// <param name="page">wiki page</param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<WikiPageRevision> GetPageRevisions(string page, int max = -1) =>  Listing<WikiPageRevision>.Create(Reddit, WikiPageRevisionsUrl(page), max, 100);
+        public Listing<WikiPageRevision> GetPageRevisions(string page, int max = -1) =>  Listing<WikiPageRevision>.Create(WebAgent, WikiPageRevisionsUrl(page), max, 100);
 
         #endregion
 
@@ -111,7 +113,7 @@ namespace RedditSharp
         /// </summary>
         /// <param name="page"></param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Post> GetPageDiscussions(string page, int max = -1) => Listing<Post>.Create(Reddit, WikiPageDiscussionsUrl(page), max, 100);
+        public Listing<Post> GetPageDiscussions(string page, int max = -1) => Listing<Post>.Create(WebAgent, WikiPageDiscussionsUrl(page), max, 100);
         #endregion
 
         /// <summary>
@@ -126,8 +128,7 @@ namespace RedditSharp
             dynamic param = new
             {
                 content = content,
-                page = page,
-                uh = Reddit.User?.Modhash
+                page = page
             };
             List<string> addParams = new List<string>();
             if (previous != null)
@@ -153,8 +154,7 @@ namespace RedditSharp
             await WebAgent.Post(HideWikiPageUrl, new
             {
                 page = page,
-                revision = revision,
-                uh = Reddit.User?.Modhash
+                revision = revision
             }).ConfigureAwait(false);
         }
 
@@ -168,8 +168,7 @@ namespace RedditSharp
             await WebAgent.Post(RevertWikiPageUrl, new
             {
                 page = page,
-                revision = revision,
-                uh = Reddit.User?.Modhash
+                revision = revision
             }).ConfigureAwait(false);
         }
 
@@ -184,8 +183,7 @@ namespace RedditSharp
             await WebAgent.Post(allow ? WikiPageAllowEditorAddUrl : WikiPageAllowEditorDelUrl, new
             {
                 page = page,
-                username = username,
-                uh = Reddit.User?.Modhash
+                username = username
             }).ConfigureAwait(false);
         }
 

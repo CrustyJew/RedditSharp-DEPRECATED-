@@ -30,16 +30,26 @@ namespace RedditSharp
         /// </summary>
         None
     }
-
+    /// <summary>
+    /// Class to manage API rate limiting
+    /// </summary>
     public class RateLimitManager
     {
         // See https://github.com/reddit/reddit/wiki/API for more details.
+        /// <summary>
+        /// Current number of estimated used requests
+        /// </summary>
         public int Used { get; private set; }
+        /// <summary>
+        /// Current estimate of remaining requests
+        /// </summary>
         public int Remaining { get; private set; }
-        // Approximate seconds until the rate limit is reset.
+        /// <summary>
+        /// Approximate seconds until the rate limit is reset.
+        /// </summary> 
         public DateTimeOffset Reset { get; private set; }
 
-        /// </summary>
+        /// <summary>
         /// It is strongly advised that you leave this set to Burst or Pace. Reddit bans excessive
         /// requests with extreme predjudice.
         /// </summary>
@@ -60,13 +70,21 @@ namespace RedditSharp
 
         private SemaphoreSlim rateLimitLock;
 
+        /// <summary>
+        /// Create new RateLimitManager. Defaults to Burst RateLimitMode
+        /// </summary>
+        /// <param name="mode">Defaults to Burst RateLimitMode</param>
         public RateLimitManager(RateLimitMode mode = RateLimitMode.Burst)
         {
             rateLimitLock = new SemaphoreSlim(1, 1);
             Reset = DateTimeOffset.UtcNow;
             Mode = mode;
         }
-
+        /// <summary>
+        /// Locks and awaits until you can make another request per RateLimitMode
+        /// </summary>
+        /// <param name="oauth"></param>
+        /// <returns></returns>
         public async Task CheckRateLimitAsync(bool oauth)
         {
             await rateLimitLock.WaitAsync().ConfigureAwait(false);
@@ -136,7 +154,7 @@ namespace RedditSharp
             LastRequest = requestTime;
         }
 
-        public async Task ReadHeadersAsync(HttpResponseMessage response)
+        internal async Task ReadHeadersAsync(HttpResponseMessage response)
         {
             await rateLimitLock.WaitAsync().ConfigureAwait(false);
             try

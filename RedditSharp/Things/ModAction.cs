@@ -11,7 +11,7 @@ namespace RedditSharp.Things
     public class ModAction : Thing
     {
         #pragma warning disable 1591
-        public ModAction(Reddit reddit, JToken json) : base(reddit, json) {
+        public ModAction(IWebAgent agent, JToken json) : base(agent, json) {
         }
         #pragma warning restore 1591
 
@@ -98,17 +98,17 @@ namespace RedditSharp.Things
         /// Author of the item against which this moderation action was performed.
         /// </summary>
         //TODO discuss
-        public async Task<RedditUser> GetTargetAuthorAsync() => 
-            await Reddit.GetUserAsync(TargetAuthorName).ConfigureAwait(false);
+        public Task<RedditUser> GetTargetAuthorAsync() => 
+            RedditUser.GetUserAsync(WebAgent, TargetAuthorName);
 
         /// <summary>
         /// Item against which this moderation action was performed.
         /// </summary>
         //TODO discuss
-        public async Task<Thing> GetTargetThing() =>
-            await Reddit.GetThingByFullnameAsync(TargetThingFullname).ConfigureAwait(false);
+        public Task<Thing> GetTargetThing() =>
+            Helpers.GetThingByFullnameAsync(WebAgent,TargetThingFullname);
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"];
    }
 }

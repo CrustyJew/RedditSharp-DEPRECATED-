@@ -17,7 +17,7 @@ namespace RedditSharp
         /// <param name="cssLink">Css link.</param>
         /// <param name="name">Name of the image.</param>
         public SubredditImage(SubredditStyle subredditStyle,
-            string cssLink, string name) : base(subredditStyle?.Reddit)
+            string cssLink, string name) : base(subredditStyle?.WebAgent)
         {
             SubredditStyle = subredditStyle;
             Name = name;
@@ -78,7 +78,6 @@ namespace RedditSharp
             await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
-                uh = Reddit.User?.Modhash,
                 r = SubredditStyle.Subreddit.Name
             }).ConfigureAwait(false);
             SubredditStyle.Images.Remove(this);
@@ -93,7 +92,6 @@ namespace RedditSharp
             await WebAgent.Post(DeleteImageUrl, new
             {
                 img_name = Name,
-                uh = Reddit.User?.Modhash,
                 r = SubredditStyle.Subreddit.Name
             }).ConfigureAwait(false);
             SubredditStyle.Images.Remove(this);

@@ -14,7 +14,7 @@ namespace RedditSharp.Things
     public class VotableThing : CreatedThing
     {
 #pragma warning disable 1591
-        public VotableThing(Reddit reddit, JToken json) : base(reddit, json) {
+        public VotableThing(IWebAgent agent, JToken json) : base(agent, json) {
         }
 
         public enum VoteType
@@ -237,8 +237,7 @@ namespace RedditSharp.Things
             var data = await WebAgent.Post(VoteUrl, new
             {
                 dir = (int)type,
-                id = FullName,
-                uh = Reddit.User?.Modhash
+                id = FullName
             }).ConfigureAwait(false);
 
             if (Liked == true) Upvotes--;
@@ -259,8 +258,7 @@ namespace RedditSharp.Things
         {
             await WebAgent.Post(SaveUrl, new
             {
-                id = FullName,
-                uh = Reddit.User?.Modhash
+                id = FullName
             }).ConfigureAwait(false);
             Saved = true;
         }
@@ -272,8 +270,7 @@ namespace RedditSharp.Things
         {
             await WebAgent.Post(UnsaveUrl, new
             {
-                id = FullName,
-                uh = Reddit.User?.Modhash
+                id = FullName
             }).ConfigureAwait(false);
             Saved = false;
         }
@@ -287,8 +284,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(VoteUrl, new
             {
                 dir = 0,
-                id = FullName,
-                uh = Reddit.User?.Modhash
+                id = FullName
             }).ConfigureAwait(false);
         }
 
@@ -322,8 +318,7 @@ namespace RedditSharp.Things
                 api_type = "json",
                 reason = reportReason,
                 other_reason = otherReason ?? "",
-                thing_id = FullName,
-                uh = Reddit.User?.Modhash
+                thing_id = FullName
             }).ConfigureAwait(false);
         }
 
@@ -333,8 +328,6 @@ namespace RedditSharp.Things
         /// <param name="distinguishType">Type you want to distinguish <see cref="DistinguishType"/></param>
         public async Task DistinguishAsync(DistinguishType distinguishType)
         {
-            if (Reddit.User == null)
-                throw new Exception("No user logged in.");
 
             string how;
             switch (distinguishType)
@@ -355,8 +348,7 @@ namespace RedditSharp.Things
             var json = await WebAgent.Post(DistinguishUrl, new
             {
                 how,
-                id = Id,
-                uh = Reddit.User?.Modhash
+                id = Id
             }).ConfigureAwait(false);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");
@@ -395,8 +387,7 @@ namespace RedditSharp.Things
             await WebAgent.Post(RemoveUrl, new
             {
                 id = FullName,
-                spam = spam,
-                uh = Reddit.User?.Modhash
+                spam = spam
             }).ConfigureAwait(false);
         }
         #pragma warning restore 1591

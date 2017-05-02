@@ -25,7 +25,7 @@ namespace RedditSharp
         /// Get the subreddit settings page.
         /// </summary>
         /// <param name="subreddit">A subreddit.</param>
-        public SubredditSettings(Subreddit subreddit) : base(subreddit?.Reddit)
+        public SubredditSettings(Subreddit subreddit) : base(subreddit?.WebAgent)
         {
             Subreddit = subreddit;
             // Default settings, for use when reduced information is given
@@ -275,7 +275,6 @@ namespace RedditSharp
                 sr = Subreddit.FullName,
                 title = Title,
                 type,
-                uh = Reddit.User?.Modhash,
                 wiki_edit_age = WikiEditAge,
                 wiki_edit_karma = WikiEditKarma,
                 wikimode,
@@ -293,7 +292,6 @@ namespace RedditSharp
         {
             await WebAgent.Post(DeleteHeaderImageUrl, new
             {
-                uh = Reddit.User?.Modhash,
                 r = Subreddit.Name
             }).ConfigureAwait(false);
         }

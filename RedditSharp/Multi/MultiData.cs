@@ -23,13 +23,13 @@ namespace RedditSharp.Multi
         /// <summary>
         /// Creates an implementation of MultiData
         /// </summary>
-        /// <param name="reddit">Reddit Object to use</param>
+        /// <param name="agent">IWebAgent Object to use</param>
         /// <param name="json">Json Token containing the information for the Multi</param>
         /// <param name="subs">Whether there are subs</param>
-        protected internal MultiData(Reddit reddit, JToken json, bool subs = true)
+        protected internal MultiData(IWebAgent agent, JToken json, bool subs = true)
         {
-            Data = new MData(reddit, json["data"], subs);
-            reddit.PopulateObject(json, this);
+            Data = new MData(agent, json["data"], subs);
+            Helpers.PopulateObject(json, this);
         }
     }
 

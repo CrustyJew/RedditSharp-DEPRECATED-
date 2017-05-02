@@ -25,11 +25,14 @@ namespace RedditSharp
         /// <summary>
         /// A web agent using reddit's OAuth interface.
         /// </summary>
-        /// <param name="username">The username.</param>
-        /// <param name="password">The user's password.</param>
+        /// <param name="refreshToken">The users refresh token.</param>
         /// <param name="clientID">Granted by reddit as part of app.</param>
         /// <param name="clientSecret">Granted by reddit as part of app.</param>
         /// <param name="redirectURI">Selected as part of app. Reddit will send users back here.</param>
+        /// <param name="userAgentString">Defaults to Global Default User Agent set on static class <see cref="WebAgent"/></param>
+        /// <param name="accessToken">currently available access token. Will get a new one immediately upon agent use if not provided</param>
+        /// <param name="validTo">UTC datetime that the access token is valid to. If not provided, defaults to expired and will get a new token</param>
+        /// <param name="rateLimiter">Defaults to Global Default Rate Limit Manager set on static class <see cref="WebAgent"/>. This really really should be set manually and is handled for you by <see cref="RefreshTokenWebAgentPool"/>.</param>
         public RefreshTokenWebAgent(string refreshToken, string clientID, string clientSecret, string redirectURI, string userAgentString = "", string accessToken = "", DateTime? validTo = null, RateLimitManager rateLimiter = null):base(accessToken,rateLimiter,userAgentString)
         {
             RefreshToken = refreshToken;

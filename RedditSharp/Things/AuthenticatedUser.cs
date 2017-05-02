@@ -10,7 +10,7 @@ namespace RedditSharp.Things
     public class AuthenticatedUser : RedditUser
     {
 #pragma warning disable 1591
-        public AuthenticatedUser(Reddit reddit, JToken json) : base (reddit, json) {
+        public AuthenticatedUser(IWebAgent agent, JToken json) : base (agent, json) {
         }
 #pragma warning restore 1591
 
@@ -24,49 +24,49 @@ namespace RedditSharp.Things
         private const string SentUrl = "/message/sent.json";
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) {
+        internal override JToken GetJsonData(JToken json) {
             return json["name"] == null ? json["data"] : json;
         }
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of subreddits moderated by the logged in user.
         /// </summary>
-        public Listing<Subreddit> GetModeratorSubreddits(int max = -1) => Listing<Subreddit>.Create(Reddit, ModeratorUrl, max, 100);
+        public Listing<Subreddit> GetModeratorSubreddits(int max = -1) => Listing<Subreddit>.Create(WebAgent, ModeratorUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unread messages.
         /// </summary>
-        public Listing<Thing> GetUnreadMessages(int max = -1) => Listing<Thing>.Create(Reddit, UnreadMessagesUrl, max, 100);
+        public Listing<Thing> GetUnreadMessages(int max = -1) => Listing<Thing>.Create(WebAgent, UnreadMessagesUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of items in the Moderation Queue.
         /// </summary>
-        public Listing<VotableThing> GetModerationQueue(int max = -1) => Listing<VotableThing>.Create(Reddit, ModQueueUrl, max, 100);
+        public Listing<VotableThing> GetModerationQueue(int max = -1) => Listing<VotableThing>.Create(WebAgent, ModQueueUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of unmoderated Posts.
         /// </summary>
-        public Listing<Post> GetUnmoderatedLinks(int max = -1) => Listing<Post>.Create(Reddit, UnmoderatedUrl, max, 100);
+        public Listing<Post> GetUnmoderatedLinks(int max = -1) => Listing<Post>.Create(WebAgent, UnmoderatedUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of (old style) modmail.
         /// </summary>
-        public Listing<PrivateMessage> GetModMail(int max = -1) => Listing<PrivateMessage>.Create(Reddit, ModMailUrl, max, 100);
+        public Listing<PrivateMessage> GetModMail(int max = -1) => Listing<PrivateMessage>.Create(WebAgent, ModMailUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of private messages.
         /// </summary>
-        public Listing<PrivateMessage> GetPrivateMessages(int max = -1) => Listing<PrivateMessage>.Create(Reddit, MessagesUrl, max, 100);
+        public Listing<PrivateMessage> GetPrivateMessages(int max = -1) => Listing<PrivateMessage>.Create(WebAgent, MessagesUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of messages in the inbox.
         /// </summary>
-        public Listing<PrivateMessage> GetInbox(int max = -1) => Listing<PrivateMessage>.Create(Reddit, InboxUrl, max, 100);
+        public Listing<PrivateMessage> GetInbox(int max = -1) => Listing<PrivateMessage>.Create(WebAgent, InboxUrl, max, 100);
 
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of sent messages.
         /// </summary>
-        public Listing<PrivateMessage> GetSent(int max = -1) => Listing<PrivateMessage>.Create(Reddit, SentUrl, max, 100);
+        public Listing<PrivateMessage> GetSent(int max = -1) => Listing<PrivateMessage>.Create(WebAgent, SentUrl, max, 100);
 
         /// <summary>
         /// User modhash.

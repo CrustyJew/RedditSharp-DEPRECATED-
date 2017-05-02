@@ -28,7 +28,7 @@ namespace RedditSharp.Things
             All = Update | Manage | Settings | Edit | Close
         }
 
-        public LiveUpdateEvent(Reddit reddit, JToken json) : base(reddit, json) {
+        public LiveUpdateEvent(IWebAgent agent, JToken json) : base(agent, json) {
             FullName = Name;
             Name = Name.Replace("LiveUpdateEvent_", "");
         }
@@ -153,14 +153,11 @@ namespace RedditSharp.Things
         /// <param name="update">Update to strike</param>
         public async Task<bool> DeleteUpdateAsync(LiveUpdate update)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreateRequest(DeleteUpdateUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
-                id = update.FullName,
-                uh = Reddit.User?.Modhash
+                id = update.FullName
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -242,14 +239,14 @@ namespace RedditSharp.Things
         /// </summary>
         /// <returns></returns>
         public Listing<Post> GetDiscussions() =>
-            new Listing<Post>(Reddit, DiscussionsUrl);
+            new Listing<Post>(WebAgent, DiscussionsUrl);
 
         /// <summary>
         /// Get a list of updates to this live event.
         /// </summary>
         /// <returns></returns>
         public Listing<LiveUpdate> GetThread() =>
-            new Listing<LiveUpdate>(Reddit, GetUrl);
+            new Listing<LiveUpdate>(WebAgent, GetUrl);
 
         /// <summary>
         /// Get invited contributors.
@@ -269,8 +266,6 @@ namespace RedditSharp.Things
         /// <param name="permissions">permissions.</param>
         public async Task<bool> InviteContributorAsync(string userName, LiveUpdateEventPermission permissions)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var perms = GetPermissionsString(permissions);
             var request = WebAgent.CreateRequest(InviteContributorUrl, "POST");
             WebAgent.WritePostBody(request, new
@@ -278,8 +273,7 @@ namespace RedditSharp.Things
                 api_type = "json",
                 name = userName,
                 permissions = perms,
-                type = "liveupdate_contributor_invite",
-                uh = Reddit.User?.Modhash,
+                type = "liveupdate_contributor_invite"
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -299,15 +293,11 @@ namespace RedditSharp.Things
         /// <param name="user">RedditUser</param>
         public async Task<bool> RemoveContributorAsync(RedditUser user)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
-
             var request = WebAgent.CreateRequest(RemoveContributorUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
-                id = user.Kind + "_" + user.Id,
-                uh = Reddit.User?.Modhash
+                id = user.Kind + "_" + user.Id
             });
             var response  = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
@@ -321,10 +311,9 @@ namespace RedditSharp.Things
         /// Remove a contributor from the live thread.
         /// </summary>
         /// <param name="userName">reddit username.</param>
-        public async Task<bool> RemoveContributorAsync(string userName)
+        public Task<bool> RemoveContributorAsync(string userName)
         {
-            var user = await Reddit.GetUserAsync(userName).ConfigureAwait(false);
-            return await RemoveContributorAsync(userName).ConfigureAwait(false);
+            return RemoveContributorAsync(userName);
         }
 
         /// <summary>
@@ -352,15 +341,12 @@ namespace RedditSharp.Things
                 }
                 throw new InvalidOperationException(message);
             }
-
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
+            
             var request = WebAgent.CreateRequest(ReportUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
-                type = reason,
-                uh = Reddit.User?.Modhash
+                type = reason
             });
 
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
@@ -376,15 +362,12 @@ namespace RedditSharp.Things
         /// <param name="user">reddit user.</param>
         public async Task<bool> RevokeContributorInviteAsync(RedditUser user)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
 
             var request = WebAgent.CreateRequest(RevokeContributorInviteUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
-                id = user.Kind + "_" + user.Id,
-                uh = Reddit.User?.Modhash
+                id = RedditUser.KindPrefix + user.Id
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -399,8 +382,8 @@ namespace RedditSharp.Things
         /// <param name="name">reddit username</param>
         public async Task<bool> RevokeContributorInviteAsync(string name)
         {
-            var user = await Reddit.GetUserAsync(name).ConfigureAwait(false);
-            return await RevokeContributorInviteAsync(user).ConfigureAwait(false);
+            var redditUser = await RedditUser.GetUserAsync(WebAgent, name);
+            return await RevokeContributorInviteAsync(redditUser).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -420,16 +403,13 @@ namespace RedditSharp.Things
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetContributorPermissions(string userName, LiveUpdateEventPermission permissions)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreateRequest(SetContributorPermissionUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 name = userName,
                 type = "liveupdate_contributor",
-                permissions = GetPermissionsString(permissions),
-                uh = Reddit.User?.Modhash
+                permissions = GetPermissionsString(permissions)
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -455,16 +435,13 @@ namespace RedditSharp.Things
         /// <param name="permissions">Permissions to set.</param>
         public async Task<bool> SetInvitedContributorPermissionsAsync(string userName, LiveUpdateEventPermission permissions)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreateRequest(SetContributorPermissionUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
                 name = userName,
                 type = "liveupdate_contributor_invite",
-                permissions = GetPermissionsString(permissions),
-                uh = Reddit.User?.Modhash
+                permissions = GetPermissionsString(permissions)
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -488,14 +465,11 @@ namespace RedditSharp.Things
         /// <param name="fullName">Full name of the update to strike</param>
         public async Task<bool> StrikeUpdateAsync(string fullName)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreateRequest(StrikeUpdateUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
-                id = fullName,
-                uh = Reddit.User?.Modhash
+                id = fullName
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -510,14 +484,11 @@ namespace RedditSharp.Things
         /// <param name="markdown">markdown of the update</param>
         public async Task<bool> UpdateAsync(string markdown)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var request = WebAgent.CreateRequest(UpdateUrl, "POST");
             WebAgent.WritePostBody(request, new
             {
                 api_type = "json",
-                body = markdown,
-                uh = Reddit.User?.Modhash
+                body = markdown
             });
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)

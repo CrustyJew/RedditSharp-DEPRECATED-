@@ -16,7 +16,7 @@ namespace RedditSharp
     {
         #region Constant Urls
 
-        private const string UserInfoUrl = "/user/{0}/about.json";
+
         private const string MeUrl = "/api/me.json";
         private const string OAuthMeUrl = "/api/v1/me.json";
         private const string SubredditAboutUrl = "/r/{0}/about.json";
@@ -59,14 +59,12 @@ namespace RedditSharp
             set { WebAgent.RateLimiter.Mode = value; }
         }
 
-        internal JsonSerializer JsonSerializer { get; }
-
         /// <summary>
         /// Gets the FrontPage using the current Reddit instance.
         /// </summary>
         public Subreddit FrontPage
         {
-            get { return Subreddit.GetFrontPage(this); }
+            get { return Subreddit.GetFrontPage(WebAgent); }
         }
 
         /// <summary>
@@ -74,7 +72,7 @@ namespace RedditSharp
         /// </summary>
         public Subreddit RSlashAll
         {
-            get { return Subreddit.GetRSlashAll(this); }
+            get { return Subreddit.GetRSlashAll(WebAgent); }
         }
 
 
@@ -85,12 +83,7 @@ namespace RedditSharp
         public Reddit(bool useSsl)
         {
             DefaultWebAgent defaultAgent = new DefaultWebAgent();
-
-            JsonSerializer = JsonSerializer.Create(new JsonSerializerSettings
-            {
-                CheckAdditionalContent = false,
-                DefaultValueHandling = DefaultValueHandling.Ignore
-            });
+            
             DefaultWebAgent.Protocol = useSsl ? "https" : "http";
             WebAgent = defaultAgent;
             CaptchaSolver = new ConsoleCaptchaSolver();
@@ -137,25 +130,8 @@ namespace RedditSharp
         public Reddit(IWebAgent agent, bool initUser)
         {
             WebAgent = agent;
-            JsonSerializer = JsonSerializer.Create(new JsonSerializerSettings
-            {
-                CheckAdditionalContent = false,
-                DefaultValueHandling = DefaultValueHandling.Ignore
-            });
             CaptchaSolver = new ConsoleCaptchaSolver();
             if (initUser) Task.Run(InitOrUpdateUserAsync).Wait();
-        }
-
-        internal void PopulateObject(JToken json, object obj)
-        {
-            if (json == null)
-                throw new ArgumentNullException(nameof(json));
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-            using (var reader = json.CreateReader())
-            {
-                JsonSerializer.Populate(reader, obj);
-            }
         }
 
         /// <summary>
@@ -163,10 +139,9 @@ namespace RedditSharp
         /// </summary>
         /// <param name="name">user name</param>
         /// <returns></returns>
-        public async Task<RedditUser> GetUserAsync(string name)
+        public Task<RedditUser> GetUserAsync(string name)
         {
-            var json = await WebAgent.Get(string.Format(UserInfoUrl, name)).ConfigureAwait(false);
-            return new RedditUser(this, json);
+            return RedditUser.GetUserAsync(WebAgent, name);
         }
 
         /// <summary>
@@ -177,7 +152,7 @@ namespace RedditSharp
         public async Task InitOrUpdateUserAsync()
         {
             var json = await WebAgent.Get(!string.IsNullOrEmpty(WebAgent.AccessToken) || WebAgent.GetType() == typeof(RefreshTokenWebAgent) ? OAuthMeUrl : MeUrl).ConfigureAwait(false);
-            User = new AuthenticatedUser(this, json);
+            User = new AuthenticatedUser(WebAgent, json);
         }
 
         /// <summary>
@@ -185,10 +160,9 @@ namespace RedditSharp
         /// </summary>
         /// <param name="name">subreddit name with or without preceding /r/</param>
         /// <returns></returns>
-        public async Task<Subreddit> GetSubredditAsync(string name)
+        public Task<Subreddit> GetSubredditAsync(string name)
         {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
-            return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name)).ConfigureAwait(false);
+            return Subreddit.GetByNameAsync(WebAgent, name);
         }
 
         /// <summary>
@@ -201,29 +175,10 @@ namespace RedditSharp
             if (!domain.StartsWith("http://") && !domain.StartsWith("https://"))
                 domain = "http://" + domain;
             var uri = new Uri(domain);
-            return new Domain(this, uri);
+            return new Domain(WebAgent, uri);
         }
 
-        /// <summary>
-        /// Get a <see cref="JToken"/> from a url.
-        /// </summary>
-        /// <param name="uri">uri to fetch</param>
-        /// <param name="isLive">bool indicating if it's a live thread or not</param>
-        /// <returns></returns>
-        public async Task<JToken> GetTokenAsync(Uri uri, bool isLive = false)
-        {
-            var url = uri.AbsoluteUri;
-
-            if (url.EndsWith("/"))
-                url = url.Remove(url.Length - 1);
-
-            var json = await WebAgent.Get(string.Format(GetPostUrl, url));
-
-            if (isLive)
-                return json;
-            else
-                return json[0]["data"]["children"].First;
-        }
+        
 
         /// <summary>
         /// Get a <see cref="Post"/> by uri.
@@ -232,9 +187,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<Post> GetPostAsync(Uri uri)
         {
-            if ((!String.IsNullOrEmpty(WebAgent.AccessToken) || WebAgent.GetType() == typeof(RefreshTokenWebAgent)) && uri.AbsoluteUri.StartsWith("https://www.reddit.com"))
-                uri = new Uri(uri.AbsoluteUri.Replace("https://www.reddit.com", "https://oauth.reddit.com"));
-            return new Post(this, await GetTokenAsync(uri).ConfigureAwait(false));
+            return new Post(WebAgent, await Helpers.GetTokenAsync(WebAgent, uri).ConfigureAwait(false));
         }
 
         /// <summary>
@@ -280,8 +233,8 @@ namespace RedditSharp
             if (!uri.AbsoluteUri.EndsWith("about"))
                 uri = new Uri(uri.AbsoluteUri + "/about");
 
-            var token = await GetTokenAsync(uri).ConfigureAwait(false);
-            return new LiveUpdateEvent(this, token);
+            var token = await Helpers.GetTokenAsync(WebAgent, uri).ConfigureAwait(false);
+            return new LiveUpdateEvent(WebAgent, token);
         }
 
 
@@ -355,7 +308,7 @@ namespace RedditSharp
                 passwd2 = passwd,
                 user = userName
             }).ConfigureAwait(false);
-            return new AuthenticatedUser(this, json);
+            return new AuthenticatedUser(WebAgent, json);
             // TODO: Error
         }
 
@@ -364,10 +317,9 @@ namespace RedditSharp
         /// </summary>
         /// <param name="fullname"></param>
         /// <returns></returns>
-        public async Task<Thing> GetThingByFullnameAsync(string fullname)
+        public Task<Thing> GetThingByFullnameAsync(string fullname)
         {
-            var json = await WebAgent.Get(string.Format(GetThingUrl, fullname)).ConfigureAwait(false);
-            return Thing.Parse(this, json["data"]["children"][0]);
+            return Helpers.GetThingByFullnameAsync(WebAgent, fullname);
         }
 
         /// <summary>
@@ -397,8 +349,8 @@ namespace RedditSharp
         {
             var url = string.Format(GetPostUrl, uri.AbsoluteUri);
             var json = await WebAgent.Get(url).ConfigureAwait(false);
-            var sender = new Post(this, json[0]["data"]["children"][0]);
-            return new Comment(this, json[1]["data"]["children"][0], sender);
+            var sender = new Post(WebAgent, json[0]["data"]["children"][0]);
+            return new Comment(WebAgent, json[1]["data"]["children"][0], sender);
         }
 
         /// <summary>
@@ -426,7 +378,7 @@ namespace RedditSharp
         {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-            return Listing<T>.Create(this, string.Format(SearchUrl, query, sort, time), max, 100);
+            return Listing<T>.Create(this.WebAgent, string.Format(SearchUrl, query, sort, time), max, 100);
         }
 
         /// <summary>
@@ -450,7 +402,7 @@ namespace RedditSharp
             var toUnix = (to - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
 
             string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
-            return Listing<T>.Create(this, string.Format(SearchUrl, searchQuery, sort, time), max, 100);
+            return Listing<T>.Create(this.WebAgent, string.Format(SearchUrl, searchQuery, sort, time), max, 100);
         }
 
 
@@ -460,48 +412,34 @@ namespace RedditSharp
         /// Returns a Listing of newly created subreddits.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetNewSubreddits(int max = -1) => Listing<Subreddit>.Create(this, NewSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetNewSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, NewSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns a Listing of the most popular subreddits.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetPopularSubreddits(int max = -1) => Listing<Subreddit>.Create(this, PopularSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetPopularSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, PopularSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns a Listing of Gold-only subreddits. This endpoint will not return anything if the authenticated Reddit account does not currently have gold.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetGoldSubreddits(int max = -1) => Listing<Subreddit>.Create(this, GoldSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetGoldSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, GoldSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns the Listing of default subreddits.
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> GetDefaultSubreddits(int max = -1) => Listing<Subreddit>.Create(this, DefaultSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetDefaultSubreddits(int max = -1) => Listing<Subreddit>.Create(this.WebAgent, DefaultSubredditsUrl, max, 100);
 
         /// <summary>
         /// Returns the Listing of subreddits related to a query.
         /// </summary>
         /// <param name="query">Search query</param>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
-        public Listing<Subreddit> SearchSubreddits(string query, int max = -1) => Listing<Subreddit>.Create(this, string.Format(SearchSubredditsUrl, query), max, 100);
+        public Listing<Subreddit> SearchSubreddits(string query, int max = -1) => Listing<Subreddit>.Create(this.WebAgent, string.Format(SearchSubredditsUrl, query), max, 100);
 
         #endregion SubredditSearching
 
-        #region Helpers
-
-        /// <summary>
-        /// Get a Thing.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        protected async internal Task<T> GetThingAsync<T>(string url) where T : Thing
-        {
-            var json = await WebAgent.Get(url).ConfigureAwait(false);
-            return Thing.Parse<T>(this, json);
-        }
-        #endregion
     }
 }

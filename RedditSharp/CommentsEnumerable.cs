@@ -14,7 +14,7 @@ namespace RedditSharp
     public class CommentsEnumarable : IAsyncEnumerable<Comment>
     {
         private Post post;
-        private Reddit reddit;
+        private IWebAgent agent;
         private int limit;
 
         /// <summary>
@@ -22,13 +22,13 @@ namespace RedditSharp
         /// This will result in multiple requests for larger comment trees as it will resolve all <see cref="More"/> objects
         /// it encounters.
         /// </summary>
-        /// <param name="reddit">Contains WebAgent necessary for requests</param>
+        /// <param name="agent"> WebAgent necessary for requests</param>
         /// <param name="post">The <see cref="Post"/> of the comments section to enumerate</param>
         /// <param name="limitPerRequest">Initial request size, ignored by the MoreChildren endpoint</param>
-        public CommentsEnumarable(Reddit reddit, Post post, int limitPerRequest = 0)
+        public CommentsEnumarable(IWebAgent agent, Post post, int limitPerRequest = 0)
         {
             this.post = post;
-            this.reddit = reddit;
+            this.agent = agent;
             limit = limitPerRequest;
         }
         /// <summary>
@@ -37,7 +37,7 @@ namespace RedditSharp
         /// <returns></returns>
         public IAsyncEnumerator<Comment> GetEnumerator()
         {
-            return new CommentsEnumerator(reddit, post, limit);
+            return new CommentsEnumerator(agent, post, limit);
         }
 
         private class CommentsEnumerator : IAsyncEnumerator<Comment>
@@ -45,18 +45,18 @@ namespace RedditSharp
             private const string GetCommentsUrl = "/comments/{0}.json";
 
             private Post post;
-            private Reddit reddit;
+            private IWebAgent agent;
             private int limit;
             private List<More> existingMores;
             private IReadOnlyList<Comment> currentBranch;
             private int currentIndex;
 
-            public CommentsEnumerator(Reddit reddit, Post post, int limitPerRequest = 0)
+            public CommentsEnumerator(IWebAgent agent, Post post, int limitPerRequest = 0)
             {
                 existingMores = new List<Things.More>();
                 currentIndex = -1;
                 this.post = post;
-                this.reddit = reddit;
+                this.agent = agent;
                 limit = limitPerRequest;
             }
 
@@ -121,20 +121,20 @@ namespace RedditSharp
                     var query = "limit=" + limit;
                     url = string.Format("{0}?{1}", url, query);
                 }
-                var json = await reddit.WebAgent.Get(url).ConfigureAwait(false);
+                var json = await agent.Get(url).ConfigureAwait(false);
                 var postJson = json.Last()["data"]["children"];
 
                 List<Comment> retrieved = new List<Things.Comment>();
                 foreach (var item in postJson)
                 {
-                    Comment newComment = new Comment(reddit, item, post);
+                    Comment newComment = new Comment(agent, item, post);
                     if (newComment.Kind != "more")
                     {
                         retrieved.Add(newComment);
                     }
                     else
                     {
-                        existingMores.Add(new More(reddit, item));
+                        existingMores.Add(new More(agent, item));
                     }
                 }
                 currentBranch = retrieved;

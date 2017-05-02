@@ -29,7 +29,7 @@ namespace RedditSharp.Things
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
 
         #pragma warning disable 1591
-        public Post(Reddit reddit, JToken json) : base(reddit, json)
+        public Post(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
         #pragma warning restore 1591
@@ -115,14 +115,14 @@ namespace RedditSharp.Things
         public string SubredditName { get; private set; }
 
         /// <summary>
-        /// Parent subreddit.
+        /// <inheritdoc />
         /// </summary>
-        [JsonIgnore]
-        public Subreddit Subreddit =>
-          Task.Run(async () =>
-          {
-              return await Reddit.GetSubredditAsync("/r/" + SubredditName).ConfigureAwait(false);
-          }).Result;
+        public override string Kind { get { return "t3"; } }
+
+        /// <summary>
+        /// Prefix for fullname. Includes trailing underscore
+        /// </summary>
+        public static string KindPrefix { get { return "t3_"; } }
 
         /// <summary>
         /// Post uri.
@@ -132,36 +132,38 @@ namespace RedditSharp.Things
         public Uri Url { get; private set; }
 
         /// <summary>
+        /// Returns the parent <see cref="Subreddit"/> for this post
+        /// </summary>
+        /// <returns></returns>
+        public Task<Subreddit> GetSubredditAsync()
+        {
+            return Subreddit.GetByNameAsync(WebAgent, SubredditName);
+        }
+
+        /// <summary>
         /// Comment on this post.
         /// </summary>
         /// <param name="message">Markdown text.</param>
         /// <returns></returns>
         public async Task<Comment> CommentAsync(string message)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             var json = await WebAgent.Post(CommentUrl, new
             {
                 text = message,
                 thing_id = FullName,
-                uh = Reddit.User?.Modhash,
                 api_type = "json"
             }).ConfigureAwait(false);
             if (json["json"]["ratelimit"] != null)
                 throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-            return new Comment(Reddit, json["json"]["data"]["things"][0], this);
+            return new Comment(WebAgent, json["json"]["data"]["things"][0], this);
         }
 
         private async Task<JToken> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
-
              return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
-                state = value,
-                uh = Reddit.User?.Modhash
+                state = value
             }).ConfigureAwait(false);
         }
 
@@ -203,8 +205,6 @@ namespace RedditSharp.Things
         /// <param name="newText">The text to replace the post's contents</param>
         public async Task EditTextAsync(string newText)
         {
-            if (Reddit.User == null)
-                throw new Exception("No user logged in.");
             if (!IsSelfPost)
                 throw new Exception("Submission to edit is not a self-post.");
 
@@ -212,8 +212,7 @@ namespace RedditSharp.Things
             {
                 api_type = "json",
                 text = newText,
-                thing_id = FullName,
-                uh = Reddit.User?.Modhash
+                thing_id = FullName
             }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
@@ -222,28 +221,24 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// Update this post.
+        /// Updates data retrieved for this post.
         /// </summary>
-        public async Task UpdateAsync() => Reddit.PopulateObject(GetJsonData(await Reddit.GetTokenAsync(Url)), this);
+        public async Task UpdateAsync() => Helpers.PopulateObject(GetJsonData(await Helpers.GetTokenAsync(WebAgent,Url)), this);
 
         /// <summary>
-        /// Sets your claim
+        /// Sets your flair
         /// </summary>
         /// <param name="flairText">Text to set your flair</param>
         /// <param name="flairClass">class of the flair</param>
         public async Task SetFlairAsync(string flairText, string flairClass)
         {
-            if (Reddit.User == null)
-                throw new Exception("No user logged in.");
-
+            //TODO Unit test
             await WebAgent.Post(SetFlairUrl, new
             {
                 api_type = "json",
                 css_class = flairClass,
                 link = FullName,
-                name = Reddit.User.Name,
-                text = flairText,
-                uh = Reddit.User?.Modhash
+                text = flairText
             }).ConfigureAwait(false);
             LinkFlairText = flairText;
         }
@@ -267,7 +262,7 @@ namespace RedditSharp.Things
             var comments = new List<Comment>();
             foreach (var comment in postJson)
             {
-                Comment newComment = new Comment(Reddit, comment, this);
+                Comment newComment = new Comment(WebAgent, comment, this);
                 if (newComment.Kind != "more")
                     comments.Add(newComment);
             }
@@ -294,14 +289,14 @@ namespace RedditSharp.Things
             var things = new List<Thing>();
             foreach (var comment in postJson)
             {
-                Comment newComment = new Comment(Reddit, comment, this);
+                Comment newComment = new Comment(WebAgent, comment, this);
                 if (newComment.Kind != "more")
                 {
                     things.Add(newComment);
                 }
                 else 
                 {
-                    things.Add(new More(Reddit, comment));
+                    things.Add(new More(WebAgent, comment));
                 }
             }
 
@@ -316,7 +311,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public IAsyncEnumerable<Comment> EnumerateCommentTreeAsync(int limitPerRequest = 0)
         {
-            return new CommentsEnumarable(Reddit, this, limitPerRequest);
+            return new CommentsEnumarable(WebAgent, this, limitPerRequest);
         }
         
     }

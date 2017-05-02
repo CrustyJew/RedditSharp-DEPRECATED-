@@ -14,7 +14,7 @@ namespace RedditSharp.Things
     public class PrivateMessage : Thing
     {
         #pragma warning disable 1591
-        public PrivateMessage(Reddit reddit, JToken json) : base(reddit, json) {
+        public PrivateMessage(IWebAgent agent, JToken json) : base(agent, json) {
             var data = json["data"];
             if (data["replies"] != null && data["replies"].Any())
             {
@@ -24,7 +24,7 @@ namespace RedditSharp.Things
                     {
                         var replies = new List<PrivateMessage>();
                         foreach (var reply in data["replies"]["data"]["children"])
-                            replies.Add(new PrivateMessage(Reddit, reply));
+                            replies.Add(new PrivateMessage(WebAgent, reply));
                         Replies = replies.ToArray();
                     }
                 }
@@ -106,6 +106,16 @@ namespace RedditSharp.Things
         public string ParentID { get; private set; }
 
         /// <summary>
+        /// <inheritdoc />
+        /// </summary>
+        public override string Kind { get { return "t4"; } }
+
+        /// <summary>
+        /// Prefix for fullname. Includes trailing underscore
+        /// </summary>
+        public static string KindPrefix { get { return "t4_"; } }
+
+        /// <summary>
         /// full name of the first message in this message chain.
         /// </summary>
         [JsonProperty("first_message_name")]
@@ -146,13 +156,13 @@ namespace RedditSharp.Things
             if (string.IsNullOrEmpty(ParentID))
                 return null;
             var id = ParentID.Remove(0, 3);
-            this.thread = new Listing<PrivateMessage>(Reddit, $"/message/messages/{id}.json");
+            this.thread = new Listing<PrivateMessage>(WebAgent, $"/message/messages/{id}.json");
             return this.thread;
         }
         // Awaitables don't have to be called asynchronously
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>
         /// Mark the message read
@@ -162,7 +172,6 @@ namespace RedditSharp.Things
             await WebAgent.Post(SetAsReadUrl, new
             {
                 id = FullName,
-                uh = Reddit.User?.Modhash,
                 api_type = "json"
             }).ConfigureAwait(false);
         }
@@ -173,13 +182,10 @@ namespace RedditSharp.Things
         /// <param name="message">Markdown text.</param>
         public async Task ReplyAsync(string message)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             await WebAgent.Post(CommentUrl, new
             {
                 text = message,
-                thing_id = FullName,
-                uh = Reddit.User?.Modhash
+                thing_id = FullName
             }).ConfigureAwait(false);
         }
     }

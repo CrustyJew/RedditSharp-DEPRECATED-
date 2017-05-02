@@ -38,7 +38,7 @@ namespace RedditSharp
 
         #endregion
 
-
+        #region Properties
         internal IWebAgent WebAgent { get; set; }
         /// <summary>
         /// Captcha solver instance to use when solving captchas.
@@ -74,7 +74,7 @@ namespace RedditSharp
         {
             get { return Subreddit.GetRSlashAll(WebAgent); }
         }
-
+        #endregion
 
 #pragma warning disable 1591
         public Reddit()

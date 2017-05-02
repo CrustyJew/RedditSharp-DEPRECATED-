@@ -13,8 +13,8 @@ namespace RedditSharp.Things
         #pragma warning disable 1591
         public RedditUser(IWebAgent agent, JToken json) : base(agent, json) {
         }
-        #pragma warning restore 1591
-
+#pragma warning restore 1591
+        #region Properties
         private string OverviewUrl => $"/user/{Name}.json";
         private string CommentsUrl => $"/user/{Name}/comments.json";
         private string LinksUrl => $"/user/{Name}/submitted.json";
@@ -67,14 +67,11 @@ namespace RedditSharp.Things
         public DateTime Created { get; private set; }
 
         /// <summary>
-        /// <inheritdoc />
-        /// </summary>
-        public override string Kind { get { return "t2"; } }
-
-        /// <summary>
         /// Prefix for fullname. Includes trailing underscore
         /// </summary>
         public static string KindPrefix { get { return "t2_"; } }
+
+#endregion
 
         /// <summary>
         /// Return the users overview.

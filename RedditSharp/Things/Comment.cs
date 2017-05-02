@@ -35,12 +35,7 @@ namespace RedditSharp.Things
 
         /// <inheritdoc />
         internal override JToken GetJsonData(JToken json) => json["data"];
-
-        /// <summary>
-        /// <inheritdoc />
-        /// </summary>
-        public override string Kind { get { return "t1"; } }
-
+        
         /// <summary>
         /// Prefix for fullname. Includes trailing underscore
         /// </summary>

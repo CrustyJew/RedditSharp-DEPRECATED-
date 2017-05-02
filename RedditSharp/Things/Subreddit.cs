@@ -41,6 +41,7 @@ namespace RedditSharp.Things
             Controversial
         }
 
+        #region Properties
         private const string SubredditAboutUrl = "/r/{0}/about.json";
         private string SubredditPostUrl => $"/r/{Name}.json";
         private string SubredditNewUrl => $"/r/{Name}/new.json?sort=new";
@@ -73,7 +74,7 @@ namespace RedditSharp.Things
         private string CommentsUrl => $"/r/{Name}/comments.json";
         private string SearchUrl(string query, string sort, string time) =>
           $"/r/{Name}/search.json?q={query}&restrict_sr=on&sort={sort}&t={time}";
-        private string SearchUrlDate(double from, double to, string sort)=>
+        private string SearchUrlDate(double from, double to, string sort) =>
             $"/r/{Name}/search.json?q=timestamp:{from}..{to}&restrict_sr=on&sort={sort}&syntax=cloudsearch";
         private string ModLogUrl => $"/r/{Name}/about/log.json";
         private string ContributorsUrl => $"/r/{Name}/about/contributors.json";
@@ -84,7 +85,7 @@ namespace RedditSharp.Things
         /// Get the subreddit Wiki
         /// </summary>
         [JsonIgnore]
-        public Wiki GetWiki => new Wiki(WebAgent,this.Name);
+        public Wiki GetWiki => new Wiki(WebAgent, this.Name);
 
         /// <summary>
         /// Date the subreddit was created.
@@ -153,10 +154,6 @@ namespace RedditSharp.Things
         [JsonProperty("title")]
         public string Title { get; private set; }
 
-        /// <summary>
-        /// <inheritdoc />
-        /// </summary>
-        public override string Kind { get { return "t5"; } }
 
         /// <summary>
         /// Prefix for fullname. Includes trailing underscore
@@ -194,7 +191,9 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonIgnore]
         public string Name { get; private set; }
-        
+
+        #endregion
+
         /// <summary>
         /// Create and populate Subreddit info from <paramref name="json"/>
         /// </summary>
@@ -420,7 +419,7 @@ namespace RedditSharp.Things
         public async Task<IEnumerable<UserFlairTemplate>> GetUserFlairTemplatesAsync()
         {
             //TODO Unit Tests
-            var json = await WebAgent.Post(FlairSelectorUrl, new {}).ConfigureAwait(false);
+            var json = await WebAgent.Post(FlairSelectorUrl, new { }).ConfigureAwait(false);
             var choices = json["choices"];
             var list = new List<UserFlairTemplate>();
             foreach (var choice in choices)
@@ -487,7 +486,7 @@ namespace RedditSharp.Things
         }
 
         /// <inheritdoc />
-        internal override JToken GetJsonData(JToken json) =>  json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"];
 
         private void SetName()
         {
@@ -604,7 +603,7 @@ namespace RedditSharp.Things
         /// <param name="user">user name.</param>
         public async Task<string> GetFlairTextAsync(string user)
         {
-            var json= await WebAgent.Get(FlairListUrl + "?name=" + user).ConfigureAwait(false);
+            var json = await WebAgent.Get(FlairListUrl + "?name=" + user).ConfigureAwait(false);
             return (string)json["users"][0]["flair_text"];
         }
 
@@ -728,7 +727,8 @@ namespace RedditSharp.Things
         /// <param name="id">reddit user full name</param>
         public async Task RemoveContributorAsync(string id)
         {
-            await WebAgent.Post(LeaveModerationUrl, new {
+            await WebAgent.Post(LeaveModerationUrl, new
+            {
                 api_type = "json",
                 r = Name,
                 type = "contributor",
@@ -786,7 +786,7 @@ namespace RedditSharp.Things
         private async Task<Post> SubmitAsync(SubmitData data, ICaptchaSolver solver = null)
         {
             var json = await WebAgent.Post(SubmitLinkUrl, data).ConfigureAwait(false);
-            
+
             if (json["errors"].Any() && json["errors"][0][0].ToString() == "BAD_CAPTCHA")
             {
                 if (solver == null) throw new CaptchaFailedException("Captcha required but not ICaptchaSolver provided");
@@ -820,14 +820,14 @@ namespace RedditSharp.Things
         public async Task<Post> SubmitPostAsync(string title, string url, string captchaId = "", string captchaAnswer = "", bool resubmit = false)
         {
             return await SubmitAsync(new LinkData
-                    {
-                        Subreddit = Name,
-                        Title = title,
-                        URL = url,
-                        Resubmit = resubmit,
-                        Iden = captchaId,
-                        Captcha = captchaAnswer
-                    }).ConfigureAwait(false);
+            {
+                Subreddit = Name,
+                Title = title,
+                URL = url,
+                Resubmit = resubmit,
+                Iden = captchaId,
+                Captcha = captchaAnswer
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -840,13 +840,13 @@ namespace RedditSharp.Things
         public async Task<Post> SubmitTextPostAsync(string title, string text, string captchaId = "", string captchaAnswer = "")
         {
             return await SubmitAsync(new TextData
-                    {
-                        Subreddit = Name,
-                        Title = title,
-                        Text = text,
-                        Iden = captchaId,
-                        Captcha = captchaAnswer
-                    }).ConfigureAwait(false);
+            {
+                Subreddit = Name,
+                Title = title,
+                Text = text,
+                Iden = captchaId,
+                Captcha = captchaAnswer
+            }).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -113,11 +113,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("subreddit")]
         public string SubredditName { get; private set; }
-
-        /// <summary>
-        /// <inheritdoc />
-        /// </summary>
-        public override string Kind { get { return "t3"; } }
+        
 
         /// <summary>
         /// Prefix for fullname. Includes trailing underscore

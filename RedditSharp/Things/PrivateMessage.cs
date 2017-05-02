@@ -13,25 +13,8 @@ namespace RedditSharp.Things
     /// </summary>
     public class PrivateMessage : Thing
     {
-        #pragma warning disable 1591
-        public PrivateMessage(IWebAgent agent, JToken json) : base(agent, json) {
-            var data = json["data"];
-            if (data["replies"] != null && data["replies"].Any())
-            {
-                if (data["replies"]["data"] != null)
-                {
-                    if (data["replies"]["data"]["children"] != null)
-                    {
-                        var replies = new List<PrivateMessage>();
-                        foreach (var reply in data["replies"]["data"]["children"])
-                            replies.Add(new PrivateMessage(WebAgent, reply));
-                        Replies = replies.ToArray();
-                    }
-                }
-            }
-        }
-        #pragma warning restore 1591
 
+        #region Properties
         private const string SetAsReadUrl = "/api/read_message";
         private const string CommentUrl = "/api/comment";
 
@@ -106,11 +89,6 @@ namespace RedditSharp.Things
         public string ParentID { get; private set; }
 
         /// <summary>
-        /// <inheritdoc />
-        /// </summary>
-        public override string Kind { get { return "t4"; } }
-
-        /// <summary>
         /// Prefix for fullname. Includes trailing underscore
         /// </summary>
         public static string KindPrefix { get { return "t4_"; } }
@@ -126,6 +104,28 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonIgnore]
         public PrivateMessage[] Replies { get; private set; }
+
+        #endregion Properties
+
+#pragma warning disable 1591
+        public PrivateMessage(IWebAgent agent, JToken json) : base(agent, json)
+        {
+            var data = json["data"];
+            if (data["replies"] != null && data["replies"].Any())
+            {
+                if (data["replies"]["data"] != null)
+                {
+                    if (data["replies"]["data"]["children"] != null)
+                    {
+                        var replies = new List<PrivateMessage>();
+                        foreach (var reply in data["replies"]["data"]["children"])
+                            replies.Add(new PrivateMessage(WebAgent, reply));
+                        Replies = replies.ToArray();
+                    }
+                }
+            }
+        }
+#pragma warning restore 1591
 
         /// <summary>
         /// Get the Original message.

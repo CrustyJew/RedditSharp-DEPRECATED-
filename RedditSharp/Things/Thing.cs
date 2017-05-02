@@ -11,40 +11,18 @@ namespace RedditSharp.Things
     /// </summary>
     public class Thing : RedditObject
     {
+        
+        #region Properties
+
         /// <summary>
         /// Current user
         /// </summary>
         public AuthenticatedUser User { get; set; }
-        /// <summary>
-        /// Create new Thing from given JSON data.
-        /// </summary>
-        /// <param name="agent">WebAgent for requests</param>
-        /// <param name="json">JSON data containing thing's info</param>
-        /// <param name="user">Optional authenticated user</param>
-        public Thing(IWebAgent agent, JToken json, AuthenticatedUser user = null) : base(agent) {
-            User = user;
-            Populate(json);
-        }
-
-        internal void Populate(JToken json) {
-            if (json == null)
-              return;
-            var data = json["name"] == null ? json["data"] : json;
-            FullName = data["name"].ValueOrDefault<string>();
-            Id = data["id"].ValueOrDefault<string>();
-            Kind = json["kind"].ValueOrDefault<string>();
-            FetchedAt = DateTime.Now;
-            Helpers.PopulateObject(GetJsonData(json), this);
-        }
-
-        internal virtual JToken GetJsonData(JToken json) {
-          return json;
-        }
 
         /// <summary>
         /// Shortlink to the item
         /// </summary>
-        public virtual string Shortlink =>  "http://redd.it/" + Id;
+        public virtual string Shortlink => "http://redd.it/" + Id;
 
         /// <summary>
         /// Base36 id.
@@ -59,7 +37,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Thing kind.  t1, t2, t3 etc
         /// </summary>
-        public virtual string Kind { get; internal set; }
+        public string Kind { get; internal set; }
 
         /// <summary>
         /// The time at which this object was fetched from reddit servers.
@@ -70,6 +48,35 @@ namespace RedditSharp.Things
         /// Gets the time since last fetch from reddit servers.
         /// </summary>
         public TimeSpan TimeSinceFetch => DateTime.Now - FetchedAt;
+        #endregion
+
+
+        /// <summary>
+        /// Create new Thing from given JSON data.
+        /// </summary>
+        /// <param name="agent">WebAgent for requests</param>
+        /// <param name="json">JSON data containing thing's info</param>
+        /// <param name="user">Optional authenticated user</param>
+        public Thing(IWebAgent agent, JToken json, AuthenticatedUser user = null) : base(agent)
+        {
+            User = user;
+            Populate(json);
+        }
+        internal virtual JToken GetJsonData(JToken json)
+        {
+            return json;
+        }
+        internal void Populate(JToken json)
+        {
+            if (json == null)
+                return;
+            var data = json["name"] == null ? json["data"] : json;
+            FullName = data["name"].ValueOrDefault<string>();
+            Id = data["id"].ValueOrDefault<string>();
+            Kind = json["kind"].ValueOrDefault<string>();
+            FetchedAt = DateTime.Now;
+            Helpers.PopulateObject(GetJsonData(json), this);
+        }
 
         // Awaitables don't have to be called asyncronously
 

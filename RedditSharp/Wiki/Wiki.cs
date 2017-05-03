@@ -10,7 +10,10 @@ namespace RedditSharp
     /// </summary>
     public class Wiki : RedditObject
     {
-        private string SubredditName { get; set; }
+        /// <summary>
+        /// Name of subreddit of the wiki
+        /// </summary>
+        public string SubredditName { get; private set; }
 
         #region constants
         private string GetWikiPageUrl(string page, string version) => $"/r/{SubredditName}/wiki/{page}.json?v={version}";

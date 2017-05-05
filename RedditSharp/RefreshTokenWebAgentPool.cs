@@ -7,10 +7,22 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
+    /// <summary>
+    /// Caching class to manage WebAgents for multiple users
+    /// </summary>
     public class RefreshTokenWebAgentPool
     {
+        /// <summary>
+        /// Number of minutes to use for cache's sliding expiration.
+        /// </summary>
         public int SlidingExpirationMinutes { get; set; }
+        /// <summary>
+        /// Default user agent to apply to all WebAgents unless otherwise specified.
+        /// </summary>
         public string DefaultUserAgent { get; set; }
+        /// <summary>
+        /// Default <see cref="RateLimitMode"/> to apply to all WebAgents unless otherwise specified.
+        /// </summary>
         public RateLimitMode DefaultRateLimitMode { get; set; }
 
         private List<RefreshTokenPoolEntry> poolEntries = new List<RefreshTokenPoolEntry>();
@@ -20,6 +32,12 @@ namespace RedditSharp
         private string ClientSecret;
         private string RedirectURI;
 
+        /// <summary>
+        /// Create new pool. Requires app info to get new tokens.
+        /// </summary>
+        /// <param name="clientID">Reddit App ClientID</param>
+        /// <param name="clientSecret">Reddit App Client Secret</param>
+        /// <param name="redirectURI">Reddit App Redirect URI</param>
         public RefreshTokenWebAgentPool(string clientID, string clientSecret, string redirectURI)
         {
             ClientID = clientID;

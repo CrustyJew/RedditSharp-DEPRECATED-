@@ -106,10 +106,10 @@ namespace RedditSharp.Multi
         /// <summary>
         /// Creates a new mData implementation
         /// </summary>
-        /// <param name="reddit">Reddit object to use</param>
+        /// <param name="agent">WebAgent object to use</param>
         /// <param name="json">Token to use with parameters for the different members</param>
         /// <param name="subs">Whether or not subs exist</param>
-        protected internal MData(Reddit reddit, JToken json, bool subs) : base(reddit)
+        protected internal MData(IWebAgent agent, JToken json, bool subs) : base(agent)
         {
             Subreddits = new List<MultiSubs>();
             if (subs)
@@ -117,10 +117,10 @@ namespace RedditSharp.Multi
                 //Get Subreddit List
                 for (int i = 0; i < json["subreddits"].Count(); i++)
                 {
-                    Subreddits.Add(new MultiSubs(reddit, json["subreddits"][i]));
+                    Subreddits.Add(new MultiSubs(agent, json["subreddits"][i]));
                 }
             }
-            reddit.PopulateObject(json, this);
+            Helpers.PopulateObject(json, this);
         }
 
     }

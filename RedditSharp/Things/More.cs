@@ -15,7 +15,7 @@ namespace RedditSharp.Things
     public class More : Thing
     {
         #pragma warning disable 1591
-        public More(Reddit reddit, JToken json) : base(reddit, json)
+        public More(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
         #pragma warning restore 1591
@@ -35,7 +35,7 @@ namespace RedditSharp.Things
         public string ParentId { get; private set; }
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"];
 
         /// <summary>
         /// 
@@ -48,7 +48,7 @@ namespace RedditSharp.Things
             if (json["errors"].Count() != 0)
                 throw new AuthenticationException("Incorrect login.");
             var moreJson = json["data"]["things"];
-            return moreJson.Select(t => Thing.Parse(Reddit, t)).ToList();
+            return moreJson.Select(t => Thing.Parse(WebAgent, t)).ToList();
         }
     }
 }

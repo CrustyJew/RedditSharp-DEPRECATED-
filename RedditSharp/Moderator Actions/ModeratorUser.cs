@@ -8,12 +8,14 @@ namespace RedditSharp
     /// </summary>
     public class ModeratorUser
     {
-        #pragma warning disable 1591
-        public ModeratorUser(Reddit reddit, JToken json)
+        /// <summary>
+        /// Create ModeratorUser from given JSON
+        /// </summary>
+        /// <param name="json"></param>
+        public ModeratorUser(JToken json)
         {
-            reddit.PopulateObject(json, this);
+            Helpers.PopulateObject(json, this);
         }
-        #pragma warning restore 1591
 
         /// <summary>
         /// Moderator username.

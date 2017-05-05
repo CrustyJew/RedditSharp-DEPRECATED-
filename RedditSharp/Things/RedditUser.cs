@@ -1,6 +1,7 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
@@ -10,10 +11,10 @@ namespace RedditSharp.Things
     public class RedditUser : Thing
     {
         #pragma warning disable 1591
-        public RedditUser(Reddit reddit, JToken json) : base(reddit, json) {
+        public RedditUser(IWebAgent agent, JToken json) : base(agent, json) {
         }
-        #pragma warning restore 1591
-
+#pragma warning restore 1591
+        #region Properties
         private string OverviewUrl => $"/user/{Name}.json";
         private string CommentsUrl => $"/user/{Name}/comments.json";
         private string LinksUrl => $"/user/{Name}/submitted.json";
@@ -21,11 +22,12 @@ namespace RedditSharp.Things
         private string LikedUrl => $"/user/{Name}/liked.json";
         private string DislikedUrl => $"/user/{Name}/disliked.json";
         private string SavedUrl => $"/user/{Name}/saved.json";
+        private const string UserInfoUrl = "/user/{0}/about.json";
 
         private const int MAX_LIMIT = 100;
 
         /// <inheritdoc/>
-        protected override JToken GetJsonData(JToken json) => json["name"] == null ? json["data"] : json;
+        internal override JToken GetJsonData(JToken json) => json["name"] == null ? json["data"] : json;
 
         /// <summary>
         /// Reddit username.
@@ -65,34 +67,41 @@ namespace RedditSharp.Things
         public DateTime Created { get; private set; }
 
         /// <summary>
+        /// Prefix for fullname. Includes trailing underscore
+        /// </summary>
+        public static string KindPrefix { get { return "t2_"; } }
+
+#endregion
+
+        /// <summary>
         /// Return the users overview.
         /// </summary>
-        public Listing<VotableThing> GetOverview(int max = -1) => Listing<VotableThing>.Create(Reddit, OverviewUrl, max, 100);
+        public Listing<VotableThing> GetOverview(int max = -1) => Listing<VotableThing>.Create(WebAgent, OverviewUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts liked by the logged in user.
         /// </summary>
-        public Listing<Post> GetLikedPosts(int max = -1) => Listing<Post>.Create(Reddit,LikedUrl, max, 100);
+        public Listing<Post> GetLikedPosts(int max = -1) => Listing<Post>.Create(WebAgent, LikedUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts disliked by the logged in user.
         /// </summary>
-        public Listing<Post> GetDislikedPosts(int max = -1) => Listing<Post>.Create(Reddit, DislikedUrl, max, 100);
+        public Listing<Post> GetDislikedPosts(int max = -1) => Listing<Post>.Create(WebAgent, DislikedUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of comments made by the user.
         /// </summary>
-        public Listing<Comment> GetComments(int max = -1) => Listing<Comment>.Create(Reddit, CommentsUrl, max, 100);
+        public Listing<Comment> GetComments(int max = -1) => Listing<Comment>.Create(WebAgent, CommentsUrl, max, 100);
 
         /// <summary>
         /// Return a <see cref="Listing{T}"/> of posts made by the user.
         /// </summary>
-        public Listing<Post> GetPosts(int max = -1) => Listing<Post>.Create(Reddit, LinksUrl, max, 100);
+        public Listing<Post> GetPosts(int max = -1) => Listing<Post>.Create(WebAgent, LinksUrl, max, 100);
 
         /// <summary>
         /// Return a list of subscribed subreddits for the logged in user.
         /// </summary>
-        public Listing<Subreddit> GetSubscribedSubreddits(int max = -1) => Listing<Subreddit>.Create(Reddit, SubscribedSubredditsUrl, max, 100);
+        public Listing<Subreddit> GetSubscribedSubreddits(int max = -1) => Listing<Subreddit>.Create(WebAgent, SubscribedSubredditsUrl, max, 100);
 
         static string QueryString(Sort sort, int limit, FromTime time) =>
           $"?sort={sort.ToString("g")}&limit={limit}&t={time.ToString("g")}";
@@ -100,6 +109,17 @@ namespace RedditSharp.Things
         static void CheckRange(int limit, int max_limit) {
             if ((limit < 1) || (limit > max_limit))
                 throw new ArgumentOutOfRangeException(nameof(limit), $"Valid range: [1, {max_limit}]");
+        }
+        /// <summary>
+        /// Returns a <see cref="RedditUser"/> by username
+        /// </summary>
+        /// <param name="agent">WebAgent to perform search</param>
+        /// <param name="username">Username of user to return</param>
+        /// <returns></returns>
+        public static async Task<RedditUser> GetUserAsync(IWebAgent agent, string username)
+        {
+            var json = await agent.Get(string.Format(UserInfoUrl, username)).ConfigureAwait(false);
+            return new RedditUser(agent, json);
         }
 
         /// <summary>
@@ -114,7 +134,7 @@ namespace RedditSharp.Things
         {
             CheckRange(limit, MAX_LIMIT);
             string overviewUrl = OverviewUrl + QueryString(sorting, limit, fromTime);
-            return new Listing<VotableThing>(Reddit, overviewUrl);
+            return new Listing<VotableThing>(WebAgent, overviewUrl);
         }
 
         /// <summary>
@@ -129,7 +149,7 @@ namespace RedditSharp.Things
         {
             CheckRange(limit, MAX_LIMIT);
             string commentsUrl = CommentsUrl + QueryString(sorting, limit, fromTime);
-            return new Listing<Comment>(Reddit, commentsUrl);
+            return new Listing<Comment>(WebAgent, commentsUrl);
         }
 
         /// <summary>
@@ -144,7 +164,7 @@ namespace RedditSharp.Things
         {
             CheckRange(limit, 100);
             string linksUrl = LinksUrl + QueryString(sorting, limit, fromTime);
-            return new Listing<Post>(Reddit, linksUrl);
+            return new Listing<Post>(WebAgent, linksUrl);
         }
 
         /// <summary>
@@ -159,7 +179,7 @@ namespace RedditSharp.Things
         {
             CheckRange(limit, 100);
             string savedUrl = SavedUrl + QueryString(sorting, limit, fromTime);
-            return new Listing<VotableThing>(Reddit, savedUrl);
+            return new Listing<VotableThing>(WebAgent, savedUrl);
         }
 
         /// <inheritdoc/>

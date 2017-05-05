@@ -11,13 +11,12 @@ namespace RedditSharp.Things
     public class Contributor : RedditUser
     {
         #pragma warning disable 1591
-        public Contributor(Reddit reddit, JToken json) : base(reddit, json) {
+        public Contributor(IWebAgent agent, JToken json) : base(agent, json) {
             var data = json["name"] == null ? json["data"] : json;
             base.Name = data["name"].ValueOrDefault<string>();
             var id = data["id"].ValueOrDefault<string>();
             if (id.Contains("_"))
             {
-                base.Kind = "t2";
                 base.Id = id.Split('_')[1];
                 base.FullName = id;
             }

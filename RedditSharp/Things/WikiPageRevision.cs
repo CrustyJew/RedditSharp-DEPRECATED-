@@ -10,8 +10,8 @@ namespace RedditSharp.Things
     public class WikiPageRevision : Thing
     {
         #pragma warning disable 1591
-        protected internal WikiPageRevision(Reddit reddit, JToken json) : base(reddit, json) {
-            Author = new RedditUser(Reddit, json["author"]);
+        protected internal WikiPageRevision(IWebAgent agent, JToken json) : base(agent, json) {
+            Author = new RedditUser(agent, json["author"]);
         }
         #pragma warning restore 1591
 

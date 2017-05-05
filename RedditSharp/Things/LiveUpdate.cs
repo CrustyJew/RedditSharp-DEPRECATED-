@@ -13,9 +13,9 @@ namespace RedditSharp.Things
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="reddit">Reddit.</param>
+        /// <param name="agent">WebAgent.</param>
         /// <param name="json">Json payload.</param>
-        public LiveUpdate(Reddit reddit, JToken json) : base(reddit, json) {
+        public LiveUpdate(IWebAgent agent, JToken json) : base(agent, json) {
         }
 
         private const string StrikeUpdateUrl = "/api/live/{0}/strike_update";

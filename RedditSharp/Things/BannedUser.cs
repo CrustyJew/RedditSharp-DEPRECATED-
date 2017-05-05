@@ -11,7 +11,7 @@ namespace RedditSharp.Things
     public class BannedUser : RedditUser
     {
         #pragma warning disable 1591
-        public BannedUser(Reddit reddit, JToken json) : base(reddit, json) {
+        public BannedUser(IWebAgent agent, JToken json) : base(agent, json) {
             var data = json["name"] == null ? json["data"] : json;
             base.Name = data["name"].ValueOrDefault<string>();
             var id = data["id"].ValueOrDefault<string>();

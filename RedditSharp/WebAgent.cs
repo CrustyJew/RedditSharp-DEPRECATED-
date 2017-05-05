@@ -32,8 +32,14 @@ namespace RedditSharp
         /// </summary>
         public static string RootDomain { get; set; }
 
+        /// <summary>
+        /// Global default RateLimitManager
+        /// </summary>
         public static RateLimitManager DefaultRateLimiter { get; private set; }
 
+        /// <summary>
+        /// RateLimitManager for this Reddit instance.
+        /// </summary>
         public RateLimitManager RateLimiter { get; set; }
 
         /// <inheritdoc />
@@ -172,8 +178,10 @@ namespace RedditSharp
         /// <inheritdoc />
         protected virtual HttpRequestMessage CreateRequest(Uri uri, string method)
         {
-            var request = new HttpRequestMessage();
-            request.RequestUri = uri;
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = uri
+            };
             if (IsOAuth)// use OAuth
                 request.Headers.Authorization = new AuthenticationHeaderValue("bearer", AccessToken);//Must be included in OAuth calls
 

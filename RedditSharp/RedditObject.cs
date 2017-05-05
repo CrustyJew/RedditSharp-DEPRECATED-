@@ -1,23 +1,28 @@
-#pragma warning disable 1591
 using Newtonsoft.Json;
 using System;
 
-namespace RedditSharp {
+namespace RedditSharp
+{
+    /// <summary>
+    /// Wrapper class to provide <see cref="IWebAgent"/> to children.
+    /// </summary>
+    public abstract class RedditObject
+    {
+        /// <summary>
+        /// WebAgent for requests
+        /// </summary>
+        [JsonIgnore]
+        public IWebAgent WebAgent { get; }
 
-  public abstract class RedditObject {
+        /// <summary>
+        /// Assign <see cref="WebAgent"/>
+        /// </summary>
+        /// <param name="agent"></param>
+        public RedditObject(IWebAgent agent)
+        {
+            WebAgent = agent ?? throw new ArgumentNullException(nameof(agent));
+        }
 
-      [JsonIgnore]
-      public Reddit Reddit { get; }
-      [JsonIgnore]
-      public IWebAgent WebAgent => Reddit?.WebAgent;
-
-      public RedditObject(Reddit reddit) {
-          if (reddit == null)
-            throw new ArgumentNullException(nameof(reddit));
-          Reddit = reddit;
-      }
-
-  }
+    }
 
 }
-#pragma warning restore 1591

@@ -19,7 +19,7 @@ namespace RedditSharp.Things
         private const string SetAsReadUrl = "/api/read_message";
 
         #pragma warning disable 1591
-        public Comment(Reddit reddit, JToken json, Thing sender) : base(reddit, json) {
+        public Comment(IWebAgent agent, JToken json, Thing sender) : base(agent, json) {
             var data = json["data"];
             Parent = sender;
 
@@ -34,7 +34,12 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"];
+        
+        /// <summary>
+        /// Prefix for fullname. Includes trailing underscore
+        /// </summary>
+        public static string KindPrefix { get { return "t1_"; } }
 
         /// <summary>
         /// Fill the object with comments.
@@ -44,15 +49,15 @@ namespace RedditSharp.Things
         public Comment PopulateComments(IEnumerator<Thing> things)
         {
             Thing first = things.Current;
-            Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>();
-            comments[this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>());
-
+            Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>
+            {
+                [this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>())
+            };
             while (things.MoveNext() && (first is Comment || first is More))
             {
                 first = things.Current;
-                if (first is Comment)
+                if (first is Comment comment)
                 {
-                    Comment comment = (Comment)first;
                     comments[comment.FullName] = Tuple.Create<Comment, List<Comment>>(comment, new List<Comment>());
                     if (comments.ContainsKey(comment.ParentId))
                     {
@@ -64,9 +69,8 @@ namespace RedditSharp.Things
                         break;
                     }
                 }
-                else if (first is More)
+                else if (first is More more)
                 {
-                    More more = (More)first;
                     if (comments.ContainsKey(more.ParentId))
                     {
                         comments[more.ParentId].Item1.More = more;
@@ -98,7 +102,7 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add(new Comment(Reddit, comment, sender));
+                    subComments.Add(new Comment(WebAgent, comment, sender));
             }
             Comments = subComments.ToArray();
         }
@@ -183,8 +187,6 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public async Task<Comment> ReplyAsync(string message)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             // TODO actual error handling. This just hides the error and returns null
             //try
             //{
@@ -192,13 +194,12 @@ namespace RedditSharp.Things
                 {
                     text = message,
                     thing_id = FullName,
-                    uh = Reddit.User?.Modhash,
                     api_type = "json"
                     //r = Subreddit
                 }).ConfigureAwait(false);
                 if (json["json"]["ratelimit"] != null)
                     throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-                return new Comment(Reddit, json["json"]["data"]["things"][0], this);
+                return new Comment(WebAgent, json["json"]["data"]["things"][0], this);
             //}
             //catch (HttpRequestException ex)
             //{
@@ -213,14 +214,11 @@ namespace RedditSharp.Things
         /// <param name="newText">The text to replace the comment's contents</param>
         public async Task EditTextAsync(string newText)
         {
-            if (Reddit.User == null)
-                throw new Exception("No user logged in.");
             var json = await WebAgent.Post(EditUserTextUrl, new
             {
                 api_type = "json",
                 text = newText,
-                thing_id = FullName,
-                uh = Reddit.User?.Modhash
+                thing_id = FullName
             }).ConfigureAwait(false);
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
@@ -231,12 +229,9 @@ namespace RedditSharp.Things
         /// <inheritdoc />
         protected override async Task<JToken> SimpleActionAsync(string endpoint)
         {
-            if (Reddit.User == null)
-                throw new AuthenticationException("No user logged in.");
             return await WebAgent.Post(endpoint, new
             {
-                id = FullName,
-                uh = Reddit.User?.Modhash
+                id = FullName
             }).ConfigureAwait(false);
         }
 
@@ -248,7 +243,6 @@ namespace RedditSharp.Things
             await WebAgent.Post(SetAsReadUrl, new
             {
                 id = FullName,
-                uh = Reddit.User?.Modhash,
                 api_type = "json"
             }).ConfigureAwait(false);
         }

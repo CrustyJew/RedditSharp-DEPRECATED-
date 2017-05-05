@@ -17,11 +17,11 @@ namespace RedditSharp.Multi
         /// <summary>
         /// Creates a new MultiSubs implementation
         /// </summary>
-        /// <param name="reddit">Reddit object to use</param>
+        /// <param name="agent">WebAgent object to use</param>
         /// <param name="json">Token to use for the name</param>
-        protected internal MultiSubs(Reddit reddit, JToken json) : base(reddit)
+        protected internal MultiSubs(IWebAgent agent, JToken json) : base(agent)
         {
-            reddit.PopulateObject(json, this);
+            Helpers.PopulateObject(json, this);
         }
 
     }

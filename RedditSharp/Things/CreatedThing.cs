@@ -10,12 +10,12 @@ namespace RedditSharp.Things
     public class CreatedThing : Thing
     {
         #pragma warning disable 1591
-        public CreatedThing(Reddit reddit, JToken json) : base(reddit, json) {
+        public CreatedThing(IWebAgent agent, JToken json) : base(agent, json) {
         }
         #pragma warning restore 1591
 
         /// <inheritdoc />
-        protected override JToken GetJsonData(JToken json) => json["data"] == null ? json : json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"] == null ? json : json["data"];
 
         /// <summary>
         /// DateTime when the item was created.

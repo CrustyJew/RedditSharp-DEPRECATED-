@@ -5,7 +5,7 @@
     <AssemblyName>RedditSharpTests</AssemblyName>
     <PackageId>RedditSharpTests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <UserSecretsId>aspnet-RedditSharpTests-20170213104014</UserSecretsId>
+    <UserSecretsId>aspnet-RedditSharpTests</UserSecretsId>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
     <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
   </PropertyGroup>

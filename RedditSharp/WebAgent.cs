@@ -232,8 +232,8 @@ namespace RedditSharp
                 var entry = Convert.ToString(additionalFields[i + 1]) ?? string.Empty;
                 content.Add(new KeyValuePair<string, string>(additionalFields[i], entry));
             }
-
-            request.Content = new FormUrlEncodedContent(content);
+            //new FormUrlEncodedContent has a limit on length which can cause issues;
+            request.Content = new StringContent(string.Join("&",content.Select(c=>c.Key + "=" + System.Net.WebUtility.UrlEncode(c.Value))), Encoding.UTF8, "application/x-www-form-urlencoded");
         }
 
         /// <inheritdoc />

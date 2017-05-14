@@ -18,7 +18,7 @@ namespace RedditSharp.Things
         public ModActionType Action { get; set; }
 
         /// <summary>
-        /// DateTime of the action.
+        /// Date and time of the action.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]

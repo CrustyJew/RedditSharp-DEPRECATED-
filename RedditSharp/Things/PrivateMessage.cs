@@ -33,14 +33,14 @@ namespace RedditSharp.Things
         public bool IsComment { get; set; }
 
         /// <summary>
-        /// DateTime message was sent.
+        /// Date and time message was sent.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
         public DateTimeOffset Sent { get; set; }
 
         /// <summary>
-        /// DateTime message was sent in UTC.
+        /// Date and time message was sent in UTC.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]

@@ -62,7 +62,7 @@ namespace RedditSharp
                             NoteTypeIndex = note["w"].Value<int>(),
                             NoteType = warnings[note["w"].Value<int>()],
                             Message = note["n"].Value<string>(),
-                            Timestamp = DateTimeOffset.FromUnixTimeSeconds(note["t"].Value<long>()).DateTime,
+                            Timestamp = DateTimeOffset.FromUnixTimeSeconds(note["t"].Value<long>()),
                             Url = UnsquashLink(subName, note["l"].ValueOrDefault<string>()),
                         };
                         toReturn.Add(uNote);

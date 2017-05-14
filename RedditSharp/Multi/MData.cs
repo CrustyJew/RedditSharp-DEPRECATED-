@@ -42,7 +42,7 @@ namespace RedditSharp.Multi
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; set; }
+        public DateTimeOffset? Created { get; set; }
 
         /// <summary>
         /// Where the multi was copied from if it was copied
@@ -67,7 +67,7 @@ namespace RedditSharp.Multi
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? CreatedUTC { get; set; }
+        public DateTimeOffset? CreatedUTC { get; set; }
 
         /// <summary>
         /// Hex Code of the color for the multi

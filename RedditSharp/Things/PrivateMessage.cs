@@ -37,14 +37,14 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Sent { get; set; }
+        public DateTimeOffset Sent { get; set; }
 
         /// <summary>
         /// DateTime message was sent in UTC.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime SentUTC { get; set; }
+        public DateTimeOffset SentUTC { get; set; }
 
         /// <summary>
         /// Destination user or subreddit name.

@@ -60,7 +60,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; set; }
+        public DateTimeOffset? Created { get; set; }
 
         /// <summary>
         /// Subreddit description.

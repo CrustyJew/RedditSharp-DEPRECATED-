@@ -22,7 +22,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; set; }
+        public DateTimeOffset? TimeStamp { get; set; }
 
         /// <summary>
         /// Populated when <see cref="Action"/> is WikiBan, BanUser, or UnBanUser.

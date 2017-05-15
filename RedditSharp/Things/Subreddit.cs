@@ -60,7 +60,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; set; }
+        public DateTimeOffset? Created { get; set; }
 
         /// <summary>
         /// Subreddit description.
@@ -291,10 +291,23 @@ namespace RedditSharp.Things
         /// <returns>A list of posts in the range of time/dates in a specific order</returns>
         public Listing<Post> Search(DateTime from, DateTime to, Sorting sortE = Sorting.New)
         {
+            return Search(new DateTimeOffset(from), new DateTimeOffset(to), sortE);
+        }
+
+        /// <summary>
+        /// Search for a list of posts from a specific time to another time
+        /// </summary>
+        /// <param name="from">Time to begin search</param>
+        /// <param name="to">Time to end search at</param>
+        /// <param name="sortE">Sort of the objects you want to have it in</param>
+        /// <returns>A list of posts in the range of time/dates in a specific order</returns>
+        public Listing<Post> Search(DateTimeOffset from, DateTimeOffset to, Sorting sortE = Sorting.New)
+        {
             string sort = sortE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, new DateTimeOffset(from).ToUnixTimeSeconds(), new DateTimeOffset(to).ToUnixTimeSeconds(), sort), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, from.ToUnixTimeSeconds(), to.ToUnixTimeSeconds(), sort), WebAgent);
         }
+
         /// <summary>
         /// Settings of the subreddit, as best as possible
         /// </summary>

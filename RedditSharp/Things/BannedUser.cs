@@ -12,7 +12,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; set; }
+        public DateTimeOffset? TimeStamp { get; set; }
 
         /// <summary>
         /// Ban note.

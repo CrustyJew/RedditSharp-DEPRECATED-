@@ -18,7 +18,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime DateAdded { get; set; }
+        public DateTimeOffset DateAdded { get; set; }
 
         /// <summary>
         /// Initialize.

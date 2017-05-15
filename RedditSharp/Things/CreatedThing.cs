@@ -41,17 +41,17 @@ namespace RedditSharp.Things
         }
 
         /// <summary>
-        /// DateTime when the item was created.
+        /// Date and time when the item was created.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Created { get; set; }
+        public DateTimeOffset Created { get; set; }
 
         /// <summary>
-        /// DateTime when the item was created in UTC.
+        /// Date and time when the item was created in UTC.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime CreatedUTC { get; set; }
+        public DateTimeOffset CreatedUTC { get; set; }
     }
 }

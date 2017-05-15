@@ -14,11 +14,11 @@ namespace RedditSharp.Things
         new public string Id { get; private set; }
 
         /// <summary>
-        /// DateTime of the revision.
+        /// DateTimeOffset of the revision.
         /// </summary>
         [JsonProperty("timestamp")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; set; }
+        public DateTimeOffset? TimeStamp { get; set; }
 
         /// <summary>
         /// Reason for the revision.

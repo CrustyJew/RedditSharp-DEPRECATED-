@@ -20,7 +20,7 @@ namespace RedditSharp.Things
             FullName = data["name"].ValueOrDefault<string>();
             Id = data["id"].ValueOrDefault<string>();
             Kind = json["kind"].ValueOrDefault<string>();
-            FetchedAt = DateTime.Now;
+            FetchedAt = DateTimeOffset.Now;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// The time at which this object was fetched from reddit servers.
         /// </summary>
-        public DateTime FetchedAt { get; private set; }
+        public DateTimeOffset FetchedAt { get; private set; }
 
         /// <summary>
         /// Gets the time since last fetch from reddit servers.
@@ -58,7 +58,7 @@ namespace RedditSharp.Things
         {
             get
             {
-                return DateTime.Now - FetchedAt;
+                return DateTimeOffset.Now - FetchedAt;
             }
         }
         // Awaitables don't have to be called asyncronously

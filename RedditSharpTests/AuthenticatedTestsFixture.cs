@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Xunit;
 
 namespace RedditSharpTests
@@ -13,7 +12,8 @@ namespace RedditSharpTests
         public AuthenticatedTestsFixture()
         {
             ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<AuthenticatedTestsFixture>();
+            builder.AddUserSecrets<AuthenticatedTestsFixture>()
+            .AddEnvironmentVariables();
             Config = builder.Build();
             WebAgent = new RedditSharp.BotWebAgent(Config["TestUserName"], Config["TestUserPassword"], Config["RedditClientID"], Config["RedditClientSecret"], Config["RedditRedirectURI"]);
             AccessToken = WebAgent.AccessToken;

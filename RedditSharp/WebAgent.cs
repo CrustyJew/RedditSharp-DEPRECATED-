@@ -280,6 +280,7 @@ namespace RedditSharp
             }
             request.Method = method;
             request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "en-US,en;q=0.8");
             request = InjectProxy(request);
             return request;
         }
@@ -306,6 +307,7 @@ namespace RedditSharp
             }
             request.Method = method;
             request.UserAgent = UserAgent + " - with RedditSharp by /u/meepster23";
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "en-US,en;q=0.8");
             request = InjectProxy(request);
             return request;
         }

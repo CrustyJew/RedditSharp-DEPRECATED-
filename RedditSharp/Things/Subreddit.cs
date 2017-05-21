@@ -23,6 +23,8 @@ namespace RedditSharp.Things
         private const string GetReducedSettingsUrl = "/r/{0}/about.json";
         private const string ModqueueUrl = "/r/{0}/about/modqueue.json";
         private const string UnmoderatedUrl = "/r/{0}/about/unmoderated.json";
+        private const string SpamUrl = "/r/{0}/about/spam.json";
+        private const string EditedUrl = "/r/{0}/about/edited.json";
         private const string FlairTemplateUrl = "/api/flairtemplate";
         private const string ClearFlairTemplatesUrl = "/api/clearflairtemplates";
         private const string SetUserFlairUrl = "/api/flair";
@@ -268,6 +270,29 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, string.Format(UnmoderatedUrl, Name), WebAgent);
             }
         }
+
+        /// <summary>
+        /// Listing of things that have been removed from the subreddit.
+        /// </summary>
+        public Listing<VotableThing> Spam
+        {
+            get
+            {
+                return new Listing<VotableThing>(Reddit, string.Format(SpamUrl, Name), WebAgent);
+            }
+        }
+
+        /// <summary>
+        /// Listing of things that have been edited
+        /// </summary>
+        public Listing<VotableThing> Edited
+        {
+            get
+            {
+                return new Listing<VotableThing>(Reddit, string.Format(EditedUrl, Name), WebAgent);
+            }
+        }
+
         /// <summary>
         /// Search using specific terms from a specified time to now
         /// </summary>

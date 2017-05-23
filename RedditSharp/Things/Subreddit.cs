@@ -55,6 +55,8 @@ namespace RedditSharp.Things
         private string GetReducedSettingsUrl => $"/r/{Name}/about.json";
         private string ModqueueUrl => $"/r/{Name}/about/modqueue.json";
         private string UnmoderatedUrl => $"/r/{Name}/about/unmoderated.json";
+        private string SpamUrl => $"/r/{Name}/about/spam.json";
+        private string EditedUrl => $"/r/{Name}/about/edited.json";
         private string FlairTemplateUrl => $"/r/{Name}/api/flairtemplate";
         private string ClearFlairTemplatesUrl => $"/r/{Name}/api/clearflairtemplates";
         private string SetUserFlairUrl => $"/r/{Name}/api/flair";
@@ -361,6 +363,22 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
         public Listing<Post> GetUnmoderatedLinks(int max = -1) => Listing<Post>.Create(WebAgent, UnmoderatedUrl, max, 100);
+
+        /// <summary>
+        /// Listing of items a moderator or the spam filter has removed. These posts are only available to a
+        /// moderator with posts permissions.
+        /// </summary>
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        /// <returns></returns>
+        public Listing<VotableThing> GetRemoved(int max = -1) => Listing<VotableThing>.Create(WebAgent, SpamUrl, max, 100);
+
+        /// <summary>
+        /// Listing of items that have been edited. These posts are only available to a moderator with posts
+        /// permissions.
+        /// </summary>
+        /// <param name="max">Maximum number of records to return.  -1 for unlimited.</param>
+        /// <returns></returns>
+        public Listing<VotableThing> GetEdited(int max = -1) => Listing<VotableThing>.Create(WebAgent, EditedUrl, max, 100);
 
         /// <summary>
         /// Search using specific terms from a specified time to now

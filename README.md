@@ -9,6 +9,13 @@ Due to the project being abandoned and the previous owner's refusal to transfer 
 A partial implementation of the [Reddit](http://reddit.com) API. Includes support for many API endpoints, as well as
 LINQ-style paging of results.
 
+## Installation
+
+### Nuget: 
+![Install-Package RedditSharp](http://i.imgur.com/KhE2Afi.png)
+
+## Usage:
+
 ```csharp
 var webAgent = new BotWebAgent("BotUsername", "BotPass", "ClientID", "ClientSecret", "RedirectUri");
 //This will check if the access token is about to expire before each request and automatically request a new one for you

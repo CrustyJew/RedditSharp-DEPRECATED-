@@ -22,7 +22,7 @@ namespace RedditSharp.Things
         private const string EditUserTextUrl = "/api/editusertext";
         private const string HideUrl = "/api/hide";
         private const string UnhideUrl = "/api/unhide";
-        private string SetFlairUrl => $"/r/{SubredditName}/api/flair";
+        private const string SetFlairUrl = "/r/{0}/api/flair";
         private const string MarkNSFWUrl = "/api/marknsfw";
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
@@ -229,13 +229,7 @@ namespace RedditSharp.Things
         public async Task SetFlairAsync(string flairText, string flairClass)
         {
             //TODO Unit test
-            await WebAgent.Post(SetFlairUrl, new
-            {
-                api_type = "json",
-                css_class = flairClass,
-                link = FullName,
-                text = flairText
-            }).ConfigureAwait(false);
+            await Post.SetFlairAsync(this.WebAgent, this.SubredditName, this.FullName, flairText, flairClass).ConfigureAwait(false);
             LinkFlairText = flairText;
         }
 
@@ -309,7 +303,26 @@ namespace RedditSharp.Things
         {
             return new CommentsEnumarable(WebAgent, this, limitPerRequest);
         }
-        
+        #region Static Operations
+        /// <summary>
+        /// Sets flair of given post by <paramref name="fullname"/>
+        /// </summary>
+        /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
+        /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
+        /// <param name="subreddit">Subreddit name of post</param>
+        /// <param name="flairText">Text of flair to set</param>
+        /// <param name="flairClass">Css class name of flair to set</param>
+        /// <returns></returns>
+        public static Task SetFlairAsync(IWebAgent agent, string subreddit, string fullname, string flairText, string flairClass ) {
+            //TODO unit test
+            return agent.Post(string.Format(SetFlairUrl,subreddit) , new {
+                api_type = "json",
+                css_class = flairClass,
+                link = fullname,
+                text = flairText
+            });
+        }
+#endregion
     }
 
 }

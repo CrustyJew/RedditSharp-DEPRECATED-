@@ -164,8 +164,7 @@ namespace RedditSharp.Things
 
         /// <summary>
         /// Execute a simple POST request against the reddit api.
-        /// Supports endpoints that require only id and modhash as
-        /// parameters.
+        /// Supports endpoints that require only id as parameter.
         /// </summary>
         /// <param name="endpoint"></param>
         /// <returns></returns>
@@ -175,6 +174,19 @@ namespace RedditSharp.Things
             {
                 id = FullName
             }).ConfigureAwait(false);
+        }
+        /// <summary>
+        /// Execute a simple POST request against the reddit api.
+        /// Supports endpoints that require only id as parameter.
+        /// </summary>
+        /// <param name="agent"><see cref="IWebAgent"/> used to execute post</param>
+        /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
+        /// <param name="endpoint">URL to post to</param>
+        /// <returns></returns>
+        protected static Task<JToken> SimpleActionAsync(IWebAgent agent, string fullname, string endpoint ) {
+            return agent.Post(endpoint, new {
+                id = fullname
+            });
         }
     }
 }

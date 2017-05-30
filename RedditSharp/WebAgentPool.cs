@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RedditSharp
@@ -15,6 +16,7 @@ namespace RedditSharp
     public class WebAgentPool<TKey, TAgent>
         where TAgent : IWebAgent
     {
+        private static readonly object cacheLock = new object();
         private MemoryCache activeAgentsCache = new MemoryCache(new MemoryCacheOptions() { CompactOnMemoryPressure = false });
 
         /// <summary>
@@ -32,14 +34,20 @@ namespace RedditSharp
         /// <param name="key">Key of Web Agent to return or create</param>
         /// <param name="create">Function that returns the <typeparamref name="TAgent" /> corresponding to the <paramref name="key"/></param>
         /// <returns></returns>
-        public Task<TAgent> GetOrCreateAgentAsync(TKey key, Func<Task<TAgent>> create)
+        public TAgent GetOrCreateAgent(TKey key, Func<TAgent> create)
         {
-            return activeAgentsCache.GetOrCreateAsync<TAgent>(key, (c) =>
-            {
-                c.AbsoluteExpiration = null;
-                c.SlidingExpiration = null;
-                return create();
-            });
+            TAgent agent = GetAgent(key);
+            if(agent!=null) return agent;
+
+            lock(cacheLock) {
+                //check if someone else wrote it while waiting for lock.
+                agent = GetAgent(key);
+                if(agent != null) return agent;
+                agent = create();
+                activeAgentsCache.Set(key, agent, new MemoryCacheEntryOptions() { AbsoluteExpiration = null, SlidingExpiration = null });
+                return agent;
+            }
+            
         }
         /// <summary>
         /// Sets the web agent at the given key to be equal to the given value.

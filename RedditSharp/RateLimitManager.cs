@@ -129,7 +129,7 @@ namespace RedditSharp
                     //limit has been reached
                     if (RequestsThisBurst >= limitRequestsPerMinute / 6.0)
                     {
-                        await Task.Delay(DateTime.UtcNow - BurstStart - TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                        await Task.Delay((DateTime.UtcNow - BurstStart - TimeSpan.FromSeconds(10)).Duration()).ConfigureAwait(false);
                         BurstStart = DateTime.UtcNow;
                         RequestsThisBurst = 0;
                     }

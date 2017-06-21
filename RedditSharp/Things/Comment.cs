@@ -143,6 +143,9 @@ namespace RedditSharp.Things
         [JsonProperty("link_title")]
         public string LinkTitle { get; private set; }
 
+        [JsonProperty("new")]
+        public bool Unread { get; private set; }
+
         /// <summary>
         /// More comments.
         /// </summary>

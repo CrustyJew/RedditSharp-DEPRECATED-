@@ -22,6 +22,7 @@ namespace RedditSharp.Things
         private const string MessagesUrl = "/message/messages.json";
         private const string InboxUrl = "/message/inbox.json";
         private const string SentUrl = "/message/sent.json";
+        private const string MentionsUrl = "/message/mentions.json";
 
         /// <inheritdoc />
         internal override JToken GetJsonData(JToken json) {
@@ -67,6 +68,11 @@ namespace RedditSharp.Things
         /// Get a <see cref="Listing{T}"/> of sent messages.
         /// </summary>
         public Listing<PrivateMessage> GetSent(int max = -1) => Listing<PrivateMessage>.Create(WebAgent, SentUrl, max, 100);
+
+        /// <summary>
+        /// Get a <see cref="Listing{T}"/> of username mentions.
+        /// </summary>
+        public Listing<Comment> GetUsernameMentions(int max = -1) => Listing<Comment>.Create(WebAgent, MentionsUrl, max, 100);
 
         /// <summary>
         /// User modhash.

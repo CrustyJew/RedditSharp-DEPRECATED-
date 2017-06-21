@@ -281,9 +281,9 @@ namespace RedditSharp
 
             ICaptchaSolver solver = CaptchaSolver; // Prevent race condition
 
-            if (json["json"]["errors"].Any() && json["json"]["errors"][0][0].ToString() == "BAD_CAPTCHA" && solver != null)
+            if (json["errors"].Any() && json["errors"][0][0].ToString() == "BAD_CAPTCHA" && solver != null)
             {
-                captchaId = json["json"]["captcha"].ToString();
+                captchaId = json["captcha"].ToString();
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(captchaId));
 
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel

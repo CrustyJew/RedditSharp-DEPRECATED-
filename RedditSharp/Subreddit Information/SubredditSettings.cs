@@ -28,6 +28,7 @@ namespace RedditSharp
             // Default settings, for use when reduced information is given
             AllowAsDefault = true;
             AllowImages = false;
+            ExcludeBannedUsersFromModqueue = false;
             Domain = null;
             Sidebar = string.Empty;
             Language = "en";
@@ -58,6 +59,7 @@ namespace RedditSharp
             var data = json["data"];
             AllowAsDefault = data["default_set"].ValueOrDefault<bool>();
             AllowImages = data["allow_images"].ValueOrDefault<bool>();
+            ExcludeBannedUsersFromModqueue = data["exclude_banned_modqueue"].ValueOrDefault<bool>();
             Domain = data["domain"].ValueOrDefault<string>();
             Sidebar = HttpUtility.HtmlDecode(data["description"].ValueOrDefault<string>() ?? string.Empty);
             Language = data["language"].ValueOrDefault<string>();
@@ -212,9 +214,14 @@ namespace RedditSharp
         public SpamFilterSettings SpamFilter { get; set; }
 
         /// <summary>
-        /// Set to bool to allow images 
+        /// Allow image uploads and links to image hosting sites.
         /// </summary>
         public bool AllowImages { get; set; }
+
+        /// <summary>
+        /// Exclude posts by site-wide banned users from modqueue/unmoderated.
+        /// </summary>
+        public bool ExcludeBannedUsersFromModqueue { get; set; }
 
         /// <summary>
         /// Update the subreddit settings.
@@ -268,6 +275,7 @@ namespace RedditSharp
                 allow_images = AllowImages,
                 description = Sidebar,
                 domain = Domain,
+                exclude_banned_modqueue = ExcludeBannedUsersFromModqueue,
                 lang = Language,
                 link_type,
                 over_18 = NSFW,

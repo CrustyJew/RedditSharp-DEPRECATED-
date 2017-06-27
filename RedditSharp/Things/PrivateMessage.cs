@@ -11,7 +11,7 @@ namespace RedditSharp.Things
     /// <summary>
     /// A private message (or modmail).
     /// </summary>
-    public class PrivateMessage : Thing
+    public class PrivateMessage : ModeratableThing
     {
 
         #region Properties

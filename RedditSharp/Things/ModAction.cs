@@ -123,7 +123,7 @@ namespace RedditSharp.Things
         public async Task<ModAction> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             CommonInit(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 

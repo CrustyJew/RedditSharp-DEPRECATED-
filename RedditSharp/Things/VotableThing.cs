@@ -58,7 +58,7 @@ namespace RedditSharp.Things
         protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await CommonInitAsync(reddit, webAgent, json);
-            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
             return this;
         }
 

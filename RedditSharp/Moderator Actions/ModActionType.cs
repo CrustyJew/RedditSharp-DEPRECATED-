@@ -35,6 +35,8 @@ namespace RedditSharp
         SetSuggestedsort,
         Sticky,
         SpamComment,
+        Spoiler,
+        UnSpoiler,
         UnSticky,
         SetContestMode,
         UnSetContestMode,

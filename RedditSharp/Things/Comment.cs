@@ -226,7 +226,7 @@ namespace RedditSharp.Things
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
             else
-                throw new Exception("Error editing text. Error: " + json["json"]["data"]["errors"][0][0]);
+                throw new Exception("Error editing text. Error: " + json["json"]["errors"][0][0].ToString());
         }
 
         /// <inheritdoc />

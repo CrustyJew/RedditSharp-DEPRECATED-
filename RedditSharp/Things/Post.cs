@@ -340,7 +340,7 @@ namespace RedditSharp.Things
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
             else
-                throw new Exception("Error editing text.");
+                throw new Exception("Error editing text. Error: " + json["json"]["errors"][0][0].ToString());
         }
 
         /// <summary>

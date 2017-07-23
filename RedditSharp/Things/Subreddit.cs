@@ -1096,6 +1096,10 @@ namespace RedditSharp.Things
             {
                 throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
+            else if(json["json"]["errors"].Any())
+            {
+                throw new Exception("Error when attempting to submit. Error: " + json["json"]["errors"][0][0].ToString());
+            }
 
             return new Post().Init(Reddit, json["json"], WebAgent);
         }
@@ -1130,7 +1134,10 @@ namespace RedditSharp.Things
             {
                 throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
-
+            else if (json["json"]["errors"].Any())
+            {
+                throw new Exception("Error when attempting to submit. Error: " + json["json"]["errors"][0][0].ToString());
+            }
             return new Post().Init(Reddit, json["json"], WebAgent);
         }
         /// <summary>

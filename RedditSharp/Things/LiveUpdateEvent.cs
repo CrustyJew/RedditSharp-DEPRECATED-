@@ -182,7 +182,7 @@ namespace RedditSharp.Things
             }
             else
             {
-                throw new Exception("Error editing text.");
+                throw new Exception("Error editing text. Error: " + json["json"]["errors"][0][0].ToString());
             }
         }
 
@@ -190,9 +190,9 @@ namespace RedditSharp.Things
         /// Get a list of contributors.
         /// </summary>
         /// <returns></returns>
-        public ICollection<LiveUpdateEvent.LiveUpdateEventUser> GetContributors()
+        public ICollection<LiveUpdateEventUser> GetContributors()
         {
-            var result = new List<LiveUpdateEvent.LiveUpdateEventUser>();
+            var result = new List<LiveUpdateEventUser>();
             var request = WebAgent.CreateGet(String.Format(ContributorsUrl, Name));
             var response = request.GetResponse();
             var data = WebAgent.GetResponseString(response.GetResponseStream());

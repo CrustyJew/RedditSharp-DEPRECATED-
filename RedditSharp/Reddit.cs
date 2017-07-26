@@ -440,6 +440,10 @@ namespace RedditSharp
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel
                     ComposePrivateMessage(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer);
             }
+            else if(json["json"]["errors"].Any())
+            {
+                throw new Exception("Error when composing message. Error: " + json["json"]["errors"][0][0].ToString());
+            }
         }
 
         /// <summary>

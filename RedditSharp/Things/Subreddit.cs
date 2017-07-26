@@ -508,7 +508,7 @@ namespace RedditSharp.Things
 
         private void SetName()
         {
-            Name = System.Text.RegularExpressions.Regex.Replace(Url.ToString(), "(r/|/)", "");
+            Name = System.Text.RegularExpressions.Regex.Replace(Url.ToString(), "^(r/|/)", "");
         }
 
         /// <summary>

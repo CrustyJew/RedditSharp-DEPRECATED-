@@ -56,7 +56,7 @@ namespace RedditSharp
         }
 
 #pragma warning disable 1591
-        public async Task Enumerate()
+        public async Task Enumerate(CancellationToken cancelationToken)
         {
             await Listing.ForEachAsync(thing =>
             {
@@ -65,7 +65,7 @@ namespace RedditSharp
                     observer.OnNext(thing);
                 }
 
-            });
+            }, cancelationToken);
         }
 #pragma warning restore 1591
 

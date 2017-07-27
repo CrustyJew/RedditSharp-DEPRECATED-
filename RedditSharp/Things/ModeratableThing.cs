@@ -267,6 +267,78 @@ namespace RedditSharp.Things
             return SimpleActionAsync(UnIgnoreReportsUrl);
         }
 
+
+
+        #region Static Operations
+        /// <summary>
+        /// Removes the <see cref="Thing"/>
+        /// </summary>
+        /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
+        /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
+        /// <returns></returns>
+        public static Task RemoveAsync( IWebAgent agent, string fullname ) {
+            return agent.Post(RemoveUrl, new {
+                id = fullname,
+                spam = false
+            });
+        }
+
+        /// <summary>
+        /// Spams the <see cref="Thing"/>
+        /// </summary>
+        /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
+        /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
+        /// <returns></returns>
+        public static Task SpamAsync( IWebAgent agent, string fullname ) {
+            return agent.Post(RemoveUrl, new {
+                id = fullname,
+                spam = true
+            });
+        }
+        /// <summary>
+        /// Approves the thing <paramref name="fullname"/>
+        /// </summary>
+        /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
+        /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
+        /// <returns></returns>
+        public static Task ApproveAsync( IWebAgent agent, string fullname ) {
+            return Thing.SimpleActionAsync(agent, fullname, ApproveUrl);
+        }
+
+        /// <summary>
+        /// Reports someone
+        /// </summary>
+        /// <param name="reportType">What you're reporting them for <see cref="ReportType"/></param>
+        /// <param name="otherReason">If your reason is "Other", say why you're reporting them</param>
+        /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
+        /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
+        public static Task ReportAsync( IWebAgent agent, string fullname, ReportType reportType, string otherReason = null ) {
+
+            string reportReason;
+            switch(reportType) {
+                case ReportType.Spam:
+                    reportReason = "spam"; break;
+                case ReportType.VoteManipulation:
+                    reportReason = "vote manipulation"; break;
+                case ReportType.PersonalInformation:
+                    reportReason = "personal information"; break;
+                case ReportType.BreakingReddit:
+                    reportReason = "breaking reddit"; break;
+                case ReportType.SexualizingMinors:
+                    reportReason = "sexualizing minors"; break;
+                default:
+                    reportReason = "other"; break;
+            }
+
+            return agent.Post(ReportUrl, new {
+                api_type = "json",
+                reason = reportReason,
+                other_reason = otherReason ?? "",
+                thing_id = fullname
+            });
+        }
+        #endregion
+
         internal class DistinguishConverter : JsonConverter
         {
             public override bool CanConvert(Type objectType)

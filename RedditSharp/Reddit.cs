@@ -265,7 +265,7 @@ namespace RedditSharp
         /// <returns></returns>
         public Subreddit GetSubreddit(string name)
         {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "^(r/|/)", "");
+            name = System.Text.RegularExpressions.Regex.Replace(name, "^([/](r/))|/", "");
             return GetThing<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 
@@ -276,7 +276,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<Subreddit> GetSubredditAsync(string name)
         {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "^(r/|/)", "");
+            name = System.Text.RegularExpressions.Regex.Replace(name, "^([/](r/))|/", "");
             return await GetThingAsync<Subreddit>(string.Format(SubredditAboutUrl, name));
         }
 

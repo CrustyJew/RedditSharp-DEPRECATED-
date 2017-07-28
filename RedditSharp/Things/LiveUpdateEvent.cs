@@ -209,8 +209,10 @@ namespace RedditSharp.Things
 
                 return true;
             }
-
-            return false;
+            else
+            {
+                throw new Exception("Error editing live thread. Error: " + json["json"]["errors"][0][0].ToString());
+            }
         }
 
         /// <summary>

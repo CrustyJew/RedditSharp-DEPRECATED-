@@ -51,14 +51,14 @@ namespace RedditSharp.Things
             Thing first = things.Current;
             Dictionary<string, Tuple<Comment, List<Comment>>> comments = new Dictionary<string, Tuple<Comment, List<Comment>>>
             {
-                [this.FullName] = Tuple.Create<Comment, List<Comment>>(this, new List<Comment>())
+                [this.FullName] = Tuple.Create(this, new List<Comment>())
             };
             while (things.MoveNext() && (first is Comment || first is More))
             {
                 first = things.Current;
                 if (first is Comment comment)
                 {
-                    comments[comment.FullName] = Tuple.Create<Comment, List<Comment>>(comment, new List<Comment>());
+                    comments[comment.FullName] = Tuple.Create(comment, new List<Comment>());
                     if (comments.ContainsKey(comment.ParentId))
                     {
                         comments[comment.ParentId].Item2.Add(comment);
@@ -226,7 +226,7 @@ namespace RedditSharp.Things
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
             else
-                throw new Exception("Error editing text.");
+                throw new Exception("Error editing text. Error: " + json["json"]["errors"][0][0].ToString());
         }
 
         /// <inheritdoc />

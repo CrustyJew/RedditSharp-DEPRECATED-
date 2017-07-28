@@ -213,7 +213,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public static Task<Subreddit> GetByNameAsync(IWebAgent agent, string name)
         {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
+            name = System.Text.RegularExpressions.Regex.Replace(name, "^([/]?(r/))|/", "");
             return Helpers.GetThingAsync<Subreddit>(agent, string.Format(SubredditAboutUrl, name));
         }
 
@@ -496,12 +496,7 @@ namespace RedditSharp.Things
 
         private void SetName()
         {
-            Name = Url.ToString();
-            if (Name.StartsWith("/r/"))
-                Name = Name.Substring(3);
-            if (Name.StartsWith("r/"))
-                Name = Name.Substring(2);
-            Name = Name.TrimEnd('/');
+            Name = System.Text.RegularExpressions.Regex.Replace(Url.ToString(), "^([/]?(r/))|/", "");
         }
 
         /// <summary>
@@ -811,6 +806,10 @@ namespace RedditSharp.Things
             else if (json["errors"].Any() && json["errors"][0][0].ToString() == "ALREADY_SUB")
             {
                 throw new DuplicateLinkException($"Post failed when submitting.  The following link has already been submitted: {((LinkData)data).URL}");
+            }
+            else if(json["errors"].Any())
+            {
+                throw new Exception($"Post failed when submitting. Error: {json["errors"][0][0].ToString()}");
             }
 
             return new Post(WebAgent, json["data"]);

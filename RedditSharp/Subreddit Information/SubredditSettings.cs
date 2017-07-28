@@ -278,9 +278,9 @@ namespace RedditSharp
                 wiki_edit_age = WikiEditAge,
                 wiki_edit_karma = WikiEditKarma,
                 wikimode,
-                spam_links = SpamFilter == null ? null : SpamFilter.LinkPostStrength.ToString().ToLowerInvariant(),
-                spam_selfposts = SpamFilter == null ? null : SpamFilter.SelfPostStrength.ToString().ToLowerInvariant(),
-                spam_comments = SpamFilter == null ? null : SpamFilter.CommentStrength.ToString().ToLowerInvariant(),
+                spam_links = SpamFilter?.LinkPostStrength.ToString().ToLowerInvariant(),
+                spam_selfposts = SpamFilter?.SelfPostStrength.ToString().ToLowerInvariant(),
+                spam_comments = SpamFilter?.CommentStrength.ToString().ToLowerInvariant(),
                 api_type = "json"
             }, "header-title", HeaderHoverText).ConfigureAwait(false);
         }

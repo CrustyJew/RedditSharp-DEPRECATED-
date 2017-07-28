@@ -69,7 +69,7 @@ namespace RedditSharp.Things
         private const string UnBanUserUrl = "/api/unfriend";
         private const string AddModeratorUrl = "/api/friend";
         private const string AddContributorUrl = "/api/friend";
-        private string ModeratorsUrl => $"/r/{Name}/about/moderators.json";
+        private const string ModeratorsUrl = "/r/{0}/about/moderators.json";
         private const string FrontPageUrl = "/.json";
         private const string SubmitLinkUrl = "/api/submit";
         private string FlairListUrl => $"/r/{Name}/api/flairlist.json";
@@ -460,21 +460,9 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get an <see cref="IEnumerable{T}"/> of the subreddit moderators.
         /// </summary>
-        public async Task<IEnumerable<ModeratorUser>> GetModeratorsAsync()
+        public Task<IEnumerable<ModeratorUser>> GetModeratorsAsync()
         {
-            var json = await WebAgent.Get(ModeratorsUrl).ConfigureAwait(false);
-            var type = json["kind"].ToString();
-            if (type != "UserList")
-                throw new FormatException("Reddit responded with an object that is not a user listing.");
-            var data = json["data"];
-            var mods = data["children"].ToArray();
-            var result = new ModeratorUser[mods.Length];
-            for (var i = 0; i < mods.Length; i++)
-            {
-                var mod = new ModeratorUser(mods[i]);
-                result[i] = mod;
-            }
-            return result;
+            return GetModeratorsAsync(WebAgent, Name);
         }
 
         /// <summary>
@@ -906,5 +894,25 @@ namespace RedditSharp.Things
             var url = $"{ModLogUrl}?type={action}";
             return Listing<ModAction>.Create(WebAgent, url, max, 500);
         }
+
+        #region Static Operations
+
+        public static async Task<IEnumerable<ModeratorUser>> GetModeratorsAsync(IWebAgent agent, string subreddit ) {
+            var json = await agent.Get(string.Format(ModeratorsUrl,subreddit)).ConfigureAwait(false);
+            var type = json["kind"].ToString();
+            if(type != "UserList")
+                throw new FormatException("Reddit responded with an object that is not a user listing.");
+            var data = json["data"];
+            var mods = data["children"].ToArray();
+            var result = new ModeratorUser[mods.Length];
+            for(var i = 0; i < mods.Length; i++) {
+                var mod = new ModeratorUser(mods[i]);
+                result[i] = mod;
+            }
+            return result;
+        }
+
+        #endregion
+
     }
 }

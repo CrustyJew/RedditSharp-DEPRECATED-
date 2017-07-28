@@ -59,12 +59,6 @@ namespace RedditSharp.Things
         public string Destination { get; private set; }
 
         /// <summary>
-        /// Message author.
-        /// </summary>
-        [JsonProperty("author")]
-        public string Author { get; private set; }
-
-        /// <summary>
         /// Subreddit (for comments).
         /// </summary>
         [JsonProperty("subreddit")]

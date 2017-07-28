@@ -51,7 +51,7 @@ namespace RedditSharp
         /// <param name="subredditName"></param>
         public Wiki(IWebAgent agent, string subredditName):base(agent)
         {
-            subredditName = System.Text.RegularExpressions.Regex.Replace(subredditName, "(r/|/)", "");
+            subredditName = System.Text.RegularExpressions.Regex.Replace(subredditName, "^([/](r/))|/", "");
             SubredditName = subredditName;
         }
 

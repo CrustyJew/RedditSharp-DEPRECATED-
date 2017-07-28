@@ -213,7 +213,7 @@ namespace RedditSharp.Things
         /// <returns></returns>
         public static Task<Subreddit> GetByNameAsync(IWebAgent agent, string name)
         {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "^([/](r/))|/", "");
+            name = System.Text.RegularExpressions.Regex.Replace(name, "^([/]?(r/))|/", "");
             return Helpers.GetThingAsync<Subreddit>(agent, string.Format(SubredditAboutUrl, name));
         }
 
@@ -508,7 +508,7 @@ namespace RedditSharp.Things
 
         private void SetName()
         {
-            Name = System.Text.RegularExpressions.Regex.Replace(Url.ToString(), "^([/](r/))|/", "");
+            Name = System.Text.RegularExpressions.Regex.Replace(Url.ToString(), "^([/]?(r/))|/", "");
         }
 
         /// <summary>

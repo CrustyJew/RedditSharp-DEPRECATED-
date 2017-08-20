@@ -26,7 +26,7 @@ namespace RedditSharp.Things
         public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             await CommonInitAsync(reddit, json, webAgent);
-            await JsonConvert.PopulateObjectAsync(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+            JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings);
             return this;
         }

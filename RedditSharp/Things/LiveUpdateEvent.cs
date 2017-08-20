@@ -518,7 +518,7 @@ namespace RedditSharp.Things
         public async Task<LiveUpdateEvent> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             CommonInit(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             FullName = Name;
             Name = Name.Replace("LiveUpdateEvent_", "");
             return this;

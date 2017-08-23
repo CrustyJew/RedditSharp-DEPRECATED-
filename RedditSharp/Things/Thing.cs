@@ -23,13 +23,6 @@ namespace RedditSharp.Things
             FetchedAt = DateTimeOffset.Now;
         }
 
-        /// <summary>
-        /// Shortlink to the item
-        /// </summary>
-        public virtual string Shortlink
-        {
-            get { return "http://redd.it/" + Id; }
-        }
 
         /// <summary>
         /// Base36 id.

@@ -17,3 +17,4 @@ StyleCop.Cache
 .vs/config/applicationhost.config
 /.vs
 /packages
+/RedditSharpTests/secrets.json

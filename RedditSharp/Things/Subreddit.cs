@@ -248,12 +248,12 @@ namespace RedditSharp.Things
         /// <summary>
         /// Comments for a subreddit, all of them, irrespective of replies and what it is replying to
         /// </summary>
-        public Listing<Comment> GetComments(int max = -1)
+        public Listing<Comment> GetComments(int max = -1, int limitPerRequest = 25)
         {
             if (Name == "/")
-                return Listing<Comment>.Create(WebAgent, "/comments.json", max, 100);
+                return Listing<Comment>.Create(WebAgent, "/comments.json", max, limitPerRequest);
 
-            return Listing<Comment>.Create(WebAgent, CommentsUrl, max, 100);
+            return Listing<Comment>.Create(WebAgent, CommentsUrl, max, limitPerRequest);
         }
 
         /// <summary>
@@ -496,6 +496,10 @@ namespace RedditSharp.Things
 
         private void SetName()
         {
+            if(Url == null) 
+            {
+                Name = ""; return;
+            }
             Name = Url.ToString();
             if (Name.StartsWith("/r/"))
                 Name = Name.Substring(3);

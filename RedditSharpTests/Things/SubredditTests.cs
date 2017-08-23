@@ -38,5 +38,26 @@ namespace RedditSharpTests.Things
             Assert.NotNull(post);
             await post.DelAsync();
         }
+
+        [Fact]
+        public async Task GetRALLComments() 
+        {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
+
+            var comments = reddit.RSlashAll.GetComments(5);
+            Assert.Equal(5, await comments.Count());
+        }
+
+        [Fact]
+        public async Task PageComments() {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
+
+            var comments = await reddit.RSlashAll.GetComments().Take(55).ToList();
+
+            Assert.Equal(55, comments.Count);
+            
+        }
     }
 }

@@ -232,7 +232,7 @@ namespace RedditSharp
                 if (LimitPerRequest > 0)
                 {
                     int limit = LimitPerRequest;
-                    if (MaximumLimit < 0)
+                    if (MaximumLimit > 0)
                     {
                         limit = new[] { LimitPerRequest, MaximumLimit, Count + LimitPerRequest - MaximumLimit }.Min();
                     }
@@ -363,7 +363,6 @@ namespace RedditSharp
                     //first call, get a page and set CurrentIndex
                     await FetchNextPageAsync().ConfigureAwait(false);
                     CurrentIndex = 0;
-                    Count = 1;
                     return CurrentPage.Count > 0; //if there are no results, return false
                 }
                 else

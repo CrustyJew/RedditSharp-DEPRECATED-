@@ -52,13 +52,13 @@ namespace RedditSharp
         /// </summary>
         /// <param name="username">Username of Reddit user attached to WebAgent</param>
         /// <returns></returns>
-        public async Task<IWebAgent> GetWebAgentAsync(string username)
+        public async Task<IWebAgent> GetWebAgentAsync(string username, int requestsPerMinuteWithOAuth = 60, int requestsPerMinuteWithoutOAuth = 30)
         {
             var poolEnt = poolEntries.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
-            return await GetWebAgentAsync(poolEnt);
+            return await GetWebAgentAsync(poolEnt, requestsPerMinuteWithOAuth, requestsPerMinuteWithoutOAuth);
         }
 
-        private async Task<IWebAgent> GetWebAgentAsync(RefreshTokenPoolEntry poolEnt) {
+        private async Task<IWebAgent> GetWebAgentAsync(RefreshTokenPoolEntry poolEnt, int requestsPerMinuteWithOAuth, int requestsPerMinuteWithoutOAuth) {
             IWebAgent toReturn = null;
             if(poolEnt != null) {
                 toReturn = activeAgentsCache.Get<IWebAgent>(poolEnt.WebAgentID);
@@ -73,7 +73,7 @@ namespace RedditSharp
                         var opts = new MemoryCacheEntryOptions() { AbsoluteExpiration = null, SlidingExpiration = new TimeSpan(0, SlidingExpirationMinutes, 0) };
                         opts.RegisterPostEvictionCallback(UpdateAgentInfoOnCacheRemove);
 
-                        agent = new RefreshTokenWebAgent(poolEnt.RefreshToken, ClientID, ClientSecret, RedirectURI, poolEnt.UserAgentString, poolEnt.AccessToken, poolEnt.TokenExpires, new RateLimitManager(poolEnt.RateLimiterMode));
+                        agent = new RefreshTokenWebAgent(poolEnt.RefreshToken, ClientID, ClientSecret, RedirectURI, poolEnt.UserAgentString, poolEnt.AccessToken, poolEnt.TokenExpires, new RateLimitManager(poolEnt.RateLimiterMode, requestsPerMinuteWithOAuth, requestsPerMinuteWithoutOAuth));
 
                         activeAgentsCache.Set(poolEnt.WebAgentID, agent, opts);
                         return agent;
@@ -92,7 +92,7 @@ namespace RedditSharp
         /// <param name="username">Username of Reddit user of <see cref="IWebAgent"/></param>
         /// <param name="createAsync">Async function to return a new <see cref="RefreshTokenPoolEntry"/>. Parameters (<see cref="string"/> username, <see cref="string"/> default useragent, <see cref="RateLimitMode"/> default rate limit mode)</param>
         /// <returns></returns>
-        public async Task<IWebAgent> GetOrCreateWebAgentAsync(string username, Func<string, string, RateLimitMode, Task<RefreshTokenPoolEntry>> createAsync)
+        public async Task<IWebAgent> GetOrCreateWebAgentAsync(string username, Func<string, string, RateLimitMode, Task<RefreshTokenPoolEntry>> createAsync, int requestsPerMinuteWithOAuth = 60, int requestsPerMinuteWithoutOAuth = 30)
         {
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("username cannot be null or empty");
 
@@ -106,7 +106,7 @@ namespace RedditSharp
                     //check if someone else wrote it while waiting for lock.
                     poolEnt = poolEntries.SingleOrDefault(a => a.Username.ToLower() == username.ToLower());
 
-                    if(poolEnt != null) return await GetWebAgentAsync(poolEnt);
+                    if(poolEnt != null) return await GetWebAgentAsync(poolEnt, requestsPerMinuteWithOAuth, requestsPerMinuteWithoutOAuth);
 
                     poolEnt = await createAsync(username, DefaultUserAgent, DefaultRateLimitMode);
                     poolEntries.Add(poolEnt);
@@ -124,7 +124,7 @@ namespace RedditSharp
                 
             }
            
-            return await GetWebAgentAsync(poolEnt);
+            return await GetWebAgentAsync(poolEnt, requestsPerMinuteWithOAuth, requestsPerMinuteWithoutOAuth);
         }
 
         /// <summary>

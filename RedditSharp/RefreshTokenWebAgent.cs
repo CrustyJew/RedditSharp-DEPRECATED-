@@ -33,7 +33,7 @@ namespace RedditSharp
         /// <param name="accessToken">currently available access token. Will get a new one immediately upon agent use if not provided</param>
         /// <param name="validTo">UTC datetime that the access token is valid to. If not provided, defaults to expired and will get a new token</param>
         /// <param name="rateLimiter">Defaults to Global Default Rate Limit Manager set on static class <see cref="WebAgent"/>. This really really should be set manually and is handled for you by <see cref="RefreshTokenWebAgentPool"/>.</param>
-        public RefreshTokenWebAgent(string refreshToken, string clientID, string clientSecret, string redirectURI, string userAgentString = "", string accessToken = "", DateTime? validTo = null, RateLimitManager rateLimiter = null):base(accessToken,rateLimiter,userAgentString)
+        public RefreshTokenWebAgent(string refreshToken, string clientID, string clientSecret, string redirectURI, string userAgentString = "", string accessToken = "", DateTime? validTo = null, IRateLimiter rateLimiter = null):base(accessToken,rateLimiter,userAgentString)
         {
             RefreshToken = refreshToken;
             AccessToken = accessToken;

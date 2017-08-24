@@ -33,7 +33,7 @@ namespace RedditSharp
     /// <summary>
     /// Class to manage API rate limiting
     /// </summary>
-    public class RateLimitManager
+    public class RateLimitManager : IRateLimiter
     {
         // See https://github.com/reddit/reddit/wiki/API for more details.
         /// <summary>
@@ -68,17 +68,23 @@ namespace RedditSharp
         /// </summary>
         public int RequestsThisBurst { get; private set; }
 
-        private SemaphoreSlim rateLimitLock;
+        protected SemaphoreSlim rateLimitLock;
+
+        public int RequestsPerMinuteWithOAuth { get; set; }
+
+        public int RequestsPerMinuteWithoutOAuth { get; set; }
 
         /// <summary>
         /// Create new RateLimitManager. Defaults to Burst RateLimitMode
         /// </summary>
         /// <param name="mode">Defaults to Burst RateLimitMode</param>
-        public RateLimitManager(RateLimitMode mode = RateLimitMode.Burst)
+        public RateLimitManager(RateLimitMode mode = RateLimitMode.Burst, int requestsPerMinuteWithOAuth = 60, int requestsPerMinuteWithoutOAuth = 30)
         {
             rateLimitLock = new SemaphoreSlim(1, 1);
             Reset = DateTimeOffset.UtcNow;
             Mode = mode;
+            this.RequestsPerMinuteWithOAuth = requestsPerMinuteWithOAuth;
+            this.RequestsPerMinuteWithoutOAuth = requestsPerMinuteWithoutOAuth;
         }
         /// <summary>
         /// Locks and awaits until you can make another request per RateLimitMode
@@ -108,9 +114,9 @@ namespace RedditSharp
         /// <summary>
         /// Enforce the api throttle.
         /// </summary>
-        async Task EnforceRateLimit(bool oauth)
+        public async Task EnforceRateLimit(bool oauth)
         {
-            var limitRequestsPerMinute = oauth ? 60.0 : 30.0;
+            var limitRequestsPerMinute = oauth ? (double)this.RequestsPerMinuteWithOAuth : (double)this.RequestsPerMinuteWithoutOAuth;
             var requestTime = DateTime.UtcNow;
             switch (Mode)
             {
@@ -154,7 +160,7 @@ namespace RedditSharp
             LastRequest = requestTime;
         }
 
-        internal async Task ReadHeadersAsync(HttpResponseMessage response)
+        public async Task ReadHeadersAsync(HttpResponseMessage response)
         {
             await rateLimitLock.WaitAsync().ConfigureAwait(false);
             try

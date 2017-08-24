@@ -35,12 +35,12 @@ namespace RedditSharp
         /// <summary>
         /// Global default RateLimitManager
         /// </summary>
-        public static RateLimitManager DefaultRateLimiter { get; private set; }
+        public static IRateLimiter DefaultRateLimiter { get; private set; }
 
         /// <summary>
         /// RateLimitManager for this Reddit instance.
         /// </summary>
-        public RateLimitManager RateLimiter { get; set; }
+        public IRateLimiter RateLimiter { get; set; }
 
         /// <inheritdoc />
         public string AccessToken { get; set; }
@@ -76,7 +76,7 @@ namespace RedditSharp
         /// <param name="accessToken">Valid access token</param>
         /// <param name="rateLimiter"><see cref="RateLimitManager"/> that controls the rate limit for this instance of the WebAgent. Defaults to the shared, static rate limiter.</param>
         /// <param name="userAgent">Optional userAgent string to override default UserAgent</param>
-        public WebAgent( string accessToken, RateLimitManager rateLimiter = null, string userAgent = "") {
+        public WebAgent( string accessToken, IRateLimiter rateLimiter = null, string userAgent = "") {
             RootDomain = OAuthDomainUrl;
             AccessToken = accessToken;
             if(rateLimiter == null)

@@ -20,11 +20,6 @@ namespace RedditSharp.Things
         public AuthenticatedUser User { get; set; }
 
         /// <summary>
-        /// Shortlink to the item
-        /// </summary>
-        public virtual string Shortlink => "http://redd.it/" + Id;
-
-        /// <summary>
         /// Base36 id.
         /// </summary>
         public string Id { get; internal set; }

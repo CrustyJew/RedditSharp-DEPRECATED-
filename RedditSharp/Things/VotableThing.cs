@@ -75,6 +75,11 @@ namespace RedditSharp.Things
         public bool Saved { get; private set; }
 
         /// <summary>
+        /// Shortlink to the item
+        /// </summary>
+        public virtual string Shortlink => "http://redd.it/" + Id;
+
+        /// <summary>
         /// Returns true if the item is sticked.
         /// </summary>
         [JsonProperty("stickied")]

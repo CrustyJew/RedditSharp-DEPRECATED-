@@ -72,6 +72,6 @@ namespace RedditSharp
         /// <summary>
         /// <see cref="RateLimitManager"/> for this instance of IWebAgent
         /// </summary>
-        RateLimitManager RateLimiter { get; set; }
+        IRateLimiter RateLimiter { get; set; }
     }
 }

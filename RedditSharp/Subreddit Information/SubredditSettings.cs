@@ -67,7 +67,7 @@ namespace RedditSharp
             UseDomainCss = data["domain_css"].ValueOrDefault<bool>();
             UseDomainSidebar = data["domain_sidebar"].ValueOrDefault<bool>();
             HeaderHoverText = data["header_hover_text"].ValueOrDefault<string>();
-            NSFW = data["over_18"].ValueOrDefault<bool>();
+            NSFW = data["over18"].ValueOrDefault<bool>();
             PublicDescription = WebUtility.HtmlDecode(data["public_description"].ValueOrDefault<string>() ?? string.Empty);
             SpamFilter = new SpamFilterSettings
             {
@@ -269,7 +269,7 @@ namespace RedditSharp
                 domain = Domain,
                 lang = Language,
                 link_type,
-                over_18 = NSFW,
+                over18 = NSFW,
                 public_description = PublicDescription,
                 show_media = ShowThumbnails,
                 sr = Subreddit.FullName,

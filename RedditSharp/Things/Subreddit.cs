@@ -129,7 +129,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Returns true of the subreddit is marked for users over 18.
         /// </summary>
-        [JsonProperty("over_18")]
+        [JsonProperty("over18")]
         public bool NSFW { get; private set; }
 
         /// <summary>

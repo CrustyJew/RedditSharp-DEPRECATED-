@@ -43,7 +43,13 @@ namespace RedditSharp
         MuteUser,
         UnMuteUser,
         SpamComment,
-        SpamLink
+        SpamLink,
+        CreateRule,
+        EditRule,
+        DeleteRule,
+        Spoiler,
+        UnSpoiler,
+        Modmail_Enrollment
     }
 }
 #pragma warning restore 1591

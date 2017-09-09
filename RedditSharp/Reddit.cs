@@ -441,5 +441,17 @@ namespace RedditSharp
 
         #endregion SubredditSearching
 
+        /// <summary>
+        /// Create a listing from the specified url.  Useful if you want to specify your own "before" and "after" values.
+        /// </summary>
+        /// <typeparam name="T">A <see cref="RedditSharp.Things.Thing"/></typeparam>
+        /// <param name="url">endpoint url.</param>
+        /// <param name="maxLimit">Maximum number of records to retrieve from reddit.</param>
+        /// <param name="limitPerRequest">Maximum number of records to return per request.  This number is endpoint specific.</param>
+        /// <returns></returns>
+        public Listing<T> GetListing<T>(string url, int maxLimit = -1, int limitPerRequest = -1) where T : Thing
+        {
+            return new Listing<T>(this.WebAgent, url, maxLimit, limitPerRequest);
+        }
     }
 }

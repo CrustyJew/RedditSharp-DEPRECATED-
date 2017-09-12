@@ -234,7 +234,8 @@ namespace RedditSharp
                     int limit = LimitPerRequest;
                     if (MaximumLimit > 0)
                     {
-                        limit = new[] { LimitPerRequest, MaximumLimit, Count + LimitPerRequest - MaximumLimit }.Min();
+                        limit = new[] { LimitPerRequest, MaximumLimit, (MaximumLimit - Count) }.Min();
+
                     }
                     if (limit > 0)
                     {

@@ -41,46 +41,46 @@ namespace RedditSharp.Things
         [JsonProperty("is_gold")]
         public bool HasGold { get; private set; }
 
-		/// <summary>
-		/// Returns true if the user has subscribed to a subreddit.
-		/// </summary>
-		[JsonProperty("has_subscribed")]
-		public bool HasSubscribed { get; private set; }
+        /// <summary>
+        /// Returns true if the user has subscribed to a subreddit.
+        /// </summary>
+        [JsonProperty("has_subscribed")]
+        public bool HasSubscribed { get; private set; }
 
-		/// <summary>
-		/// Returns true if this user's email has been verified.
-		/// </summary>
-		[JsonProperty("has_verified_email")]
-		public bool HasVerifiedEmail { get; private set; }
+        /// <summary>
+        /// Returns true if this user's email has been verified.
+        /// </summary>
+        [JsonProperty("has_verified_email")]
+        public bool HasVerifiedEmail { get; private set; }
 
-		/// <summary>
-		/// Returns true if the user is an employee. This does not denote someone
-		/// who can use the full administrative features of reddit, but users
-		/// who are employees can distinguish as an admin (marked by a red [A]).
-		/// </summary>
-		[JsonProperty("is_employee")]
-		public bool IsEmployee { get; private set; }
+        /// <summary>
+        /// Returns true if the user is an employee. This does not denote someone
+        /// who can use the full administrative features of reddit, but users
+        /// who are employees can distinguish as an admin (marked by a red [A]).
+        /// </summary>
+        [JsonProperty("is_employee")]
+        public bool IsEmployee { get; private set; }
 
-		/// <summary>
-		/// Returns true if the user is a friend of this user. Users who the
-		/// current logged in user has marked as a friend will have their
-		/// posts and comments distinguished with an orange [F].
-		/// </summary>
-		[JsonProperty("is_friend")]
-		public bool IsFriend { get; private set; }
+        /// <summary>
+        /// Returns true if the user is a friend of this user. Users who the
+        /// current logged in user has marked as a friend will have their
+        /// posts and comments distinguished with an orange [F].
+        /// </summary>
+        [JsonProperty("is_friend")]
+        public bool IsFriend { get; private set; }
 
-		/// <summary>
-		/// Returns true if the user is a moderator of any subreddit.
-		/// </summary>
-		[JsonProperty("is_mod")]
+        /// <summary>
+        /// Returns true if the user is a moderator of any subreddit.
+        /// </summary>
+        [JsonProperty("is_mod")]
         public bool IsModerator { get; private set; }
 
-		/// <summary>
-		/// Returns true if the user is verified. This appears to not be working
-		/// correctly and instead returns if the user has a new profile.
-		/// </summary>
-		[JsonProperty("verified")]
-		public bool IsVerified { get; private set; }
+        /// <summary>
+        /// Returns true if the user is verified. This appears to not be working
+        /// correctly and instead returns if the user has a new profile.
+        /// </summary>
+        [JsonProperty("verified")]
+        public bool IsVerified { get; private set; }
 
         /// <summary>
         /// Total link karma of the user.
@@ -94,16 +94,16 @@ namespace RedditSharp.Things
         [JsonProperty("comment_karma")]
         public int CommentKarma { get; private set; }
 
-		/// <summary>
-		/// Whether this user profile should be hidden from crawler robots.
-		/// </summary>
-		[JsonProperty("hide_from_robots")]
-		public bool HideFromRobots { get; private set; }
+        /// <summary>
+        /// Whether this user profile should be hidden from crawler robots.
+        /// </summary>
+        [JsonProperty("hide_from_robots")]
+        public bool HideFromRobots { get; private set; }
 
-		/// <summary>
-		/// Whether to show this user's snoovatar
-		/// </summary>
-		public bool ShowSnoovatar { get; private set; }
+        /// <summary>
+        /// Whether to show this user's snoovatar
+        /// </summary>
+        public bool ShowSnoovatar { get; private set; }
 
         /// <summary>
         /// Prefix for fullname. Includes trailing underscore

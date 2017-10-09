@@ -103,6 +103,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Whether to show this user's snoovatar
         /// </summary>
+        [JsonProperty("pref_show_snoovatar")]
         public bool ShowSnoovatar { get; private set; }
 
         /// <summary>

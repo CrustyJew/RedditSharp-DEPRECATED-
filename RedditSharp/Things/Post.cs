@@ -35,12 +35,6 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <summary>
-        /// Author of this post.
-        /// </summary>
-        [JsonProperty("author")]
-        public new string AuthorName { get; private set; }
-
-        /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]

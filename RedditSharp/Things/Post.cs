@@ -35,12 +35,6 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <summary>
-        /// Author of this post.
-        /// </summary>
-        [JsonProperty("author")]
-        public new string AuthorName { get; private set; }
-
-        /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]
@@ -73,7 +67,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
-        [JsonProperty("over_18")]
+        [JsonProperty("over18")]
         public bool NSFW { get; private set; }
 
         /// <summary>

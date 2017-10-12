@@ -67,7 +67,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Returns true if this post is marked not safe for work.
         /// </summary>
-        [JsonProperty("over18")]
+        [JsonProperty("over_18")]
         public bool NSFW { get; private set; }
 
         /// <summary>

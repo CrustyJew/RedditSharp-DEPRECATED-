@@ -237,19 +237,34 @@ namespace RedditSharp
                     link_type = "self";
                     break;
             }
-            switch (SubredditType)
-            {
-                case SubredditType.Public:
-                    type = "public";
-                    break;
-                case SubredditType.Private:
-                    type = "private";
-                    break;
-                default:
-                    type = "restricted";
-                    break;
-            }
-            switch (WikiEditMode)
+			switch (SubredditType)
+			{
+				case SubredditType.Archived:
+					type = "archived";
+					break;
+				case SubredditType.EmployeesOnly:
+					type = "employees_only";
+					break;
+				case SubredditType.GoldOnly:
+					type = "gold_only";
+					break;
+				case SubredditType.GoldRestricted:
+					type = "gold_restricted";
+					break;
+				case SubredditType.Private:
+					type = "private";
+					break;
+				case SubredditType.Public:
+					type = "public";
+					break;
+				case SubredditType.Restricted:
+					type = "restricted";
+					break;
+				default:
+					type = "public";
+					break;
+			}
+			switch (WikiEditMode)
             {
                 case WikiEditMode.All:
                     wikimode = "anyone";
@@ -283,12 +298,12 @@ namespace RedditSharp
                 spam_comments = SpamFilter == null ? null : SpamFilter.CommentStrength.ToString().ToLowerInvariant(),
                 api_type = "json"
             }, "header-title", HeaderHoverText).ConfigureAwait(false);
-        }
+		}
 
-        /// <summary>
-        /// Resets the subreddit's header image to the Reddit logo
-        /// </summary>
-        public async Task ResetHeaderImage()
+		/// <summary>
+		/// Resets the subreddit's header image to the Reddit logo
+		/// </summary>
+		public async Task ResetHeaderImage()
         {
             await WebAgent.Post(DeleteHeaderImageUrl, new
             {
@@ -310,12 +325,12 @@ namespace RedditSharp
                     return SpamFilterStrength.High;
             }
         }
-    }
+	}
 
-    /// <summary>
-    /// Rules for editing the wiki.
-    /// </summary>
-    public enum WikiEditMode
+	/// <summary>
+	/// Rules for editing the wiki.
+	/// </summary>
+	public enum WikiEditMode
     {
         /// <summary>
         /// Wiki is disabled for all users except mods.
@@ -326,7 +341,7 @@ namespace RedditSharp
         /// </summary>
         Moderators,
         /// <summary>
-        /// Anyone who can submit to the subreddit may edit.
+        /// Anyone who can submit to the subreddit that meets the minimum thresholds may edit.
         /// </summary>
         All
     }
@@ -336,19 +351,42 @@ namespace RedditSharp
     /// </summary>
     public enum SubredditType
     {
-        /// <summary>
-        /// Anyone can view and submit.
-        /// </summary>
-        Public,
-        /// <summary>
-        /// Anyone can view, but only some are approved to submit links.
-        /// </summary>
-        Restricted,
-        /// <summary>
-        /// Only approved members can view and submit.
-        /// </summary>
-        Private
-    }
+		/// <summary>
+		/// Anyone can view, but only admins, moderators, and approved
+		/// submitters can submit posts. This has the same net effect as a
+		/// <see cref="Restricted"/> subreddit, however an archived subreddit
+		/// displays the UI somewhat differently.
+		/// </summary>
+		Archived,
+		/// <summary>
+		/// Only admins and employees can view or submit.
+		/// </summary>
+        EmployeesOnly,
+		/// <summary>
+		/// Only admins, moderators, gold members, gold charter members, and
+		/// approved submitters can view or submit.
+		/// </summary>
+		GoldOnly,
+		/// <summary>
+		/// Anyone can view, but only admins, moderators, gold members, and
+		/// approved submitters can submit.
+		/// </summary>
+		GoldRestricted,
+		/// <summary>
+		/// Only admins, moderators, and approved submiters can view 
+		/// and submit.
+		/// </summary>
+		Private,
+		/// <summary>
+		/// Anyone can view and submit.
+		/// </summary>
+		Public,
+		/// <summary>
+		/// Anyone can view, but only admins, moderators, and approved
+		/// submitters can submit posts.
+		/// </summary>
+		Restricted,
+	}
 
     /// <summary>
     /// Content Options.

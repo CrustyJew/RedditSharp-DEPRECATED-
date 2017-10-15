@@ -260,6 +260,9 @@ namespace RedditSharp
                 case SubredditType.Restricted:
                     type = "restricted";
                     break;
+                case SubredditType.User:
+                    type = "user";
+                    break;
                 default:
                     type = "public";
                     break;
@@ -386,6 +389,12 @@ namespace RedditSharp
         /// submitters can submit posts.
         /// </summary>
         Restricted,
+        /// <summary>
+        /// Anyone can view, but only admins, moderators, and approved
+        /// submitters can submit posts. Most subreddit options are unable to
+        /// be changed. This is the subreddit type for the new user profiles.
+        /// </summary>
+        User,
     }
 
     /// <summary>

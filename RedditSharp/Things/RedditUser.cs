@@ -51,7 +51,7 @@ namespace RedditSharp.Things
         /// Returns true if this user's email has been verified.
         /// </summary>
         [JsonProperty("has_verified_email")]
-        public bool HasVerifiedEmail { get; private set; }
+        public bool? HasVerifiedEmail { get; private set; }
 
         /// <summary>
         /// Returns true if the user is an employee. This does not denote someone

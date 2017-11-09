@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions.DateTimeExtensions;
+using System.Text.RegularExpressions;
 
 namespace RedditSharp.Things
 {
@@ -14,6 +15,9 @@ namespace RedditSharp.Things
     /// </summary>
     public class Subreddit : Thing
     {
+        private static readonly Regex SubredditRegex = new Regex("^(/?r/)?(?<Name>[a-z0-9][a-z0-9_]{2,20})/?$", Flags);
+        private const RegexOptions Flags = RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase |
+                                           RegexOptions.Compiled;
         /// <summary>
         /// Sorting for posts in a a subreddit.
         /// </summary>
@@ -210,10 +214,15 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="agent">IWebAgent to use</param>
         /// <param name="name">Name of subreddit. Will remove 'r/' if it is included.</param>
+        /// <param name="validateName">Whether to validate the subreddit name.</param>
         /// <returns></returns>
-        public static Task<Subreddit> GetByNameAsync(IWebAgent agent, string name)
+        public static Task<Subreddit> GetByNameAsync(IWebAgent agent, string name, bool validateName = true)
         {
-            name = System.Text.RegularExpressions.Regex.Replace(name, "(r/|/)", "");
+            name = Regex.Replace(name, "^([/](r/))|/", "");
+            if (validateName && !SubredditRegex.IsMatch(name))
+            {
+                throw new ArgumentException(nameof(name));
+            }
             return Helpers.GetThingAsync<Subreddit>(agent, string.Format(SubredditAboutUrl, name));
         }
 

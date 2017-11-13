@@ -191,6 +191,9 @@ namespace RedditSharp.Things
         [JsonProperty("saved")]
         public bool Saved { get; set; }
 
+        [JsonProperty("permalink")]
+        public string Permalink { get; set; }
+
         /// <summary>
         /// Shortlink to the item
         /// </summary>

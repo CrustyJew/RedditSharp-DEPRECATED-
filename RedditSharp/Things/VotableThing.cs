@@ -80,6 +80,13 @@ namespace RedditSharp.Things
         public virtual string Shortlink => "http://redd.it/" + Id;
 
         /// <summary>
+        /// The permalink for an item
+        /// </summary>
+        [JsonProperty("permalink")]
+        [JsonConverter(typeof(UrlParser))]
+        public Uri Permalink { get; private set; }
+
+        /// <summary>
         /// Returns true if the item is sticked.
         /// </summary>
         [JsonProperty("stickied")]

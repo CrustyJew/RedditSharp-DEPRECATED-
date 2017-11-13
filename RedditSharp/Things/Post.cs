@@ -71,13 +71,6 @@ namespace RedditSharp.Things
         public bool NSFW { get; private set; }
 
         /// <summary>
-        /// Post permalink.
-        /// </summary>
-        [JsonProperty("permalink")]
-        [JsonConverter(typeof(UrlParser))]
-        public Uri Permalink { get; private set; }
-
-        /// <summary>
         /// Post self text markdown.
         /// </summary>
         [JsonProperty("selftext")]

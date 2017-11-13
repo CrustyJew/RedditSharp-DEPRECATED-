@@ -164,25 +164,8 @@ namespace RedditSharp.Things
         [JsonIgnore]
         public Thing Parent { get; internal set; }
 
-        /// <inheritdoc/>
-        public override string Shortlink
-        {
-            get
-            {
-                // Not really a "short" link, but you can't actually use short links for comments
-                string linkId = "";
-                int index = this.LinkId.IndexOf('_');
-                if (index > -1)
-                {
-                    linkId = this.LinkId.Substring(index + 1);
-                }
-
-                return string.Format("{0}://www.reddit.com/r/{1}/comments/{2}/_/{3}",
-                                     RedditSharp.WebAgent.Protocol,
-                                     this.Subreddit, this.Parent != null ? this.Parent.Id : linkId, 
-                                     this.Id);
-            }
-        }
+		/// <inheritdoc/>
+		public override string Shortlink => Permalink;
 
         /// <summary>
         /// Reply to this comment.

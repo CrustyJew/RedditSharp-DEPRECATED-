@@ -159,10 +159,11 @@ namespace RedditSharp
         /// Get a subreddit by name.
         /// </summary>
         /// <param name="name">subreddit name with or without preceding /r/</param>
+        /// <param name="validateName">Whether to validate the subreddit name.</param>
         /// <returns></returns>
-        public Task<Subreddit> GetSubredditAsync(string name)
+        public Task<Subreddit> GetSubredditAsync(string name, bool validateName = true)
         {
-            return Subreddit.GetByNameAsync(WebAgent, name);
+            return Subreddit.GetByNameAsync(WebAgent, name, validateName);
         }
 
         /// <summary>

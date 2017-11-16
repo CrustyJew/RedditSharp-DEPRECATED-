@@ -165,7 +165,7 @@ namespace RedditSharp.Things
         public Thing Parent { get; internal set; }
 
 		/// <inheritdoc/>
-		public override string Shortlink => Permalink;
+		public override string Shortlink => Permalink.ToString();
 
         /// <summary>
         /// Reply to this comment.

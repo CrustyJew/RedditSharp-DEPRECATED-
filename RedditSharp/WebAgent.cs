@@ -109,6 +109,7 @@ namespace RedditSharp
               await RateLimiter.CheckRateLimitAsync(IsOAuth).ConfigureAwait(false);
               response = await _httpClient.SendAsync(request()).ConfigureAwait(false);
               await RateLimiter.ReadHeadersAsync(response);
+              ++tries;
             } while( 
             //only retry if 500 or 503
                 (response.StatusCode == System.Net.HttpStatusCode.InternalServerError || 
@@ -229,7 +230,7 @@ namespace RedditSharp
             }
             for (int i = 0; i < additionalFields.Length; i += 2)
             {
-                var entry = Convert.ToString(additionalFields[i + 1]) ?? string.Empty;
+                var entry = Convert.ToString(additionalFields[i + 1]);
                 content.Add(new KeyValuePair<string, string>(additionalFields[i], entry));
             }
             //new FormUrlEncodedContent has a limit on length which can cause issues;

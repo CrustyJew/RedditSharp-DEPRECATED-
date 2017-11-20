@@ -311,9 +311,10 @@ namespace RedditSharp.Things
         /// Remove a contributor from the live thread.
         /// </summary>
         /// <param name="userName">reddit username.</param>
-        public Task<bool> RemoveContributorAsync(string userName)
+        public async Task<bool> RemoveContributorAsync(string userName)
         {
-            return RemoveContributorAsync(userName);
+            var redditUser = await RedditUser.GetUserAsync(WebAgent, userName);
+            return await RemoveContributorAsync(redditUser).ConfigureAwait(false);
         }
 
         /// <summary>

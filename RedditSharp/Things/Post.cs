@@ -34,7 +34,7 @@ namespace RedditSharp.Things
         public async Task<Post> InitAsync(Reddit reddit, JToken post, IWebAgent webAgent)
         {
             await CommonInitAsync(reddit, post, webAgent);
-            await JsonConvert.PopulateObjectAsync(post["data"].ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(post["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 
@@ -340,7 +340,7 @@ namespace RedditSharp.Things
             if (json["json"].ToString().Contains("\"errors\": []"))
                 SelfText = newText;
             else
-                throw new Exception("Error editing text.");
+                throw new Exception("Error editing text. Error: " + json["json"]["errors"][0][0].ToString());
         }
 
         /// <summary>

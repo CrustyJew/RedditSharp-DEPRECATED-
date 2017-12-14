@@ -440,6 +440,10 @@ namespace RedditSharp
                 if (!captchaResponse.Cancel) // Keep trying until we are told to cancel
                     ComposePrivateMessage(subject, body, to, fromSubReddit, captchaId, captchaResponse.Answer);
             }
+            else if(json["json"]["errors"].Any())
+            {
+                throw new Exception("Error when composing message. Error: " + json["json"]["errors"][0][0].ToString());
+            }
         }
 
         /// <summary>
@@ -554,8 +558,8 @@ namespace RedditSharp
         /// Return a <see cref="Listing{T}"/> of items matching search with a given time period.
         /// </summary>
         /// <typeparam name="T"><see cref="Thing"/></typeparam>
-        /// <param name="from">DateTime when to begin. </param>
-        /// <param name="to">DateTime when to end. </param>
+        /// <param name="from">When to begin. </param>
+        /// <param name="to">When to end. </param>
         /// <param name="query">string to query</param>
         /// <param name="subreddit">subreddit in which to search</param>
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
@@ -563,18 +567,31 @@ namespace RedditSharp
         /// <returns></returns>
         public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
+            return SearchByTimestamp<T>(new DateTimeOffset(from), new DateTimeOffset(to), query, subreddit, sortE, timeE);
+        }
+
+        /// <summary>
+        /// Return a <see cref="Listing{T}"/> of items matching search with a given time period.
+        /// </summary>
+        /// <typeparam name="T"><see cref="Thing"/></typeparam>
+        /// <param name="from">When to begin. </param>
+        /// <param name="to">When to end. </param>
+        /// <param name="query">string to query</param>
+        /// <param name="subreddit">subreddit in which to search</param>
+        /// <param name="sortE">Order by <see cref="Sorting"/></param>
+        /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
+        /// <returns></returns>
+        public Listing<T> SearchByTimestamp<T>(DateTimeOffset from, DateTimeOffset to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
+        {
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-            DateTimeOffset fromDto = new DateTimeOffset(from);
-            DateTimeOffset toDto = new DateTimeOffset(to);
-                        
-            var fromUnix = fromDto.ToUnixTimeSeconds();
-            var toUnix = toDto.ToUnixTimeSeconds();
+
+            var fromUnix = from.ToUnixTimeSeconds();
+            var toUnix = to.ToUnixTimeSeconds();
 
             string searchQuery = "(and+timestamp:" + fromUnix + ".." + toUnix + "+'" + query + "'+" + "subreddit:'" + subreddit + "')&syntax=cloudsearch";
             return new Listing<T>(this, string.Format(SearchUrl, searchQuery, sort, time), WebAgent);
         }
-
 
         #region SubredditSearching
 

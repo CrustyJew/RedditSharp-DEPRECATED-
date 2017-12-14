@@ -23,6 +23,8 @@ namespace RedditSharp.Things
         private const string GetReducedSettingsUrl = "/r/{0}/about.json";
         private const string ModqueueUrl = "/r/{0}/about/modqueue.json";
         private const string UnmoderatedUrl = "/r/{0}/about/unmoderated.json";
+        private const string SpamUrl = "/r/{0}/about/spam.json";
+        private const string EditedUrl = "/r/{0}/about/edited.json";
         private const string FlairTemplateUrl = "/api/flairtemplate";
         private const string ClearFlairTemplatesUrl = "/api/clearflairtemplates";
         private const string SetUserFlairUrl = "/api/flair";
@@ -60,7 +62,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? Created { get; set; }
+        public DateTimeOffset? Created { get; set; }
 
         /// <summary>
         /// Subreddit description.
@@ -268,6 +270,29 @@ namespace RedditSharp.Things
                 return new Listing<Post>(Reddit, string.Format(UnmoderatedUrl, Name), WebAgent);
             }
         }
+
+        /// <summary>
+        /// Listing of things that have been removed from the subreddit.
+        /// </summary>
+        public Listing<VotableThing> Spam
+        {
+            get
+            {
+                return new Listing<VotableThing>(Reddit, string.Format(SpamUrl, Name), WebAgent);
+            }
+        }
+
+        /// <summary>
+        /// Listing of things that have been edited
+        /// </summary>
+        public Listing<VotableThing> Edited
+        {
+            get
+            {
+                return new Listing<VotableThing>(Reddit, string.Format(EditedUrl, Name), WebAgent);
+            }
+        }
+
         /// <summary>
         /// Search using specific terms from a specified time to now
         /// </summary>
@@ -291,10 +316,23 @@ namespace RedditSharp.Things
         /// <returns>A list of posts in the range of time/dates in a specific order</returns>
         public Listing<Post> Search(DateTime from, DateTime to, Sorting sortE = Sorting.New)
         {
+            return Search(new DateTimeOffset(from), new DateTimeOffset(to), sortE);
+        }
+
+        /// <summary>
+        /// Search for a list of posts from a specific time to another time
+        /// </summary>
+        /// <param name="from">Time to begin search</param>
+        /// <param name="to">Time to end search at</param>
+        /// <param name="sortE">Sort of the objects you want to have it in</param>
+        /// <returns>A list of posts in the range of time/dates in a specific order</returns>
+        public Listing<Post> Search(DateTimeOffset from, DateTimeOffset to, Sorting sortE = Sorting.New)
+        {
             string sort = sortE.ToString().ToLower();
 
-            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, new DateTimeOffset(from).ToUnixTimeSeconds(), new DateTimeOffset(to).ToUnixTimeSeconds(), sort), WebAgent);
+            return new Listing<Post>(Reddit, string.Format(SearchUrlDate, Name, from.ToUnixTimeSeconds(), to.ToUnixTimeSeconds(), sort), WebAgent);
         }
+
         /// <summary>
         /// Settings of the subreddit, as best as possible
         /// </summary>
@@ -452,7 +490,7 @@ namespace RedditSharp.Things
         public async Task<Subreddit> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
             SetName();
 
             return this;
@@ -1058,6 +1096,10 @@ namespace RedditSharp.Things
             {
                 throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
+            else if(json["json"]["errors"].Any())
+            {
+                throw new Exception("Error when attempting to submit. Error: " + json["json"]["errors"][0][0].ToString());
+            }
 
             return new Post().Init(Reddit, json["json"], WebAgent);
         }
@@ -1092,7 +1134,10 @@ namespace RedditSharp.Things
             {
                 throw new DuplicateLinkException(string.Format("Post failed when submitting.  The following link has already been submitted: {0}", SubmitLinkUrl));
             }
-
+            else if (json["json"]["errors"].Any())
+            {
+                throw new Exception("Error when attempting to submit. Error: " + json["json"]["errors"][0][0].ToString());
+            }
             return new Post().Init(Reddit, json["json"], WebAgent);
         }
         /// <summary>

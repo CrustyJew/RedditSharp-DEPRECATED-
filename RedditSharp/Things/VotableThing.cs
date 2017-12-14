@@ -58,7 +58,7 @@ namespace RedditSharp.Things
         protected async Task<VotableThing> InitAsync(Reddit reddit, IWebAgent webAgent, JToken json)
         {
             await CommonInitAsync(reddit, webAgent, json);
-            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json["data"].ToString(), this, Reddit.JsonSerializerSettings);
             return this;
         }
 
@@ -190,6 +190,17 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("saved")]
         public bool Saved { get; set; }
+
+        [JsonProperty("permalink")]
+        public string Permalink { get; set; }
+
+        /// <summary>
+        /// Shortlink to the item
+        /// </summary>
+        public virtual string Shortlink
+        {
+            get { return "http://redd.it/" + Id; }
+        }
 
         /// <summary>
         /// Returns true if the item is sticked.

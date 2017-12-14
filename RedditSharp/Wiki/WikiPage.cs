@@ -19,7 +19,7 @@ namespace RedditSharp
         /// </summary>
         [JsonProperty("revision_date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? RevisionDate { get; set; }
+        public DateTimeOffset? RevisionDate { get; set; }
 
         /// <summary>
         /// Content of the page.

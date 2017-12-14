@@ -33,18 +33,18 @@ namespace RedditSharp.Things
         public bool IsComment { get; set; }
 
         /// <summary>
-        /// DateTime message was sent.
+        /// Date and time message was sent.
         /// </summary>
         [JsonProperty("created")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Sent { get; set; }
+        public DateTimeOffset Sent { get; set; }
 
         /// <summary>
-        /// DateTime message was sent in UTC.
+        /// Date and time message was sent in UTC.
         /// </summary>
         [JsonProperty("created_utc")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime SentUTC { get; set; }
+        public DateTimeOffset SentUTC { get; set; }
 
         /// <summary>
         /// Destination user or subreddit name.
@@ -139,7 +139,7 @@ namespace RedditSharp.Things
         public async Task<PrivateMessage> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            await JsonConvert.PopulateObjectAsync(json["data"].ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json["data"].ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 

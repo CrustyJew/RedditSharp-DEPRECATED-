@@ -72,20 +72,20 @@ namespace RedditSharp
         public CookieContainer Cookies { get; set; }
         public string AuthCookie { get; set; }
 
-        private static DateTime _lastRequest;
-        private static DateTime _burstStart;
+        private static DateTimeOffset _lastRequest;
+        private static DateTimeOffset _burstStart;
         private static int _requestsThisBurst;
         /// <summary>
-        /// UTC DateTime of last request made to Reddit API
+        /// UTC date and time of last request made to Reddit API
         /// </summary>
-        public DateTime LastRequest
+        public DateTimeOffset LastRequest
         {
             get { return _lastRequest; }
         }
         /// <summary>
-        /// UTC DateTime of when the last burst started
+        /// UTC date and time of when the last burst started
         /// </summary>
-        public DateTime BurstStart
+        public DateTimeOffset BurstStart
         {
             get { return _burstStart; }
         }
@@ -208,40 +208,40 @@ namespace RedditSharp
             switch (RateLimit)
             {
                 case RateLimitMode.Pace:
-                    while ((DateTime.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
+                    while ((DateTimeOffset.UtcNow - _lastRequest).TotalSeconds < 60.0 / limitRequestsPerMinute)// Rate limiting
                         Thread.Sleep(250);
-                    _lastRequest = DateTime.UtcNow;
+                    _lastRequest = DateTimeOffset.UtcNow;
                     break;
                 case RateLimitMode.SmallBurst:
-                    if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
+                    if (_requestsThisBurst == 0 || (DateTimeOffset.UtcNow - _burstStart).TotalSeconds >= 10) //this is first request OR the burst expired
                     {
-                        _burstStart = DateTime.UtcNow;
+                        _burstStart = DateTimeOffset.UtcNow;
                         _requestsThisBurst = 0;
                     }
                     if (_requestsThisBurst >= limitRequestsPerMinute / 6.0) //limit has been reached
                     {
-                        while ((DateTime.UtcNow - _burstStart).TotalSeconds < 10)
+                        while ((DateTimeOffset.UtcNow - _burstStart).TotalSeconds < 10)
                             Thread.Sleep(250);
-                        _burstStart = DateTime.UtcNow;
+                        _burstStart = DateTimeOffset.UtcNow;
                         _requestsThisBurst = 0;
                     }
-                    _lastRequest = DateTime.UtcNow;
+                    _lastRequest = DateTimeOffset.UtcNow;
                     _requestsThisBurst++;
                     break;
                 case RateLimitMode.Burst:
-                    if (_requestsThisBurst == 0 || (DateTime.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
+                    if (_requestsThisBurst == 0 || (DateTimeOffset.UtcNow - _burstStart).TotalSeconds >= 60) //this is first request OR the burst expired
                     {
-                        _burstStart = DateTime.UtcNow;
+                        _burstStart = DateTimeOffset.UtcNow;
                         _requestsThisBurst = 0;
                     }
                     if (_requestsThisBurst >= limitRequestsPerMinute) //limit has been reached
                     {
-                        while ((DateTime.UtcNow - _burstStart).TotalSeconds < 60)
+                        while ((DateTimeOffset.UtcNow - _burstStart).TotalSeconds < 60)
                             Thread.Sleep(250);
-                        _burstStart = DateTime.UtcNow;
+                        _burstStart = DateTimeOffset.UtcNow;
                         _requestsThisBurst = 0;
                     }
-                    _lastRequest = DateTime.UtcNow;
+                    _lastRequest = DateTimeOffset.UtcNow;
                     _requestsThisBurst++;
                     break;
             }

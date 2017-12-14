@@ -28,7 +28,7 @@ namespace RedditSharp.Things
         {
             var data = await CommonInitAsync(reddit, json, webAgent, sender);
             await ParseCommentsAsync(reddit, json, webAgent, sender);
-            await JsonConvert.PopulateObjectAsync(data.ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(data.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 
@@ -227,20 +227,7 @@ namespace RedditSharp.Things
         /// <inheritdoc/>
         public override string Shortlink
         {
-            get
-            {
-                // Not really a "short" link, but you can't actually use short links for comments
-                string linkId = "";
-                int index = this.LinkId.IndexOf('_');
-                if (index > -1)
-                {
-                    linkId = this.LinkId.Substring(index + 1);
-                }
-
-                return string.Format("{0}://{1}/r/{2}/comments/{3}/_/{4}",
-                                     RedditSharp.WebAgent.Protocol, RedditSharp.WebAgent.RootDomain,
-                                     this.Subreddit, this.Parent != null ? this.Parent.Id : linkId, this.Id);
-            }
+            get { return Permalink; }
         }
 
         /// <summary>
@@ -302,7 +289,7 @@ namespace RedditSharp.Things
             if (json["json"].ToString().Contains("\"errors\": []"))
                 Body = newText;
             else
-                throw new Exception("Error editing text.");
+                throw new Exception("Error editing text. Error: " + json["json"]["errors"][0][0].ToString());
         }
 
         /// <summary>

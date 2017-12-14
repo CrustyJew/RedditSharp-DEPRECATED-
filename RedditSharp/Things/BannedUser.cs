@@ -12,7 +12,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; set; }
+        public DateTimeOffset? TimeStamp { get; set; }
 
         /// <summary>
         /// Ban note.
@@ -50,7 +50,7 @@ namespace RedditSharp.Things
         public async Task<BannedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(json);
-            await JsonConvert.PopulateObjectAsync(json.ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 

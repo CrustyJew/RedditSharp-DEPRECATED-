@@ -14,11 +14,11 @@ namespace RedditSharp.Things
         new public string Id { get; private set; }
 
         /// <summary>
-        /// DateTime of the revision.
+        /// DateTimeOffset of the revision.
         /// </summary>
         [JsonProperty("timestamp")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? TimeStamp { get; set; }
+        public DateTimeOffset? TimeStamp { get; set; }
 
         /// <summary>
         /// Reason for the revision.
@@ -43,7 +43,7 @@ namespace RedditSharp.Things
         internal async Task<WikiPageRevision> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(reddit, json, webAgent);
-            await JsonConvert.PopulateObjectAsync(json.ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
         internal WikiPageRevision Init(Reddit reddit, JToken json, IWebAgent webAgent)

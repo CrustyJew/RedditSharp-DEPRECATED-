@@ -12,14 +12,6 @@ namespace RedditSharp
         public string Message { get; set; }
         public string AppliesToUsername { get; set; }
         public string Url { get; set; }
-        private DateTime _timestamp;
-        public DateTime Timestamp
-        {
-            get { return _timestamp; }
-            set
-            {
-                _timestamp = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-            }
-        }
+        public DateTimeOffset Timestamp { get; set; }
     }
 }

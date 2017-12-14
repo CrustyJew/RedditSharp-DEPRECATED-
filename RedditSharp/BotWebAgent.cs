@@ -15,9 +15,9 @@ namespace RedditSharp
         private string Password;
 
         /// <summary>
-        /// DateTime the token expires.
+        /// Date and time the token expires.
         /// </summary>
-        public DateTime TokenValidTo { get; set; }
+        public DateTimeOffset TokenValidTo { get; set; }
 
         /// <summary>
         /// A web agent using reddit's OAuth interface.
@@ -42,7 +42,7 @@ namespace RedditSharp
         public override HttpWebRequest CreateRequest(string url, string method)
         {
             //add 5 minutes for clock skew to ensure requests succeed 
-            if (url != AuthProvider.AccessUrl && DateTime.UtcNow.AddMinutes(5) > TokenValidTo)
+            if (url != AuthProvider.AccessUrl && DateTimeOffset.UtcNow.AddMinutes(5) > TokenValidTo)
             {
                 GetNewToken();
             }
@@ -53,7 +53,7 @@ namespace RedditSharp
         protected override HttpWebRequest CreateRequest(Uri uri, string method)
         {
             //add 5 minutes for clock skew to ensure requests succeed
-            if (uri.ToString() != AuthProvider.AccessUrl && DateTime.UtcNow.AddMinutes(5) > TokenValidTo)
+            if (uri.ToString() != AuthProvider.AccessUrl && DateTimeOffset.UtcNow.AddMinutes(5) > TokenValidTo)
             {
                 GetNewToken();
             }
@@ -63,7 +63,7 @@ namespace RedditSharp
         private void GetNewToken()
         {
             AccessToken = TokenProvider.GetOAuthToken(Username, Password);
-            TokenValidTo = DateTime.UtcNow.AddHours(1);
+            TokenValidTo = DateTimeOffset.UtcNow.AddHours(1);
         }
     }
 

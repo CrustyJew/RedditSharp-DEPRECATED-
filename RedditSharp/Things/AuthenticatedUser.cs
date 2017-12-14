@@ -26,7 +26,7 @@ namespace RedditSharp.Things
         public new async Task<AuthenticatedUser> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             await CommonInitAsync(reddit, json, webAgent);
-            await JsonConvert.PopulateObjectAsync(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
+            JsonConvert.PopulateObject(json["name"] == null ? json["data"].ToString() : json.ToString(), this,
                 reddit.JsonSerializerSettings);
             return this;
         }
@@ -125,11 +125,11 @@ namespace RedditSharp.Things
         /// <summary>
         /// Get a <see cref="Listing{T}"/> of messages in the inbox.
         /// </summary>
-        public Listing<PrivateMessage> Inbox
+        public Listing<Thing> Inbox
         {
             get
             {
-                return new Listing<PrivateMessage>(Reddit, InboxUrl, WebAgent);
+                return new Listing<Thing>(Reddit, InboxUrl, WebAgent);
             }
         }
 

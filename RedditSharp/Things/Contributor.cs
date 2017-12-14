@@ -18,7 +18,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("date")]
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime DateAdded { get; set; }
+        public DateTimeOffset DateAdded { get; set; }
 
         /// <summary>
         /// Initialize.
@@ -44,7 +44,7 @@ namespace RedditSharp.Things
         public async Task<Contributor> InitAsync(Reddit reddit, JToken json, IWebAgent webAgent)
         {
             CommonInit(json);
-            await JsonConvert.PopulateObjectAsync(json.ToString(), this, reddit.JsonSerializerSettings);
+            JsonConvert.PopulateObject(json.ToString(), this, reddit.JsonSerializerSettings);
             return this;
         }
 

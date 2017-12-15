@@ -35,6 +35,18 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <summary>
+        /// Returns true if post is marked as spoiler
+        /// </summary>
+        [JsonProperty("spoiler")]
+        public bool IsSpoiler { get; set; }
+        
+        /// <summary>
+        /// Returns true if this post is hidden
+        /// </summary>
+        [JsonProperty("hidden")]
+        public bool IsHidden { get; set; }
+        
+        /// <summary>
         /// Domain of this post.
         /// </summary>
         [JsonProperty("domain")]

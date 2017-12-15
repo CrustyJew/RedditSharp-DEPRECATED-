@@ -93,6 +93,13 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("spoiler")]
         public bool IsSpoiler { get; set; }
+        
+        /// <summary>
+        /// Returns true if this post is hidden
+        /// </summary>
+        [JsonProperty("hidden")]
+        public bool IsHidden { get; set; }
+        
         /// <summary>
         /// Domain of this post.
         /// </summary>

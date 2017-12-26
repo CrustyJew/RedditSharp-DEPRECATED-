@@ -51,6 +51,9 @@
   <ItemGroup>
     <Compile Include="BotWebAgent.cs" />
     <Compile Include="Flairs\FlairTemplate.cs" />
+    <Compile Include="Search\AdvancedSearch.cs" />
+    <Compile Include="Search\DefaultSearchFormatter.cs" />
+    <Compile Include="Search\ISearchFormatter.cs" />
     <Compile Include="Things\LiveUpdateEvent.cs" />
     <Compile Include="Things\LiveUpdate.cs" />
     <Compile Include="Moderator Actions\ModActionType.cs" />

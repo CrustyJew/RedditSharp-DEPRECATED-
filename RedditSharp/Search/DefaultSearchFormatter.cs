@@ -14,6 +14,7 @@ namespace RedditSharp.Search
         {
             Expression expression = null;
             Stack<Expression> expressionStack = new Stack<Expression>();
+            Stack<FormatInfo> formatInfoStack = new Stack<FormatInfo>();
             expressionStack.Push(search.Body);
             Stack<string> searchStack = new Stack<string>();
             while (expressionStack.Count > 0) {
@@ -21,13 +22,13 @@ namespace RedditSharp.Search
                 switch (expression)
                 {
                     case MemberExpression memberExpression:
-                        searchStack.Push(MemberExpressionHelper(memberExpression));
+                        MemberExpressionHelper(memberExpression, searchStack, formatInfoStack);
                         break;
                     case UnaryExpression unaryExpression:
-                        searchStack.Push(UnaryExpressionHelper(unaryExpression,expressionStack));
+                        UnaryExpressionHelper(unaryExpression, expressionStack, formatInfoStack);
                         break;
                     case BinaryExpression binaryExpression:
-                        BinaryExpressionHelper(binaryExpression, expressionStack, searchStack);
+                        BinaryExpressionHelper(binaryExpression, expressionStack, formatInfoStack);
                         break;
                     case ConstantExpression constantExpresssion:
                         searchStack.Push(ConstantExpressionHelper(constantExpresssion));
@@ -37,12 +38,24 @@ namespace RedditSharp.Search
                 }
             }
 
-            string searchQuery = searchStack.Pop();
-            while(searchStack.Count > 0)
+            string searchQuery = string.Empty;
+            Stack<string> compoundSearchStack = new Stack<string>();
+            while(formatInfoStack.Count >0)
             {
-                searchQuery = string.Format(searchStack.Pop(), searchQuery);
+                FormatInfo current = formatInfoStack.Pop();
+                string[] formatParameters = new string[current.ParameterCount];
+                int currentCount = current.ParameterCount;
+                while(currentCount > 0)
+                {
+                    formatParameters[formatParameters.Length - currentCount] = current.IsCompound  ? compoundSearchStack.Pop() : searchStack.Pop();
+                    currentCount--;
+                }
+               
+                compoundSearchStack.Push(string.Format(current.Pattern, formatParameters));
+                
             }
-            return searchQuery;
+
+            return compoundSearchStack.Pop();
         }
 
         private string ConstantExpressionHelper(ConstantExpression constantExpresssion)
@@ -50,7 +63,7 @@ namespace RedditSharp.Search
             return constantExpresssion.ToString().Replace("\"","");
         }
 
-        private void BinaryExpressionHelper(BinaryExpression expression, Stack<Expression> expressionStack, Stack<string> searchStack)
+        private void BinaryExpressionHelper(BinaryExpression expression, Stack<Expression> expressionStack, Stack<FormatInfo> formatInfoStack)
         {
             if(IsAdvancedSearchMemberExpression(expression.Left) && IsAdvancedSearchMemberExpression(expression.Right))
             {
@@ -70,7 +83,7 @@ namespace RedditSharp.Search
 
             if (expression.NodeType != ExpressionType.Equal)
             {
-                searchStack.Push(expression.ToOperator());
+                formatInfoStack.Push(expression.ToFormatInfo());
                 //searchStack.Push("NOT(+{0}+)");
             }
             
@@ -78,32 +91,29 @@ namespace RedditSharp.Search
         }
 
      
-        private string UnaryExpressionHelper(UnaryExpression expression, Stack<Expression> expressionStack)
+        private void UnaryExpressionHelper(UnaryExpression expression, Stack<Expression> expressionStack,Stack<FormatInfo> formatInfoStack)
         {
-            string expressionOperator = expression.ToOperator();
+            formatInfoStack.Push( expression.ToFormatInfo());
             expressionStack.Push(expression.Operand);
-            return expressionOperator;
+            //return expressionOperator;
         }
 
-        private string MemberExpressionHelper(MemberExpression expression)
+        private void MemberExpressionHelper(MemberExpression expression, Stack<string> searchStack, Stack<FormatInfo> formatInfoStack)
         {
             MemberInfo member = expression.Member;
-            string result = string.Empty;
+            
 
             if (member.DeclaringType == typeof(AdvancedSearchFilter))
             {
-                result = member.Name.Replace(BOOL_PROPERTY_PREFIX, string.Empty).ToLower();
+                string result = member.Name.Replace(BOOL_PROPERTY_PREFIX, string.Empty).ToLower();
+                formatInfoStack.Push(expression.ToFormatInfo());
+                searchStack.Push(result);
                 if (expression.Type == typeof(bool))
                 {
-                    result = result + ":1";
+                    searchStack.Push("1");
+                    
                 }
-                else
-                {
-                    result = result + ":{0}";
-                }
-
             }
-            return result;
         }
 
 
@@ -137,28 +147,48 @@ namespace RedditSharp.Search
             MemberExpression memberExpression = expression as MemberExpression;
             return memberExpression?.Member.DeclaringType == typeof(AdvancedSearchFilter);
         }
+
+        internal class FormatInfo
+        {
+            public string Pattern { get; private set; }
+            public int ParameterCount { get; private set; }
+            public bool IsCompound { get; private set; }
+
+            public FormatInfo(string pattern, int parameterCount = 0, bool isCompound = false)
+            {
+                Pattern = pattern;
+                ParameterCount = parameterCount;
+                IsCompound = isCompound;
+            }
+
+            internal static FormatInfo Not = new FormatInfo("NOT(+{0}+)", 1, true);
+            internal static FormatInfo NotEqual = Not;
+            internal static FormatInfo AndAlso = new FormatInfo("(+{0}+AND+{1}+)", 2, true);
+            internal static FormatInfo OrElse = new FormatInfo("(+{0}+OR+{1}+)", 2, true);
+            internal static FormatInfo MemberAccess = new FormatInfo("{1}:{0}", 2);
+        }
     }
 
     public static class Extensions
     {
-        public static string ToOperator(this Expression expression)
+        internal static DefaultSearchFormatter.FormatInfo ToFormatInfo(this Expression expression)
         {
             ExpressionType? type = expression?.NodeType;
-            string result = string.Empty;
             switch (type)
             {
                 case ExpressionType.Not:
                 case ExpressionType.NotEqual:
-                    result = "NOT(+{0}+)";
-                    break;
+                    return DefaultSearchFormatter.FormatInfo.Not;
                 case ExpressionType.Equal:
-                    result = ":";
-                    break;
+                    throw new NotImplementedException("Currently not supporting Equal expression.");
                 case ExpressionType.AndAlso:
-                    result = "(+{0}+AND)";
-                    break;
+                    return DefaultSearchFormatter.FormatInfo.AndAlso;
+                case ExpressionType.MemberAccess:
+                    return DefaultSearchFormatter.FormatInfo.MemberAccess;
+                case ExpressionType.OrElse:
+                    return DefaultSearchFormatter.FormatInfo.OrElse;
             }
-            return result;
+            throw new NotImplementedException($"{type.ToString()} is not implemented.");
         }
 
     }

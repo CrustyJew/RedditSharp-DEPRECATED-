@@ -110,7 +110,7 @@ namespace UnitTesting
 
         [TestMethod]
         [TestCategory("AdvancedSearch")]
-        public void AndTest()
+        public void AndAlsoTest()
         {
             //Arrange
             Expression<Func<AdvancedSearchFilter, bool>>
@@ -126,14 +126,81 @@ namespace UnitTesting
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        [TestCategory("AdvancedSearch")]
+        public void TwoString_AndAlsoTest()
+        {
+            //Arrange
+            Expression<Func<AdvancedSearchFilter, bool>>
+                expression = x => x.Author=="AutoModerator" && x.Site == "google.com";
+            string expected = "(+author:AutoModerator+AND+site:google.com+)";
+
+            ISearchFormatter searchFormatter = new DefaultSearchFormatter();
+
+            //Act
+            string actual = searchFormatter.Format(expression);
+
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        [TestCategory("AdvancedSearch")]
+        public void TwoString_OrElseTest()
+        {
+            //Arrange
+            Expression<Func<AdvancedSearchFilter, bool>>
+                expression = x => x.Author == "AutoModerator" || x.Site == "google.com";
+            string expected = "(+author:AutoModerator+OR+site:google.com+)";
+
+            ISearchFormatter searchFormatter = new DefaultSearchFormatter();
+
+            //Act
+            string actual = searchFormatter.Format(expression);
+
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        [TestCategory("AdvancedSearch")]
+        public void NotOrElseTest()
+        {
+            //Arrange
+            Expression<Func<AdvancedSearchFilter, bool>>
+                expression = x => !(x.Author == "AutoModerator" || x.Site == "google.com");
+            string expected = "NOT(+(+author:AutoModerator+OR+site:google.com+)+)";
+
+            ISearchFormatter searchFormatter = new DefaultSearchFormatter();
+
+            //Act
+            string actual = searchFormatter.Format(expression);
+
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
 
 
+        [TestMethod]
+        [TestCategory("AdvancedSearch")]
+        public void AndNotOrElseTest()
+        {
+            //Arrange
+            Expression<Func<AdvancedSearchFilter, bool>>
+                expression = x =>  (x.Title != "trump") && !(x.Author == "AutoModerator" || x.Site == "google.com");
+            string expected = "(+NOT(+title:trump+)+AND+NOT(+(+author:AutoModerator+OR+site:google.com+)+)+)";
 
+            ISearchFormatter searchFormatter = new DefaultSearchFormatter();
 
+            //Act
+            string actual = searchFormatter.Format(expression);
 
-
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
 
         //[TestMethod]
+        //[TestCategory("AdvancedSearch")]
         //public void ValueComparison_BoolPropertyTest()
         //{
         //    //Arrange

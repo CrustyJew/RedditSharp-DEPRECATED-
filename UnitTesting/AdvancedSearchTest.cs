@@ -199,6 +199,24 @@ namespace UnitTesting
             Assert.AreEqual(expected, actual);
         }
 
+        [TestCategory("AdvancedSearch"), TestMethod]
+        public void StringVariablePropertyTest()
+        {
+            //Arrange
+            string title = "meirl";
+            Expression<Func<AdvancedSearchFilter, bool>>
+                expression = x => x.Title == title;
+            string expected = "title:meirl";
+
+            ISearchFormatter searchFormatter = new DefaultSearchFormatter();
+
+            //Act
+            string actual = searchFormatter.Format(expression);
+
+            //Assert
+            Assert.AreEqual(expected, actual);
+        }
+
         //[TestMethod]
         //[TestCategory("AdvancedSearch")]
         //public void ValueComparison_BoolPropertyTest()

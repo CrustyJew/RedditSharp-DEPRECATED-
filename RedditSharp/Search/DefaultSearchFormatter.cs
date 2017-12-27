@@ -38,7 +38,6 @@ namespace RedditSharp.Search
                 }
             }
 
-            string searchQuery = string.Empty;
             Stack<string> compoundSearchStack = new Stack<string>();
             while(formatInfoStack.Count >0)
             {
@@ -114,10 +113,23 @@ namespace RedditSharp.Search
                     
                 }
             }
+            else
+            {
+                searchStack.Push(InvokeGetExpression(expression).ToString());
+            }
         }
 
+        private static object InvokeGetExpression(Expression expression)
+        {
+            var objectMember = Expression.Convert(expression, typeof(object));
 
-        
+            var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+
+            var getter = getterLambda.Compile();
+
+            return getter();
+        }
+
 
 
 

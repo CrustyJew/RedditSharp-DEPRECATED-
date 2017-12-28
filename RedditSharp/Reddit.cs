@@ -5,7 +5,9 @@ using System;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using RedditSharp.Search;
 using DefaultWebAgent = RedditSharp.WebAgent;
+using System.Linq.Expressions;
 
 namespace RedditSharp
 {
@@ -37,6 +39,19 @@ namespace RedditSharp
         private const string GetLiveEventUrl = "https://www.reddit.com/live/{0}/about";
 
         #endregion
+        private IAdvancedSearchFormatter _searchFormatter;
+        private IAdvancedSearchFormatter SearchFormatter
+        {
+            get
+            {
+                if(_searchFormatter == null)
+                {
+                    _searchFormatter = new DefaultSearchFormatter();
+                }
+                return _searchFormatter;
+            }
+            set => _searchFormatter = value;
+        }
 
         #region Properties
         internal IWebAgent WebAgent { get; set; }
@@ -380,6 +395,15 @@ namespace RedditSharp
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
             return Listing<T>.Create(this.WebAgent, string.Format(SearchUrl, query, sort, time), max, 100);
+        }
+
+        public Listing<Post> AdvancedSearch(Expression<Func<AdvancedSearchFilter, bool>> searchFilter, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All)
+        {
+            string query = SearchFormatter.Format(searchFilter);
+            string sort = sortE.ToString().ToLower();
+            string time = timeE.ToString().ToLower();
+            string final = string.Format(SearchUrl, query, sort, time);
+            return new Listing<Post>(this,final,WebAgent);
         }
 
         /// <summary>

@@ -638,7 +638,7 @@ namespace RedditSharp
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
         /// <returns></returns>
-        [Obsolete("time search was discontinued by reddit")]
+        [Obsolete("time search was discontinued by reddit", true)]
         public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
             return SearchByTimestamp<T>(new DateTimeOffset(from), new DateTimeOffset(to), query, subreddit, sortE, timeE);
@@ -655,7 +655,7 @@ namespace RedditSharp
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
         /// <returns></returns>
-        [Obsolete("time search was discontinued by reddit")]
+        [Obsolete("time search was discontinued by reddit", true)]
         public Listing<T> SearchByTimestamp<T>(DateTimeOffset from, DateTimeOffset to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
             string sort = sortE.ToString().ToLower();

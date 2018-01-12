@@ -125,7 +125,7 @@ namespace RedditSharp.Things
         /// enrolled in new modmail.
         /// </summary>
         [JsonProperty("new_modmail_exists")]
-        public bool NewModmailExists { get; private set; }
+        public bool? NewModmailExists { get; private set; }
 
         /// <summary>
         /// Returns trus if this user is in the reddit beta program.

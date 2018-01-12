@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
+using System.Text;
 using System.Threading.Tasks;
 using DefaultWebAgent = RedditSharp.WebAgent;
 
@@ -546,12 +547,84 @@ namespace RedditSharp
         /// <param name="query">string to query</param>
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
+        /// <param name="author">The user who submitted the post</param>
+        /// <param name="flair">The text of the link flair on the post.</param>
+        /// <param name="nsfw">include NSFW posts.</param>
+        /// <param name="self">includ eText post.</param>
+        /// <param name="selfText">For self-posts, the body of the post.</param>
+        /// <param name="site">The domain of the submitted URL.</param>
+        /// <param name="subreddit">The submission's subreddit.</param>
+        /// <param name="title">The submission title.</param>
+        /// <param name="url">The submission's URL (the website's address)</param>
+        /// <remarks>https://www.reddit.com/wiki/search#wiki_field_search</remarks>
         /// <returns></returns>
-        public Listing<T> Search<T>(string query, Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
+        public Listing<T> Search<T>(string query, 
+            Sorting sortE = Sorting.Relevance, 
+            TimeSorting timeE = TimeSorting.All, 
+            string author = null,
+            string flair = null,
+            bool? nsfw = null,
+            bool? self = null,
+            string selfText = null,
+            string site = null,
+            string subreddit = null,
+            string title = null,
+            string url = null
+
+            ) where T : Thing
         {
+
+            StringBuilder queryBuilder = new StringBuilder(query);
+
+
+            if (author != null)
+            {
+                queryBuilder.Append($"+author:{author}");
+            }
+
+            if (flair != null)
+            {
+                queryBuilder.Append($"+flair:{flair}");
+            }
+
+            if (nsfw != null)
+            {
+                queryBuilder.Append($"+nsfw:{Convert.ToInt16(nsfw.Value)}");
+            }
+
+            if (self != null)
+            {
+                queryBuilder.Append($"+self:{Convert.ToInt16(self.Value)}");
+            }
+
+            if (selfText != null)
+            {
+                queryBuilder.Append($"+selftext:{selfText}");
+            }
+
+            if (site != null)
+            {
+                queryBuilder.Append($"+site:{site}");
+            }
+
+            if (subreddit != null)
+            {
+                queryBuilder.Append($"+subreddit:{subreddit}");
+            }
+
+            if (title != null)
+            {
+                queryBuilder.Append($"+title:{title}");
+            }
+
+            if (url != null)
+            {
+                queryBuilder.Append($"+url:{url}");
+            }
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
-            return new Listing<T>(this, string.Format(SearchUrl, query, sort, time), WebAgent);
+            string final = string.Format(SearchUrl, queryBuilder.ToString(), sort, time);
+            return new Listing<T>(this, final, WebAgent);
         }
 
         /// <summary>
@@ -565,6 +638,7 @@ namespace RedditSharp
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
         /// <returns></returns>
+        [Obsolete("time search was discontinued by reddit", true)]
         public Listing<T> SearchByTimestamp<T>(DateTime from, DateTime to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
             return SearchByTimestamp<T>(new DateTimeOffset(from), new DateTimeOffset(to), query, subreddit, sortE, timeE);
@@ -581,6 +655,7 @@ namespace RedditSharp
         /// <param name="sortE">Order by <see cref="Sorting"/></param>
         /// <param name="timeE">Order by <see cref="TimeSorting"/></param>
         /// <returns></returns>
+        [Obsolete("time search was discontinued by reddit", true)]
         public Listing<T> SearchByTimestamp<T>(DateTimeOffset from, DateTimeOffset to, string query = "", string subreddit = "", Sorting sortE = Sorting.Relevance, TimeSorting timeE = TimeSorting.All) where T : Thing
         {
             string sort = sortE.ToString().ToLower();

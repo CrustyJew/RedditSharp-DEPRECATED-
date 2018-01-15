@@ -17,6 +17,7 @@ namespace RedditSharp.Things
         private const string CommentUrl = "/api/comment";
         private const string EditUserTextUrl = "/api/editusertext";
         private const string SetAsReadUrl = "/api/read_message";
+        private const string SetAsUnReadUrl = "/api/unread_message";
 
         #pragma warning disable 1591
         public Comment(IWebAgent agent, JToken json, Thing sender) : base(agent, json) {
@@ -227,7 +228,20 @@ namespace RedditSharp.Things
         /// </summary>
         public async Task SetAsReadAsync()
         {
-            await WebAgent.Post(SetAsReadUrl, new
+            await SetReadStatusAsync(SetAsReadUrl);
+        }
+
+        /// <summary>
+        /// Mark this comment as unread.
+        /// </summary>
+        public async Task SetAsUnReadAsync()
+        {
+            await SetReadStatusAsync(SetAsUnReadUrl);
+        }
+
+        private async Task SetReadStatusAsync(string statusUrl)
+        {
+            await WebAgent.Post(statusUrl, new
             {
                 id = FullName,
                 api_type = "json"

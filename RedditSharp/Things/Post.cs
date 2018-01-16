@@ -225,14 +225,19 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="limit">Maximum number of comments to return</param>
         /// <returns></returns>
-        public async Task<List<Comment>> GetCommentsAsync(int limit = 0)
+        public async Task<List<Comment>> GetCommentsAsync(int limit = 0, CommentSort sort = CommentSort.Best)
         {
             var url = string.Format(GetCommentsUrl, Id);
+
+            //Only 'best' comment sorting isn't named the same
+            if (sort == CommentSort.Best)
+                url = $"{url}?sort=confidence";
+            else
+                url = $"{url}?sort={sort.ToString().ToLower()}";
+
             if (limit > 0)
-            {
-                var query = "limit=" + limit;
-                url = string.Format("{0}?{1}", url, query);
-            }
+                url = $"{url}&limit={limit}";
+
             var json = await WebAgent.Get(url).ConfigureAwait(false);
             var postJson = json.Last()["data"]["children"];
 
@@ -252,14 +257,19 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="limit">Maximum number of comments to return. Returned list may be larger than this number though due to <see cref="More"/></param>
         /// <returns></returns>
-        public async Task<List<Thing>> GetCommentsWithMoresAsync(int limit = 0)
+        public async Task<List<Thing>> GetCommentsWithMoresAsync(int limit = 0, CommentSort sort = CommentSort.Best)
         {
             var url = string.Format(GetCommentsUrl, Id);
+
+            //Only 'best' comment sorting isn't named the same
+            if (sort == CommentSort.Best)
+                url = $"{url}?sort=confidence";
+            else
+                url = $"{url}?sort={sort.ToString().ToLower()}";
+
             if (limit > 0)
-            {
-                var query = "limit=" + limit;
-                url = string.Format("{0}?{1}", url, query);
-            }
+                url = $"{url}&limit={limit}";
+
             var json = await WebAgent.Get(url).ConfigureAwait(false);
             var postJson = json.Last()["data"]["children"];
 

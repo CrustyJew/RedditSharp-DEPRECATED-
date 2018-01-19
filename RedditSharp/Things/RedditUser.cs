@@ -234,7 +234,15 @@ namespace RedditSharp.Things
         Top,
         Controversial
     }
-
+    public enum CommentSort
+    {
+        Best,
+        Top,
+        New,
+        Controversial,
+        Old,
+        Qa
+    }
     public enum FromTime
     {
         All,

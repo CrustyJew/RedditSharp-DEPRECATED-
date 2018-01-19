@@ -196,7 +196,7 @@ namespace RedditSharp.Things
             var json = await WebAgent.Post(DistinguishUrl, new
             {
                 how,
-                id = Id
+                id = FullName
             }).ConfigureAwait(false);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");

@@ -135,7 +135,7 @@ namespace RedditSharp.Things
         [JsonProperty("user_reports")]
         [JsonConverter(typeof(ReportCollectionConverter))]
         public ICollection<Report> UserReports { get; private set; }
-        
+
         /// <summary>
         /// Reports someone
         /// </summary>
@@ -174,7 +174,8 @@ namespace RedditSharp.Things
         /// Distinguishes (or undistinguishes) an item
         /// </summary>
         /// <param name="distinguishType">Type you want to distinguish <see cref="DistinguishType"/></param>
-        public async Task DistinguishAsync(DistinguishType distinguishType)
+        /// <param name="sticky">Stickies the Thing if applicable</param>
+        public async Task DistinguishAsync(DistinguishType distinguishType, bool sticky = false)
         {
 
             string how;
@@ -196,7 +197,8 @@ namespace RedditSharp.Things
             var json = await WebAgent.Post(DistinguishUrl, new
             {
                 how,
-                id = Id
+                id = FullName, //oAuth requires the full ID
+                sticky = sticky
             }).ConfigureAwait(false);
             if (json["jquery"].Count(i => i[0].Value<int>() == 11 && i[1].Value<int>() == 12) == 0)
                 throw new Exception("You are not permitted to distinguish this comment.");
@@ -229,7 +231,7 @@ namespace RedditSharp.Things
             return RemoveImplAsync(true);
         }
 
-        #pragma warning disable 1591
+#pragma warning disable 1591
         protected async Task RemoveImplAsync(bool spam)
         {
             await WebAgent.Post(RemoveUrl, new
@@ -238,7 +240,7 @@ namespace RedditSharp.Things
                 spam = spam
             }).ConfigureAwait(false);
         }
-        #pragma warning restore 1591
+#pragma warning restore 1591
 
         /// <summary>
         /// Delete this item.
@@ -276,8 +278,10 @@ namespace RedditSharp.Things
         /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
         /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
         /// <returns></returns>
-        public static Task RemoveAsync( IWebAgent agent, string fullname ) {
-            return agent.Post(RemoveUrl, new {
+        public static Task RemoveAsync(IWebAgent agent, string fullname)
+        {
+            return agent.Post(RemoveUrl, new
+            {
                 id = fullname,
                 spam = false
             });
@@ -289,8 +293,10 @@ namespace RedditSharp.Things
         /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
         /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
         /// <returns></returns>
-        public static Task SpamAsync( IWebAgent agent, string fullname ) {
-            return agent.Post(RemoveUrl, new {
+        public static Task SpamAsync(IWebAgent agent, string fullname)
+        {
+            return agent.Post(RemoveUrl, new
+            {
                 id = fullname,
                 spam = true
             });
@@ -301,7 +307,8 @@ namespace RedditSharp.Things
         /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
         /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
         /// <returns></returns>
-        public static Task ApproveAsync( IWebAgent agent, string fullname ) {
+        public static Task ApproveAsync(IWebAgent agent, string fullname)
+        {
             return Thing.SimpleActionAsync(agent, fullname, ApproveUrl);
         }
 
@@ -312,10 +319,12 @@ namespace RedditSharp.Things
         /// <param name="otherReason">If your reason is "Other", say why you're reporting them</param>
         /// <param name="agent"><see cref="IWebAgent"/> used to send post</param>
         /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
-        public static Task ReportAsync( IWebAgent agent, string fullname, ReportType reportType, string otherReason = null ) {
+        public static Task ReportAsync(IWebAgent agent, string fullname, ReportType reportType, string otherReason = null)
+        {
 
             string reportReason;
-            switch(reportType) {
+            switch (reportType)
+            {
                 case ReportType.Spam:
                     reportReason = "spam"; break;
                 case ReportType.VoteManipulation:
@@ -330,7 +339,8 @@ namespace RedditSharp.Things
                     reportReason = "other"; break;
             }
 
-            return agent.Post(ReportUrl, new {
+            return agent.Post(ReportUrl, new
+            {
                 api_type = "json",
                 reason = reportReason,
                 other_reason = otherReason ?? "",

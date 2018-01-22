@@ -22,12 +22,12 @@ namespace RedditSharp
         /// <summary>
         /// OAuth2 token.
         /// </summary>
-        public static string OAuthToken { get; set; }
+        public string OAuthToken { get; set; }
 
         /// <summary>
         /// OAuth2 refresh token.
         /// </summary>
-        public static string RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
 
 #pragma warning disable 1591
         [Flags]

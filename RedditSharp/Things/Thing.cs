@@ -48,7 +48,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Create new Thing from given JSON data.
         /// </summary>
-        /// <param name="agent">WebAgent for requests</param>
+        /// <param name="agent">An <see cref="IWebAgent"/>to make requests with</param>
         /// <param name="json">JSON data containing thing's info</param>
         /// <param name="user">Optional authenticated user</param>
         public Thing(IWebAgent agent, JToken json, AuthenticatedUser user = null) : base(agent)

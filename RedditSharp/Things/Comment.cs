@@ -18,7 +18,7 @@ namespace RedditSharp.Things
         private const string SetAsReadUrl = "/api/read_message";
         private const string SetAsUnReadUrl = "/api/unread_message";
 
-        #pragma warning disable 1591
+        /// <inheritdoc />
         public Comment(IWebAgent agent, JToken json, Thing sender) : base(agent, json) {
             var data = json["data"];
             Parent = sender;
@@ -31,7 +31,6 @@ namespace RedditSharp.Things
             }
             ParseComments(json, sender);
         }
-        #pragma warning restore 1591
 
         /// <inheritdoc />
         internal override JToken GetJsonData(JToken json) => json["data"];
@@ -207,10 +206,10 @@ namespace RedditSharp.Things
                 text = newText,
                 thing_id = FullName
             }).ConfigureAwait(false);
-            if (json["json"].ToString().Contains("\"errors\": []"))
+            if (!json["json"]["errors"].Any())
                 Body = newText;
             else
-                throw new Exception("Error editing text.");
+                throw new Exception($"Errors editing text {json["json"]["errors"][0][0].ToString()}");
         }
 
         /// <inheritdoc />

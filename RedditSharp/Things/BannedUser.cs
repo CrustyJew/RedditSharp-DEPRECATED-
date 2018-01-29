@@ -10,7 +10,7 @@ namespace RedditSharp.Things
     /// </summary>
     public class BannedUser : RedditUser
     {
-        #pragma warning disable 1591
+        /// <inheritdoc />
         public BannedUser(IWebAgent agent, JToken json) : base(agent, json) {
             var data = json["name"] == null ? json["data"] : json;
             base.Name = data["name"].ValueOrDefault<string>();
@@ -22,7 +22,6 @@ namespace RedditSharp.Things
                 base.FullName = id;
             }
         }
-        #pragma warning restore 1591
 
         /// <summary>
         /// Date the user was banned.

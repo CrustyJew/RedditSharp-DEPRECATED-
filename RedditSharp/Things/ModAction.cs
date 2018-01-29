@@ -10,10 +10,9 @@ namespace RedditSharp.Things
     /// </summary>
     public class ModAction : Thing
     {
-        #pragma warning disable 1591
+        /// <inheritdoc />
         public ModAction(IWebAgent agent, JToken json) : base(agent, json) {
         }
-        #pragma warning restore 1591
 
         /// <summary>
         /// Type of action.

@@ -13,7 +13,11 @@ namespace RedditSharp.Things
     /// </summary>
     public class ModeratableThing : CreatedThing
     {
-#pragma warning disable 1591
+        /// <summary>
+        /// A moderateable thing that can have actions taken against it
+        /// </summary>
+        /// <param name="agent">An <see cref="IWebAgent"/>to make requests with</param>
+        /// <param name="json">A JSON object to init the <see cref="CreatedThing"/> with</param>
         public ModeratableThing(IWebAgent agent, JToken json) : base(agent, json) { }
 
         /// <summary>
@@ -52,7 +56,6 @@ namespace RedditSharp.Things
             /// </summary>
             Special,
         }
-#pragma warning restore 1591
 
         private const string ReportUrl = "/api/report";
         private const string DistinguishUrl = "/api/distinguish";
@@ -230,8 +233,11 @@ namespace RedditSharp.Things
         {
             return RemoveImplAsync(true);
         }
-
-#pragma warning disable 1591
+        /// <summary>
+        /// An implied remove type, doesn't need to be called
+        /// </summary>
+        /// <param name="spam">Whether or not to mark removed item as spam</param>
+        /// <returns></returns>
         protected async Task RemoveImplAsync(bool spam)
         {
             await WebAgent.Post(RemoveUrl, new
@@ -240,7 +246,6 @@ namespace RedditSharp.Things
                 spam = spam
             }).ConfigureAwait(false);
         }
-#pragma warning restore 1591
 
         /// <summary>
         /// Delete this item.

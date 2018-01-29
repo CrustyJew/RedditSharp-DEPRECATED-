@@ -199,11 +199,7 @@ namespace RedditSharp.Things
 
         #endregion
 
-        /// <summary>
-        /// Create and populate Subreddit info from <paramref name="json"/>
-        /// </summary>
-        /// <param name="agent">IWebAgent to use</param>
-        /// <param name="json">JSON data with subreddit info</param>
+        /// <inheritdoc />
         public Subreddit(IWebAgent agent, JToken json) : base(agent, json)
         {
             SetName();

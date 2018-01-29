@@ -492,7 +492,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Subreddit modmail.
         /// <para/>
-        ///  When calling <see cref="System.Linq.Enumerable.Take{T}"/> make sure to take replies into account!
+        ///  When calling <see cref="Enumerable.Take{T}"/> make sure to take replies into account!
         /// </summary>
         public Listing<PrivateMessage> GetModmail()
         {
@@ -824,7 +824,10 @@ namespace RedditSharp.Things
             {
                 throw new DuplicateLinkException($"Post failed when submitting.  The following link has already been submitted: {((LinkData)data).URL}");
             }
-
+            else if(json["errors"].Any())
+            {
+                throw new Exception(json["errors"][0][0].ToString());
+            }
             return new Post(WebAgent, json["data"]);
         }
         /// <summary>

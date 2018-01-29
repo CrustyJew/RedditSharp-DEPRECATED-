@@ -36,12 +36,10 @@ namespace RedditSharp
         /// </summary>
         public Listing<Post> GetHot(int max = -1) => Listing<Post>.Create(WebAgent, DomainHotUrl, max, 100);
 
-#pragma warning disable 1591
         protected internal Domain(IWebAgent agent, Uri domain) : base(agent)
         {
             Name = domain.Host;
         }
-        #pragma warning restore 1591
 
         /// <inheritdoc/>
         public override string ToString() => "/domain/" + Name;

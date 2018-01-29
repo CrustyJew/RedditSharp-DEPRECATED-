@@ -21,7 +21,6 @@ namespace RedditSharp
 
         private MultipartFormDataContent Content { get; set; }
 
-        #pragma warning disable 1591
         public MultipartFormBuilder(HttpRequestMessage request)
         {
             // TODO: See about regenerating the boundary when needed
@@ -32,8 +31,10 @@ namespace RedditSharp
             Buffer = new MemoryStream();
             TextBuffer = new StreamWriter(Buffer);
         }
-        #pragma warning restore 1591
-
+        /// <summary>
+        /// Creates a random boundary that we use for buffers
+        /// </summary>
+        /// <returns></returns>
         private string CreateRandomBoundary()
         {
             // TODO: There's probably a better way to go about this

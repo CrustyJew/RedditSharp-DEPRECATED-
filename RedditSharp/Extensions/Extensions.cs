@@ -1,6 +1,6 @@
 ﻿#pragma warning disable 1591
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace RedditSharp.Extensions
 {

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using RedditSharp.Extensions;
+using System;
 
 namespace RedditSharp.Things
 {

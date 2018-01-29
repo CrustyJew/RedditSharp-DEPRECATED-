@@ -1,6 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace RedditSharp.Things
 {
@@ -15,7 +15,7 @@ namespace RedditSharp.Things
         #pragma warning restore 1591
 
         /// <inheritdoc />
-        internal override JToken GetJsonData(JToken json) => json["data"] == null ? json : json["data"];
+        internal override JToken GetJsonData(JToken json) => json["data"] ?? json;
 
         /// <summary>
         /// DateTime when the item was created.

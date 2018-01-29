@@ -10,7 +10,9 @@ using System.Threading.Tasks;
 
 namespace RedditSharp
 {
-#pragma warning disable 1591
+    /// <summary>
+    /// Method to sort by (e.g. relevance, new)
+    /// </summary>
     public enum Sorting
     {
         Relevance,
@@ -18,7 +20,9 @@ namespace RedditSharp
         Top,
         Comments
     }
-
+    /// <summary>
+    /// Length of time to go back by (e.g. all time, past year)
+    /// </summary>
     public enum TimeSorting
     {
         All,
@@ -28,7 +32,6 @@ namespace RedditSharp
         Month,
         Year
     }
-#pragma warning restore 1591
 
     /// <summary>
     /// A semi-realtime stream of <see cref="Thing"/> being posted to an item.
@@ -55,7 +58,6 @@ namespace RedditSharp
             return new Unsubscriber(_observers, observer);
         }
 
-#pragma warning disable 1591
         public async Task Enumerate(CancellationToken cancelationToken)
         {
             await Listing.ForEachAsync(thing =>
@@ -67,7 +69,6 @@ namespace RedditSharp
 
             }, cancelationToken);
         }
-#pragma warning restore 1591
 
         private class Unsubscriber : IDisposable
         {

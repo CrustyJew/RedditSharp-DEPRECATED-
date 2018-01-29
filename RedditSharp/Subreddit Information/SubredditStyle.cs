@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using RedditSharp.Things;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {

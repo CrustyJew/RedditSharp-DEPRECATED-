@@ -1,8 +1,8 @@
-﻿#pragma warning disable 1591
-using System;
+﻿using System;
 
 namespace RedditSharp
 {
+    [Serializable]
     public class CaptchaFailedException : RedditException
     {
         public CaptchaFailedException()
@@ -23,4 +23,3 @@ namespace RedditSharp
         }
     }
 }
-#pragma warning restore 1591

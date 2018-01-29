@@ -1,8 +1,8 @@
-#pragma warning disable 1591
 using System;
 
 namespace RedditSharp
 {
+    [Serializable]
     public class RateLimitException : Exception
     {
         public TimeSpan TimeToReset { get; set; }
@@ -13,4 +13,3 @@ namespace RedditSharp
         }
     }
 }
-#pragma warning restore 1591

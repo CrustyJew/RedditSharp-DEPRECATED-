@@ -5,9 +5,9 @@ namespace RedditSharp
     /// <summary>
     /// Exception that gets thrown if you try and submit a duplicate link to a SubReddit
     /// </summary>
+    [Serializable]
     public class DuplicateLinkException : RedditException
     {
-        #pragma warning disable 1591
         public DuplicateLinkException()
         {
         }
@@ -21,7 +21,6 @@ namespace RedditSharp
             : base(message, inner)
         {
         }
-        #pragma warning restore 1591
     }
 }
 

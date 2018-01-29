@@ -1,13 +1,11 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using RedditSharp.Search;
 using RedditSharp.Things;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using RedditSharp.Search;
 using DefaultWebAgent = RedditSharp.WebAgent;
-using System.Linq.Expressions;
 
 namespace RedditSharp
 {
@@ -403,7 +401,7 @@ namespace RedditSharp
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
             string final = string.Format(SearchUrl, query, sort, time);
-            return new Listing<Post>(this,final,WebAgent);
+            return new Listing<Post>(this.WebAgent,final);
         }
 
         /// <summary>

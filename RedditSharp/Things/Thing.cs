@@ -1,8 +1,7 @@
-using System;
-using System.Security.Authentication;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 using RedditSharp.Extensions;
+using System;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {

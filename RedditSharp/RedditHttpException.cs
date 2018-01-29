@@ -6,6 +6,7 @@ namespace RedditSharp
     /// <summary>
     /// HTTP exception from Reddit
     /// </summary>
+    [Serializable]
     public class RedditHttpException : Exception
     {
         /// <summary>

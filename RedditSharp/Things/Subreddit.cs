@@ -229,7 +229,9 @@ namespace RedditSharp.Things
         public Listing<Post> GetTop(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/top.json", max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, SubredditTopUrl, max, 100);
         }
@@ -244,7 +246,9 @@ namespace RedditSharp.Things
         {
             var period = timePeriod.ToString("g").ToLower();
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/top.json?t=" + period, max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, $"{SubredditTopUrl}?t={period}", max, 100);
         }
@@ -255,7 +259,9 @@ namespace RedditSharp.Things
         public Listing<Comment> GetComments(int max = -1, int limitPerRequest = 25)
         {
             if (Name == "/")
+            {
                 return Listing<Comment>.Create(WebAgent, "/comments.json", max, limitPerRequest);
+            }
 
             return Listing<Comment>.Create(WebAgent, CommentsUrl, max, limitPerRequest);
         }
@@ -267,7 +273,9 @@ namespace RedditSharp.Things
         private Listing<Post> GetNew(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/new.json", max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, SubredditNewUrl, max, 100);
         }
@@ -279,7 +287,9 @@ namespace RedditSharp.Things
         private Listing<Post> GetHot(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/.json", max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, SubredditHotUrl, max, 100);
         }
@@ -291,7 +301,9 @@ namespace RedditSharp.Things
         private Listing<Post> GetRising(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/.json", max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, SubredditRisingUrl, max, 100);
         }
@@ -303,7 +315,9 @@ namespace RedditSharp.Things
         private Listing<Post> GetControversial(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/.json", max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, SubredditControversialUrl, max, 100);
         }
@@ -315,7 +329,9 @@ namespace RedditSharp.Things
         public Listing<Post> GetPosts(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<Post>.Create(WebAgent, "/.json", max, 100);
+            }
 
             return Listing<Post>.Create(WebAgent, SubredditPostUrl, max, 100);
         }
@@ -351,7 +367,9 @@ namespace RedditSharp.Things
         public Listing<VotableThing> GetGilded(int max = -1)
         {
             if (Name == "/")
+            {
                 return Listing<VotableThing>.Create(WebAgent, "/.json", max, 100);
+            }
 
             return Listing<VotableThing>.Create(WebAgent, SubredditGildedUrl, max, 100);
         }
@@ -506,9 +524,15 @@ namespace RedditSharp.Things
             }
             Name = Url.ToString();
             if (Name.StartsWith("/r/"))
+            {
                 Name = Name.Substring(3);
+            }
+
             if (Name.StartsWith("r/"))
+            {
                 Name = Name.Substring(2);
+            }
+
             Name = Name.TrimEnd('/');
         }
 
@@ -803,7 +827,10 @@ namespace RedditSharp.Things
 
             if (json["errors"].Any() && json["errors"][0][0].ToString() == "BAD_CAPTCHA")
             {
-                if (solver == null) throw new CaptchaFailedException("Captcha required but not ICaptchaSolver provided");
+                if (solver == null)
+                {
+                    throw new CaptchaFailedException("Captcha required but not ICaptchaSolver provided");
+                }
 
                 data.Iden = json["json"]["captcha"].ToString();
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(data.Iden));
@@ -811,7 +838,9 @@ namespace RedditSharp.Things
                 // We throw exception due to this method being expected to return a valid Post object, but we cannot
                 // if we got a Captcha error.
                 if (captchaResponse.Cancel)
+                {
                     throw new CaptchaFailedException("Captcha verification failed when submitting " + data.Kind + " post");
+                }
 
                 data.Captcha = captchaResponse.Answer;
                 return await SubmitAsync(data, solver).ConfigureAwait(false);
@@ -912,7 +941,10 @@ namespace RedditSharp.Things
             var json = await agent.Get(string.Format(ModeratorsUrl,subreddit)).ConfigureAwait(false);
             var type = json["kind"].ToString();
             if(type != "UserList")
+            {
                 throw new FormatException("Reddit responded with an object that is not a user listing.");
+            }
+
             var data = json["data"];
             var mods = data["children"].ToArray();
             var result = new ModeratorUser[mods.Length];

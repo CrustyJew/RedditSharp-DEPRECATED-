@@ -54,7 +54,10 @@ namespace RedditSharp
         public IDisposable Subscribe(IObserver<T> observer)
         {
             if (!_observers.Contains(observer))
+            {
                 _observers.Add(observer);
+            }
+
             return new Unsubscriber(_observers, observer);
         }
 
@@ -86,7 +89,9 @@ namespace RedditSharp
             public void Dispose()
             {
                 if (_observer != null && _observers.Contains(_observer))
+                {
                     _observers.Remove(_observer);
+                }
             }
 
         }
@@ -132,7 +137,9 @@ namespace RedditSharp
         internal static Listing<T> Create(IWebAgent agent, string url, int max, int perRequest)
         {
             if (max > 0 && max <= perRequest)
+            {
                 perRequest = max;
+            }
 
             return new Listing<T>(agent, url, max, perRequest);
         }
@@ -168,7 +175,7 @@ namespace RedditSharp
         /// <inheritdoc/>
         public IAsyncEnumerator<T> GetEnumerator()
         {
-            return GetEnumerator(LimitPerRequest,MaximumLimit,IsStream);
+            return GetEnumerator(LimitPerRequest, MaximumLimit, IsStream);
         }
 
         /// <summary>
@@ -220,9 +227,13 @@ namespace RedditSharp
             private Task FetchNextPageAsync()
             {
                 if (stream)
+                {
                     return PageForwardAsync();
+                }
                 else
+                {
                     return PageBackAsync();
+                }
             }
 
             string AppendQueryParam(string url, string param, string value) =>
@@ -269,7 +280,10 @@ namespace RedditSharp
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
                 //json = json.Last();
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
+                {
                     throw new FormatException("Reddit responded with an object that is not a listing.");
+                }
+
                 Parse(json);
             }
 
@@ -287,7 +301,10 @@ namespace RedditSharp
                 url = AppendCommonParams(url);
                 var json = await Listing.WebAgent.Get(url).ConfigureAwait(false);
                 if (json["kind"].ValueOrDefault<string>() != "Listing")
+                {
                     throw new FormatException("Reddit responded with an object that is not a listingStream.");
+                }
+
                 Parse(json);
             }
 
@@ -299,7 +316,9 @@ namespace RedditSharp
                 for (int i = 0; i < children.Count; i++)
                 {
                     if (!stream)
+                    {
                         things.Add(Thing.Parse<T>(Listing.WebAgent, children[i]));
+                    }
                     else
                     {
                         var kind = children[i]["kind"].ValueOrDefault<string>();
@@ -313,7 +332,9 @@ namespace RedditSharp
                             {
                                 var replyId = reply["data"]["id"].ValueOrDefault<string>();
                                 if (done.Contains(replyId))
+                                {
                                     continue;
+                                }
 
                                 things.Add(Thing.Parse<T>(Listing.WebAgent, reply));
                                 done.Add(replyId);
@@ -321,7 +342,9 @@ namespace RedditSharp
                         }
 
                         if (String.IsNullOrEmpty(id) || done.Contains(id))
+                        {
                             continue;
+                        }
 
                         things.Add(Thing.Parse<T>(Listing.WebAgent, children[i]));
                         done.Add(id);
@@ -330,7 +353,9 @@ namespace RedditSharp
 
                 // this doesn't really work when we're processing messages with replies.
                 if (stream)
+                {
                     things.Reverse();
+                }
 
                 CurrentPage = new ReadOnlyCollection<T>(things);
                 // Increase the total count of items returned
@@ -406,7 +431,9 @@ namespace RedditSharp
                     tries++;
 
                     if (MaximumLimit != -1 && Count >= MaximumLimit)
+                    {
                         return false;
+                    }
 
                     try
                     {
@@ -421,7 +448,9 @@ namespace RedditSharp
 
                     // the page is only populated if there are *new* items to yielded from the listing.
                     if (CurrentPage.Count > 0)
+                    {
                         break;
+                    }
 
                     // No listings were returned in the page.
                     await Sleep(tries, cancellationToken).ConfigureAwait(false);
@@ -440,7 +469,9 @@ namespace RedditSharp
                 if (tries > 36)
                 {
                     if (ex != null)
+                    {
                         throw ex;
+                    }
                 }
                 else
                 {

@@ -14,6 +14,7 @@ namespace RedditSharp.Things
     {
 
         #region Properties
+        private const string SetAsUnReadUrl = "/api/unread_message";
         private const string SetAsReadUrl = "/api/read_message";
         private const string CommentUrl = "/api/comment";
 
@@ -155,19 +156,7 @@ namespace RedditSharp.Things
         /// <inheritdoc />
         internal override JToken GetJsonData(JToken json) => json["data"];
 
-        /// <summary>
-        /// Mark the message read
-        /// </summary>
-        public async Task SetAsReadAsync()
-        {
-            await WebAgent.Post(SetAsReadUrl, new
-            {
-                id = FullName,
-                api_type = "json"
-            }).ConfigureAwait(false);
-        }
-
-        /// <summary>
+       /// <summary>
         /// Reply to the message
         /// </summary>
         /// <param name="message">Markdown text.</param>
@@ -177,6 +166,31 @@ namespace RedditSharp.Things
             {
                 text = message,
                 thing_id = FullName
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Mark this comment as read.
+        /// </summary>
+        public async Task SetAsReadAsync()
+        {
+            await SetReadStatusAsync(SetAsReadUrl);
+        }
+
+        /// <summary>
+        /// Mark this comment as unread.
+        /// </summary>
+        public async Task SetAsUnReadAsync()
+        {
+            await SetReadStatusAsync(SetAsUnReadUrl);
+        }
+
+        private async Task SetReadStatusAsync(string statusUrl)
+        {
+            await WebAgent.Post(statusUrl, new
+            {
+                id = FullName,
+                api_type = "json"
             }).ConfigureAwait(false);
         }
     }

@@ -401,7 +401,7 @@ namespace RedditSharp
             string sort = sortE.ToString().ToLower();
             string time = timeE.ToString().ToLower();
             string final = string.Format(SearchUrl, query, sort, time);
-            return new Listing<Post>(this.WebAgent,final);
+            return new Listing<Post>(WebAgent, final);
         }
 
         /// <summary>

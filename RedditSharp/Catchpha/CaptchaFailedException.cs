@@ -2,7 +2,6 @@
 
 namespace RedditSharp
 {
-    [Serializable]
     public class CaptchaFailedException : RedditException
     {
         public CaptchaFailedException()

@@ -2,7 +2,6 @@
 
 namespace RedditSharp
 {
-    [Serializable]
     class ToolBoxUserNotesException : Exception
     {
         public ToolBoxUserNotesException()

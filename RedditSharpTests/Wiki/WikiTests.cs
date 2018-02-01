@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 namespace RedditSharpTests.Wiki
@@ -36,7 +34,7 @@ namespace RedditSharpTests.Wiki
             var settings = await sub.GetWiki.GetPageSettingsAsync(WIKI_PAGE_NAME);
 
             Assert.NotNull(settings);
-            Assert.Equal(true, settings.Listed);
+            Assert.True(settings.Listed);
             Assert.Equal(RedditSharp.WikiPageSettings.WikiPagePermissionLevel.Contributors, settings.PermLevel);
         }
     }

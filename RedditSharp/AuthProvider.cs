@@ -1,5 +1,3 @@
-using Newtonsoft.Json.Linq;
-using RedditSharp.Things;
 using System;
 using System.Security.Authentication;
 using System.Text;

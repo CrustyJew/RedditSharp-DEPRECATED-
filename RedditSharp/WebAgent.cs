@@ -2,10 +2,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace RedditSharp
 {
@@ -130,9 +130,9 @@ namespace RedditSharp
                     {
                         json = json["json"]; //get json object if there is a root node
                     }
-                    if (json["error"] != null)
+                    if (json["errors"] != null)
                     {
-                        switch (json["error"].ToString())
+                        switch (json["errors"].ToString())
                         {
                             case "404":
                                 throw new Exception("File Not Found");
@@ -143,6 +143,8 @@ namespace RedditSharp
                                 //AccessToken = authProvider.GetRefreshToken();
                                 //ExecuteRequest(request);
                                 break;
+                            default:
+                                throw new Exception($"Error return by reddit: {json["errors"][0][0].ToString()}");
                         }
                     }
                 }

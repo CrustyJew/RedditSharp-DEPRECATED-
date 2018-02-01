@@ -1,6 +1,6 @@
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace RedditSharp.Things
 {
@@ -9,10 +9,9 @@ namespace RedditSharp.Things
     /// </summary>
     public class AuthenticatedUser : RedditUser
     {
-#pragma warning disable 1591
+        /// <inheritdoc />
         public AuthenticatedUser(IWebAgent agent, JToken json) : base (agent, json) {
         }
-#pragma warning restore 1591
 
         private const string ModeratorUrl = "/reddits/mine/moderator.json";
         private const string UnreadMessagesUrl = "/message/unread.json?mark=true&limit=25";

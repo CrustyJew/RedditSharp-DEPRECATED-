@@ -1,11 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Security.Authentication;
+using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
@@ -27,13 +26,12 @@ namespace RedditSharp.Things
             Close = 16,
             All = Update | Manage | Settings | Edit | Close
         }
-
+#pragma warning restore 1591
+        /// <inheritdoc />
         public LiveUpdateEvent(IWebAgent agent, JToken json) : base(agent, json) {
             FullName = Name;
             Name = Name.Replace("LiveUpdateEvent_", "");
         }
-
-#pragma warning restore 1591
 
         /// <summary>
         /// A user participating in this live event.
@@ -198,7 +196,7 @@ namespace RedditSharp.Things
 
             var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             JToken json = JToken.Parse(data);
-            if (json["json"].ToString().Contains("\"errors\": []"))
+            if (!json["json"]["errors"].Any())
             {
                 Title = title ?? "";
                 Description = description ?? "";

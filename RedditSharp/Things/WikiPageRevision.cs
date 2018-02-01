@@ -1,6 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace RedditSharp.Things
 {
@@ -9,11 +9,10 @@ namespace RedditSharp.Things
     /// </summary>
     public class WikiPageRevision : Thing
     {
-        #pragma warning disable 1591
+        /// <inheritdoc />
         protected internal WikiPageRevision(IWebAgent agent, JToken json) : base(agent, json) {
             Author = new RedditUser(agent, json["author"]);
         }
-        #pragma warning restore 1591
 
         /// <summary>
         /// Revision id.

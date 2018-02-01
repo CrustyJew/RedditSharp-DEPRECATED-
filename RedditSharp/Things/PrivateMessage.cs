@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Authentication;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
@@ -101,8 +100,7 @@ namespace RedditSharp.Things
         public PrivateMessage[] Replies { get; private set; }
 
         #endregion Properties
-
-#pragma warning disable 1591
+        /// <inheritdoc />
         public PrivateMessage(IWebAgent agent, JToken json) : base(agent, json)
         {
             var data = json["data"];
@@ -120,7 +118,6 @@ namespace RedditSharp.Things
                 }
             }
         }
-#pragma warning restore 1591
 
         /// <summary>
         /// Get the Original message.

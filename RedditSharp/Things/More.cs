@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things
 {
@@ -14,11 +14,10 @@ namespace RedditSharp.Things
     /// </summary>
     public class More : Thing
     {
-        #pragma warning disable 1591
+        /// <inheritdoc />
         public More(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
-        #pragma warning restore 1591
 
         private const string MoreUrl = "/api/morechildren.json?link_id={0}&children={1}&api_type=json";
 

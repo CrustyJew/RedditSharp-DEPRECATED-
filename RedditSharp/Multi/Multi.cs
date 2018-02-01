@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace RedditSharp.Multi
@@ -111,8 +110,10 @@ namespace RedditSharp.Multi
         public async Task<string> PutSubMultiAsync(string path, string subName)
         {
             var request = WebAgent.CreateRequest(PutSubMultiUrl(path, subName), "PUT");
-            JObject modelData = new JObject();
-            modelData.Add("name", subName);
+            JObject modelData = new JObject
+            {
+                { "name", subName }
+            };
             WebAgent.WritePostBody(request, new
             {
                 model = modelData,
@@ -133,8 +134,10 @@ namespace RedditSharp.Multi
         public async Task<string> PutMultiDescriptionAsync(string path, string description)
         {
             var request = WebAgent.CreateRequest(GetMultiDescriptionPathUrl(path), "PUT");
-            JObject modelData = new JObject();
-            modelData.Add("body_md", description);
+            JObject modelData = new JObject
+            {
+                { "body_md", description }
+            };
             WebAgent.WritePostBody(request, new
             {
                 model = modelData,
@@ -206,11 +209,13 @@ namespace RedditSharp.Multi
         /// <returns>A string containing the information for the newly created Multi or a status of (409) if the Multi already exists</returns>
         public async Task<JToken> PostMultiAsync(MData m, string path)
         {
-            JObject modelData = new JObject();
-            modelData.Add("description_md", m.DescriptionMD);
-            modelData.Add("display_name", m.DisplayName);
-            modelData.Add("icon_name", m.IconName);
-            modelData.Add("key_color", m.KeyColor);
+            JObject modelData = new JObject
+            {
+                { "description_md", m.DescriptionMD },
+                { "display_name", m.DisplayName },
+                { "icon_name", m.IconName },
+                { "key_color", m.KeyColor }
+            };
             JArray subData = new JArray();
             foreach (var s in m.Subreddits)
             {
@@ -239,11 +244,13 @@ namespace RedditSharp.Multi
         public async Task<string> PutMultiAsync(MData m, string path)
         {
             var request = WebAgent.CreateRequest(GetMultiPathUrl(path), "PUT");
-            JObject modelData = new JObject();
-            modelData.Add("description_md", m.DescriptionMD);
-            modelData.Add("display_name", m.DisplayName);
-            modelData.Add("icon_name", m.IconName);
-            modelData.Add("key_color", m.KeyColor);
+            JObject modelData = new JObject
+            {
+                { "description_md", m.DescriptionMD },
+                { "display_name", m.DisplayName },
+                { "icon_name", m.IconName },
+                { "key_color", m.KeyColor }
+            };
             JArray subData = new JArray();
             foreach (var s in m.Subreddits)
             {

@@ -3,6 +3,11 @@ using Newtonsoft.Json.Converters;
 
 namespace RedditSharp
 {
+    public enum FlairType
+    {
+        Link,
+        User
+    }
     // TODO: confirm this?
     /// <summary>
     /// Justification 

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
@@ -13,18 +10,27 @@ namespace RedditSharp.Things
     /// </summary>
     public class VotableThing : ModeratableThing
     {
-#pragma warning disable 1591
+        /// <inheritdoc />
         public VotableThing(IWebAgent agent, JToken json) : base(agent, json) {
         }
-
+        /// <summary>
+        /// Type of vote to do
+        /// </summary>
         public enum VoteType
         {
+            /// <summary>
+            /// An upvote, adds a vote
+            /// </summary>
             Upvote = 1,
+            /// <summary>
+            /// No vote / removes a vote
+            /// </summary>
             None = 0,
+            /// <summary>
+            /// Downvotes, removes a vote someone else has made (technically)
+            /// </summary>
             Downvote = -1
         }
-
-#pragma warning restore 1591
 
         private const string VoteUrl = "/api/vote";
         private const string SaveUrl = "/api/save";
@@ -191,7 +197,6 @@ namespace RedditSharp.Things
             Saved = false;
         }
 
-        //TODO clean this up, unnecessary calls
         /// <summary>
         /// Clear you vote on this item.
         /// </summary>

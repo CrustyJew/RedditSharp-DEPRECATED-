@@ -1,7 +1,7 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions;
+using System;
 
 namespace RedditSharp.Things
 {
@@ -10,7 +10,7 @@ namespace RedditSharp.Things
     /// </summary>
     public class Contributor : RedditUser
     {
-        #pragma warning disable 1591
+        /// <inheritdoc />
         public Contributor(IWebAgent agent, JToken json) : base(agent, json) {
             var data = json["name"] == null ? json["data"] : json;
             base.Name = data["name"].ValueOrDefault<string>();
@@ -21,7 +21,6 @@ namespace RedditSharp.Things
                 base.FullName = id;
             }
         }
-        #pragma warning restore 1591
 
         /// <summary>
         /// Contributor name.

@@ -1,6 +1,4 @@
 ﻿#pragma warning disable 1591
-using Newtonsoft.Json;
-using System;
 
 namespace RedditSharp
 {

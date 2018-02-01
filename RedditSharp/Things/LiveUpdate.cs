@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
@@ -10,11 +10,7 @@ namespace RedditSharp.Things
     /// </summary>
     public class LiveUpdate : CreatedThing
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="agent">WebAgent.</param>
-        /// <param name="json">Json payload.</param>
+        /// <inheritdoc />
         public LiveUpdate(IWebAgent agent, JToken json) : base(agent, json) {
         }
 

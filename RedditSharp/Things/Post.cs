@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Authentication;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions;
-using System.Net;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
@@ -27,12 +24,10 @@ namespace RedditSharp.Things
         private const string UnmarkNSFWUrl = "/api/unmarknsfw";
         private const string ContestModeUrl = "/api/set_contest_mode";
         private const string StickyModeUrl = "/api/set_subreddit_sticky";
-
-        #pragma warning disable 1591
+        /// <inheritdoc />
         public Post(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
-        #pragma warning restore 1591
 
         /// <summary>
         /// Returns true if post is marked as spoiler
@@ -112,7 +107,7 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("subreddit")]
         public string SubredditName { get; private set; }
-        
+
 
         /// <summary>
         /// Prefix for fullname. Includes trailing underscore
@@ -155,7 +150,7 @@ namespace RedditSharp.Things
 
         private async Task<JToken> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
         {
-             return await WebAgent.Post(endpoint, new
+            return await WebAgent.Post(endpoint, new
             {
                 id = FullName,
                 state = value
@@ -218,7 +213,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Updates data retrieved for this post.
         /// </summary>
-        public async Task UpdateAsync() => Helpers.PopulateObject(GetJsonData(await Helpers.GetTokenAsync(WebAgent,Url)), this);
+        public async Task UpdateAsync() => Helpers.PopulateObject(GetJsonData(await Helpers.GetTokenAsync(WebAgent, Url)), this);
 
         /// <summary>
         /// Sets your flair
@@ -305,7 +300,7 @@ namespace RedditSharp.Things
                 {
                     things.Add(newComment);
                 }
-                else 
+                else
                 {
                     things.Add(new More(WebAgent, comment));
                 }
@@ -334,16 +329,18 @@ namespace RedditSharp.Things
         /// <param name="flairText">Text of flair to set</param>
         /// <param name="flairClass">Css class name of flair to set</param>
         /// <returns></returns>
-        public static Task SetFlairAsync(IWebAgent agent, string subreddit, string fullname, string flairText, string flairClass ) {
+        public static Task SetFlairAsync(IWebAgent agent, string subreddit, string fullname, string flairText, string flairClass)
+        {
             //TODO unit test
-            return agent.Post(string.Format(SetFlairUrl,subreddit) , new {
+            return agent.Post(string.Format(SetFlairUrl, subreddit), new
+            {
                 api_type = "json",
                 css_class = flairClass,
                 link = fullname,
                 text = flairText
             });
         }
-#endregion
+        #endregion
     }
 
 }

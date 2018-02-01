@@ -1,6 +1,6 @@
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Threading.Tasks;
 
 namespace RedditSharp.Things
@@ -10,10 +10,10 @@ namespace RedditSharp.Things
     /// </summary>
     public class RedditUser : CreatedThing
     {
-        #pragma warning disable 1591
-        public RedditUser(IWebAgent agent, JToken json) : base(agent, json) {
+        /// <inheritdoc />
+        public RedditUser(IWebAgent agent, JToken json) : base(agent, json)
+        {
         }
-#pragma warning restore 1591
         #region Properties
         private string OverviewUrl => $"/user/{Name}.json";
         private string CommentsUrl => $"/user/{Name}/comments.json";
@@ -111,7 +111,7 @@ namespace RedditSharp.Things
         /// </summary>
         public static string KindPrefix { get { return "t2_"; } }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Return the users overview.
@@ -146,7 +146,8 @@ namespace RedditSharp.Things
         static string QueryString(Sort sort, int limit, FromTime time) =>
           $"?sort={sort.ToString("g")}&limit={limit}&t={time.ToString("g")}";
 
-        static void CheckRange(int limit, int max_limit) {
+        static void CheckRange(int limit, int max_limit)
+        {
             if ((limit < 1) || (limit > max_limit))
                 throw new ArgumentOutOfRangeException(nameof(limit), $"Valid range: [1, {max_limit}]");
         }
@@ -226,7 +227,9 @@ namespace RedditSharp.Things
         public override string ToString() => Name;
 
     }
-#pragma warning disable 1591
+    /// <summary>
+    /// A sorting system for how their posts are sorted (E.G. new, hot, etc.)
+    /// </summary>
     public enum Sort
     {
         New,
@@ -234,6 +237,9 @@ namespace RedditSharp.Things
         Top,
         Controversial
     }
+    /// <summary>
+    /// How to sort a post's comments (Qa style, best, etc.)
+    /// </summary>
     public enum CommentSort
     {
         Best,
@@ -243,6 +249,9 @@ namespace RedditSharp.Things
         Old,
         Qa
     }
+    /// <summary>
+    /// A time to end what you're looking at (year, etc.)
+    /// </summary>
     public enum FromTime
     {
         All,
@@ -252,5 +261,4 @@ namespace RedditSharp.Things
         Day,
         Hour
     }
-#pragma warning restore 1591
 }

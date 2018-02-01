@@ -1,13 +1,11 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using RedditSharp.Search;
 using RedditSharp.Things;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using RedditSharp.Search;
 using DefaultWebAgent = RedditSharp.WebAgent;
-using System.Linq.Expressions;
 
 namespace RedditSharp
 {

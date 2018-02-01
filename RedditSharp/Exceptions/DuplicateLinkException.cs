@@ -7,7 +7,6 @@ namespace RedditSharp
     /// </summary>
     public class DuplicateLinkException : RedditException
     {
-        #pragma warning disable 1591
         public DuplicateLinkException()
         {
         }
@@ -21,7 +20,6 @@ namespace RedditSharp
             : base(message, inner)
         {
         }
-        #pragma warning restore 1591
     }
 }
 

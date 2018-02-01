@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Authentication;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RedditSharp.Extensions.DateTimeExtensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace RedditSharp.Things
 {
@@ -200,11 +199,7 @@ namespace RedditSharp.Things
 
         #endregion
 
-        /// <summary>
-        /// Create and populate Subreddit info from <paramref name="json"/>
-        /// </summary>
-        /// <param name="agent">IWebAgent to use</param>
-        /// <param name="json">JSON data with subreddit info</param>
+        /// <inheritdoc />
         public Subreddit(IWebAgent agent, JToken json) : base(agent, json)
         {
             SetName();
@@ -511,7 +506,7 @@ namespace RedditSharp.Things
         /// <summary>
         /// Subreddit modmail.
         /// <para/>
-        ///  When calling <see cref="System.Linq.Enumerable.Take{T}"/> make sure to take replies into account!
+        ///  When calling <see cref="Enumerable.Take{T}"/> make sure to take replies into account!
         /// </summary>
         public Listing<PrivateMessage> GetModmail()
         {
@@ -854,7 +849,10 @@ namespace RedditSharp.Things
             {
                 throw new DuplicateLinkException($"Post failed when submitting.  The following link has already been submitted: {((LinkData)data).URL}");
             }
-
+            else if(json["errors"].Any())
+            {
+                throw new Exception(json["errors"][0][0].ToString());
+            }
             return new Post(WebAgent, json["data"]);
         }
         /// <summary>

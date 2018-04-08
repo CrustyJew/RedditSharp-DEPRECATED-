@@ -247,7 +247,7 @@ namespace RedditSharp
             if (!uri.AbsoluteUri.EndsWith("about"))
                 uri = new Uri(uri.AbsoluteUri + "/about");
 
-            var token = await Helpers.GetTokenAsync(WebAgent, uri).ConfigureAwait(false);
+            var token = await Helpers.GetTokenAsync(WebAgent, uri,true).ConfigureAwait(false);
             return new LiveUpdateEvent(WebAgent, token);
         }
 

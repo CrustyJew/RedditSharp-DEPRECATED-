@@ -166,29 +166,24 @@ namespace RedditSharp.Things
         /// <summary>
         /// Edit a live thread.  Set parameters to empty string to clear those fields.  Or null to ignore them on update.
         /// </summary>
-        /// <param name="title">New Title.</param>
+        /// <param name="title">New Title. Cannot be empty string.</param>
         /// <param name="description">New Description</param>
         /// <param name="resources">new Resources</param>
         /// <param name="nsfw">NSFW flag</param>
         public async Task<bool> EditAsync(string title, string description, string resources, bool? nsfw)
         {
-            var expando = (IDictionary<string, object>)new ExpandoObject();
+            if (title == null)
+                title = Title;
+            if (description == null)
+                description = Description;
+            if (resources == null)
+                resources = Resources;
+            if (!nsfw.HasValue)
+                nsfw = NSFW;
 
-            if (title != null)
-                expando.Add(new KeyValuePair<string, object>("title", title));
-
-            if (description != null)
-                expando.Add(new KeyValuePair<string, object>("description", description));
-
-            if (resources != null)
-                expando.Add(new KeyValuePair<string, object>("resources", resources));
-
-            if (nsfw.HasValue)
-                expando.Add(new KeyValuePair<string, object>("nsfw", nsfw.Value));
-
+            dynamic properties = new { title=title,description =description, resources = resources, nsfw = nsfw};
             var request = WebAgent.CreateRequest(EditUrl, "POST");
-            WebAgent.WritePostBody(request, expando);
-
+            WebAgent.WritePostBody(request, properties);
             var response = await WebAgent.GetResponseAsync(request).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
@@ -198,9 +193,9 @@ namespace RedditSharp.Things
             JToken json = JToken.Parse(data);
             if (json["success"].Value<Boolean>())
             {
-                Title = title ?? "";
-                Description = description ?? "";
-                Resources = resources ?? "";
+                Title = title ?? Title;
+                Description = description ?? Description;
+                Resources = resources ?? Resources;
 
                 if (nsfw.HasValue)
                     NSFW = nsfw.Value;

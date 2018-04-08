@@ -196,7 +196,7 @@ namespace RedditSharp.Things
 
             var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             JToken json = JToken.Parse(data);
-            if (!json["json"]["errors"].Any())
+            if (json["success"].Value<Boolean>())
             {
                 Title = title ?? "";
                 Description = description ?? "";

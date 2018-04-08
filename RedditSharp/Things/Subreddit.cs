@@ -832,7 +832,7 @@ namespace RedditSharp.Things
                     throw new CaptchaFailedException("Captcha required but not ICaptchaSolver provided");
                 }
 
-                data.Iden = json["json"]["captcha"].ToString();
+                data.Iden = json["captcha"].ToString();
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(data.Iden));
 
                 // We throw exception due to this method being expected to return a valid Post object, but we cannot

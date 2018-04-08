@@ -4,6 +4,7 @@ using RedditSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RedditSharp.Things
@@ -176,16 +177,26 @@ namespace RedditSharp.Things
             // TODO actual error handling. This just hides the error and returns null
             //try
             //{
-                var json = await WebAgent.Post(CommentUrl, new
+            var json = await WebAgent.Post(CommentUrl, new
+            {
+                text = message,
+                thing_id = FullName,
+                api_type = "json"
+                //r = Subreddit
+            }).ConfigureAwait(false);
+            if (json["errors"].Any())
+            {
+                if (json["errors"][0].Any(x => x.ToString() == "RATELIMIT" || x.ToString() == "ratelimit"))
                 {
-                    text = message,
-                    thing_id = FullName,
-                    api_type = "json"
-                    //r = Subreddit
-                }).ConfigureAwait(false);
-                if (json["json"]["ratelimit"] != null)
-                    throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-                return new Comment(WebAgent, json["json"]["data"]["things"][0], this);
+                    var timeToReset = TimeSpan.FromMinutes(Convert.ToDouble(Regex.Match(json["errors"][0].ElementAt(1).ToString(), @"\d+").Value));
+                    throw new RateLimitException(timeToReset);
+                }
+                else
+                {
+                    throw new Exception(json["errors"][0][0].ToString());
+                }
+            }
+            return new Comment(WebAgent, json["data"]["things"][0], this);
             //}
             //catch (HttpRequestException ex)
             //{
@@ -206,10 +217,10 @@ namespace RedditSharp.Things
                 text = newText,
                 thing_id = FullName
             }).ConfigureAwait(false);
-            if (!json["json"]["errors"].Any())
+            if (!json["errors"].Any())
                 Body = newText;
             else
-                throw new Exception($"Errors editing text {json["json"]["errors"][0][0].ToString()}");
+                throw new Exception($"Errors editing text {json["errors"][0][0].ToString()}");
         }
 
         /// <inheritdoc />

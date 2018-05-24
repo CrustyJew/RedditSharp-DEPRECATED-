@@ -832,7 +832,7 @@ namespace RedditSharp.Things
                     throw new CaptchaFailedException("Captcha required but not ICaptchaSolver provided");
                 }
 
-                data.Iden = json["json"]["captcha"].ToString();
+                data.Iden = json["captcha"].ToString();
                 CaptchaResponse captchaResponse = solver.HandleCaptcha(new Captcha(data.Iden));
 
                 // We throw exception due to this method being expected to return a valid Post object, but we cannot
@@ -853,7 +853,8 @@ namespace RedditSharp.Things
             {
                 throw new Exception(json["errors"][0][0].ToString());
             }
-            return new Post(WebAgent, json["data"]);
+            
+            return new Post(WebAgent, await Helpers.GetTokenAsync(WebAgent, new Uri(json["data"]["url"].ToString())).ConfigureAwait(false));
         }
         /// <summary>
         /// Submits a link post in the current subreddit using the logged-in user

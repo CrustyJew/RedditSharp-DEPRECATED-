@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace RedditSharp.Things
 {
@@ -143,9 +144,20 @@ namespace RedditSharp.Things
                 thing_id = FullName,
                 api_type = "json"
             }).ConfigureAwait(false);
-            if (json["json"]["ratelimit"] != null)
-                throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
-            return new Comment(WebAgent, json["json"]["data"]["things"][0], this);
+            if (json["errors"].Any())
+            {
+                if (json["errors"][0].Any(x => x.ToString() == "RATELIMIT" || x.ToString() == "ratelimit"))
+                {
+                    var timeToReset = TimeSpan.FromMinutes(Convert.ToDouble(Regex.Match(json["errors"][0].ElementAt(1).ToString(), @"\d+").Value));
+                    throw new RateLimitException(timeToReset);
+                }
+                else
+                {
+                    throw new Exception(json["errors"][0][0].ToString());
+                }
+            }
+
+            return new Comment(WebAgent, json["data"]["things"][0], this);
         }
 
         private async Task<JToken> SimpleActionToggleAsync(string endpoint, bool value, bool requiresModAction = false)
@@ -204,7 +216,7 @@ namespace RedditSharp.Things
                 text = newText,
                 thing_id = FullName
             }).ConfigureAwait(false);
-            if (json["json"].ToString().Contains("\"errors\": []"))
+            if (!json["errors"].Any())
                 SelfText = newText;
             else
                 throw new Exception("Error editing text.");
@@ -319,7 +331,7 @@ namespace RedditSharp.Things
         {
             return new CommentsEnumarable(WebAgent, this, limitPerRequest);
         }
-        #region Static Operations
+#region Static Operations
         /// <summary>
         /// Sets flair of given post by <paramref name="fullname"/>
         /// </summary>

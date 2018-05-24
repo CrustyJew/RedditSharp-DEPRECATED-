@@ -229,10 +229,10 @@ namespace RedditSharp
                 nsfw = nsfw
             }).ConfigureAwait(false);
 
-            if (json["json"]["errors"].Any())
-                throw new Exception(json["json"]["errors"][0][0].ToString());
+            if (json["errors"].Any())
+                throw new Exception(json["errors"][0][0].ToString());
 
-            var id = json["json"]["data"]["id"].ToString();
+            var id = json["data"]["id"].ToString();
 
             return await GetLiveEvent(new Uri(String.Format(GetLiveEventUrl, id))).ConfigureAwait(false);
         }
@@ -247,7 +247,7 @@ namespace RedditSharp
             if (!uri.AbsoluteUri.EndsWith("about"))
                 uri = new Uri(uri.AbsoluteUri + "/about");
 
-            var token = await Helpers.GetTokenAsync(WebAgent, uri).ConfigureAwait(false);
+            var token = await Helpers.GetTokenAsync(WebAgent, uri,true).ConfigureAwait(false);
             return new LiveUpdateEvent(WebAgent, token);
         }
 

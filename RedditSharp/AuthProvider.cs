@@ -17,6 +17,16 @@ namespace RedditSharp
         private const string OauthGetMeUrl = "https://oauth.reddit.com/api/v1/me";
         private const string RevokeUrl = "https://www.reddit.com/api/v1/revoke_token";
 
+        /// <summary>
+        /// OAuth2 token.
+        /// </summary>
+        public static string OAuthToken { get; set; }
+
+        /// <summary>
+        /// OAuth2 refresh token.
+        /// </summary>
+        public static string RefreshToken { get; set; }
+
 #pragma warning disable 1591
         [Flags]
         public enum Scope

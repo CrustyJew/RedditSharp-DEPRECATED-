@@ -135,6 +135,9 @@ namespace RedditSharp
                 }).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
+                if (json["refresh_token"] != null)
+                    RefreshToken = json["refresh_token"].ToString();
+                OAuthToken = json["access_token"].ToString();
                 return json["access_token"].ToString();
             }
             throw new AuthenticationException("Could not log in.");
@@ -168,6 +171,9 @@ namespace RedditSharp
                 }).ConfigureAwait(false);
             if (json["access_token"] != null)
             {
+                if (json["refresh_token"] != null)
+                    RefreshToken = json["refresh_token"].ToString();
+                OAuthToken = json["access_token"].ToString();
                 return json["access_token"].ToString();
             }
             throw new AuthenticationException("Could not log in.");

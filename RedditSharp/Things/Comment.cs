@@ -256,5 +256,38 @@ namespace RedditSharp.Things
                 api_type = "json"
             }).ConfigureAwait(false);
         }
+
+        #region Static Methods
+        /// <summary>
+        /// Post a reply to a specific comment
+        /// </summary>
+        /// <param name="webAgent"></param>
+        /// <param name="commentFullName">e.g. "t1_12345"</param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static async Task Reply(IWebAgent webAgent, string commentFullName, string message) {
+            // TODO actual error handling. This just hides the error and returns null
+            //try
+            //{
+            var json = await webAgent.Post(CommentUrl, new {
+                text = message,
+                thing_id = commentFullName,
+                api_type = "json"
+                //r = Subreddit
+            }).ConfigureAwait(false);
+            if (json["json"]["ratelimit"] != null) {
+                throw new RateLimitException(TimeSpan.FromSeconds(json["json"]["ratelimit"].ValueOrDefault<double>()));
+            }
+            
+
+            //}
+            //catch (HttpRequestException ex)
+            //{
+            //    var error = new StreamReader(ex..GetResponseStream()).ReadToEnd();
+            //    return null;
+            //}
+        }
+        #endregion
+
     }
 }

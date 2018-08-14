@@ -47,7 +47,10 @@ namespace RedditSharp
         DeleteRule,
         Spoiler,
         UnSpoiler,
-        Modmail_Enrollment
+        Modmail_Enrollment,
+        Community_Styling,
+        Community_Widgets,
+        MarkOriginalContent,
     }
 }
 #pragma warning restore 1591

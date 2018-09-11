@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -56,6 +57,22 @@ namespace RedditSharpTests.Things
 
             Assert.Equal(55, comments.Count);
             
+        }
+
+        [Fact]
+        public async Task StreamComments()
+        {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
+
+            var count = 0;
+            var comments = reddit.RSlashAll.GetComments().GetEnumerator(50, 100, true);
+            while (await comments.MoveNext(CancellationToken.None))
+            {
+                count++;
+            }
+
+            Assert.Equal(100, count);
         }
     }
 }

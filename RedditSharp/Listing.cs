@@ -424,36 +424,40 @@ namespace RedditSharp
             private async Task<bool> MoveNextForwardAsync(CancellationToken cancellationToken)
             {
                 CurrentIndex++;
-                int tries = 0;
-                while (true)
+
+                if (MaximumLimit != -1 && Count >= MaximumLimit)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    tries++;
-
-                    if (MaximumLimit != -1 && Count >= MaximumLimit)
+                    return false;
+                }
+                
+                if (CurrentIndex == 0 || CurrentIndex >= CurrentPage.Count)
+                {
+                    int tries = 0;
+                    while (true)
                     {
-                        return false;
-                    }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        tries++;
 
-                    try
-                    {
-                        await FetchNextPageAsync().ConfigureAwait(false);
-                        CurrentIndex = 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        // sleep for a while to see if we can recover
-                        await Sleep(tries, cancellationToken, ex).ConfigureAwait(false);
-                    }
+                        try
+                        {
+                            await FetchNextPageAsync().ConfigureAwait(false);
+                            CurrentIndex = 0;
+                        }
+                        catch (Exception ex)
+                        {
+                            // sleep for a while to see if we can recover
+                            await Sleep(tries, cancellationToken, ex).ConfigureAwait(false);
+                        }
 
-                    // the page is only populated if there are *new* items to yielded from the listing.
-                    if (CurrentPage.Count > 0)
-                    {
-                        break;
-                    }
+                        // the page is only populated if there are *new* items to yielded from the listing.
+                        if (CurrentPage.Count > 0)
+                        {
+                            break;
+                        }
 
-                    // No listings were returned in the page.
-                    await Sleep(tries, cancellationToken).ConfigureAwait(false);
+                        // No listings were returned in the page.
+                        await Sleep(tries, cancellationToken).ConfigureAwait(false);
+                    }
                 }
                 Count++;
                 return true;

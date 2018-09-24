@@ -10,7 +10,7 @@ namespace RedditSharp.Things
     /// </summary>
     public class Thing : RedditObject
     {
-        
+
         #region Properties
 
         /// <summary>
@@ -42,6 +42,16 @@ namespace RedditSharp.Things
         /// Gets the time since last fetch from reddit servers.
         /// </summary>
         public TimeSpan TimeSinceFetch => DateTime.Now - FetchedAt;
+
+        private JToken RawJson { get; set; }
+
+        /// <summary>
+        /// Gets a property of this Thing, without any automatic conversion.
+        /// </summary>
+        /// <param name="property">The reddit API name of the property</param>
+        /// <returns>The property's value as a <see cref="String"/> or null if the property 
+        /// doesn't exist or is null.</returns>
+        public String this[String property] => RawJson[property].ValueOrDefault<string>();
         #endregion
 
 
@@ -68,6 +78,7 @@ namespace RedditSharp.Things
             FullName = data["name"].ValueOrDefault<string>();
             Id = data["id"].ValueOrDefault<string>();
             Kind = json["kind"].ValueOrDefault<string>();
+            RawJson = data;
             FetchedAt = DateTime.Now;
             Helpers.PopulateObject(GetJsonData(json), this);
         }
@@ -177,8 +188,10 @@ namespace RedditSharp.Things
         /// <param name="fullname">FullName of thing to act on. eg. t1_66666</param>
         /// <param name="endpoint">URL to post to</param>
         /// <returns></returns>
-        protected static Task<JToken> SimpleActionAsync(IWebAgent agent, string fullname, string endpoint ) {
-            return agent.Post(endpoint, new {
+        protected static Task<JToken> SimpleActionAsync(IWebAgent agent, string fullname, string endpoint)
+        {
+            return agent.Post(endpoint, new
+            {
                 id = fullname
             });
         }

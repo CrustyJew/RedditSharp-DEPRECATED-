@@ -190,7 +190,7 @@ namespace RedditSharp
 
             request.Method = new HttpMethod(method);
             //request.Headers.UserAgent.ParseAdd(UserAgent);
-            request.Headers.TryAddWithoutValidation("User-Agent", $"{DefaultUserAgent} - with RedditSharp by meepster23");
+            request.Headers.TryAddWithoutValidation("User-Agent", $"{UserAgent} - with RedditSharp by meepster23");
             return request;
         }
 

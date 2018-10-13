@@ -19,7 +19,7 @@ namespace RedditSharp
         /// <summary>
         /// Additional values to append to the default RedditSharp user agent.
         /// </summary>
-        public static string DefaultUserAgent { get; set; }
+        public static string DefaultUserAgent { get; set; } = "RedditSharp";
 
         /// <summary>
         /// web protocol "http", "https"
@@ -49,6 +49,11 @@ namespace RedditSharp
         /// String to override default useragent for this instance
         /// </summary>
         public string UserAgent { get; set; }
+
+        /// <summary>
+        /// Append the library to the end of the User-Agent string. Default is true.
+        /// </summary>
+        public bool AppendLibraryToUA { get; set; } = true;
 
         private static readonly bool IsMono = Type.GetType("Mono.Runtime") != null;
         private static bool IsOAuth => RootDomain == "oauth.reddit.com";
@@ -190,7 +195,8 @@ namespace RedditSharp
 
             request.Method = new HttpMethod(method);
             //request.Headers.UserAgent.ParseAdd(UserAgent);
-            request.Headers.TryAddWithoutValidation("User-Agent", $"{UserAgent} - with RedditSharp by meepster23");
+            var userAgentString = AppendLibraryToUA ? $"{UserAgent} - with RedditSharp by meepster23" : UserAgent;
+            request.Headers.TryAddWithoutValidation("User-Agent", userAgentString);
             return request;
         }
 

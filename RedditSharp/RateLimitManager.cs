@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -177,7 +178,7 @@ namespace RedditSharp
                 }
                 if (headers.TryGetValues("X-Ratelimit-Remaining", out values))
                 {
-                    remaining = (int)double.Parse(values.First());
+                    remaining = (int)double.Parse(values.First(), CultureInfo.InvariantCulture);
                 }
                 else
                 {

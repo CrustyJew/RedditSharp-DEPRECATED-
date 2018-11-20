@@ -12,7 +12,7 @@ namespace RedditSharpTests
         public AuthenticatedTestsFixture()
         {
             ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddJsonFile("private.config")
+            builder.AddJsonFile("private.config",true)
             .AddEnvironmentVariables();
             Config = builder.Build();
             WebAgent = new RedditSharp.BotWebAgent(Config["TestUserName"], Config["TestUserPassword"], Config["RedditClientID"], Config["RedditClientSecret"], Config["RedditRedirectURI"]);

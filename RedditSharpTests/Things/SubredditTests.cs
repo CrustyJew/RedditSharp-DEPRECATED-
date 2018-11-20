@@ -25,21 +25,33 @@ namespace RedditSharpTests.Things
             Assert.NotEmpty(contribs);
             Assert.Contains<string>(authFixture.TestUserName.ToLower(), contribs.Select(c => c.Name.ToLower()));
         }
-        
+
+        [Fact]
+        public async Task GetModerators()
+        {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent);
+            var sub = await reddit.GetSubredditAsync(authFixture.Config["TestSubreddit"]);
+            var mods = await sub.GetModeratorsAsync();
+
+            Assert.NotEmpty(mods);
+            Assert.NotEmpty(mods.Where(m => m.Permissions != RedditSharp.ModeratorPermission.None));
+        }
+
         [Fact]
         public async Task SubmitPost()
         {
             RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
-            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent,true);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
 
             var sub = await reddit.GetSubredditAsync(authFixture.Config["TestSubreddit"]);
-            var post = await sub.SubmitPostAsync("ThisIsASubmittedPost", "https://github.com/CrustyJew/RedditSharp/issues/76", resubmit:true);
+            var post = await sub.SubmitPostAsync("ThisIsASubmittedPost", "https://github.com/CrustyJew/RedditSharp/issues/76", resubmit: true);
             Assert.NotNull(post);
             await post.DelAsync();
         }
 
         [Fact]
-        public async Task GetRALLComments() 
+        public async Task GetRALLComments()
         {
             RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
             RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
@@ -49,14 +61,15 @@ namespace RedditSharpTests.Things
         }
 
         [Fact]
-        public async Task PageComments() {
+        public async Task PageComments()
+        {
             RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
             RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
 
             var comments = await reddit.RSlashAll.GetComments().Take(55).ToList();
 
             Assert.Equal(55, comments.Count);
-            
+
         }
 
         [Fact]

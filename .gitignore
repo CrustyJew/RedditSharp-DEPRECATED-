@@ -19,4 +19,4 @@ StyleCop.Cache
 /.vs
 /packages
 /RedditSharpTests/secrets.json
-/RedditSharpTests/private.config
+/RedditSharpTests/private.json

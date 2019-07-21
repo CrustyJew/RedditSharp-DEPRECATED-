@@ -5,6 +5,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using RedditSharp.Data;
+using RedditSharp.Data.Collections;
+using RedditSharp.Extensions.JTokenExtensions;
 using DefaultWebAgent = RedditSharp.WebAgent;
 
 namespace RedditSharp
@@ -476,6 +479,24 @@ namespace RedditSharp
         public Listing<T> GetListing<T>(string url, int maxLimit = -1, int limitPerRequest = -1) where T : Thing
         {
             return new Listing<T>(this.WebAgent, url, maxLimit, limitPerRequest);
+        }
+
+        public async Task<Collection> GetCollectionAsync(string collectionId, bool includePostsContent = true)
+        {
+            var json = await WebAgent.Get(Urls.Collections.Get(collectionId, includePostsContent));
+            json.ThrowIfHasErrors("Could not retrieve the collection.");
+            return new Collection(json, WebAgent);
+        }
+
+        /// <summary>
+        /// Deletes the specified collection. Must be a mod of the subreddit to delete.
+        /// </summary>
+        /// <param name="collectionId"></param>
+        /// <returns></returns>
+        public async Task DeleteCollectionAsync(string collectionId)
+        {
+            var json = await WebAgent.Post(Urls.Collections.Delete, new CollectionBaseParams { CollectionId = collectionId });
+            json.ThrowIfHasErrors("Could not delete the collection.");
         }
     }
 }

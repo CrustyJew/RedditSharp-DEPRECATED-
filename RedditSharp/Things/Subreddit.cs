@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using RedditSharp.Data;
+using RedditSharp.Data.Collections;
+using RedditSharp.Extensions.JTokenExtensions;
 
 namespace RedditSharp.Things
 {
@@ -934,6 +937,28 @@ namespace RedditSharp.Things
         {
             var url = $"{ModLogUrl}?type={action}";
             return Listing<ModAction>.Create(WebAgent, url, max, 500);
+        }
+
+        public async Task<Collection> CreateCollectionAsync(string title, string description)
+        {
+            var data = new CollectionCreationParams
+            {
+                Subreddit = FullName,
+                Title = title,
+                Description = description,
+            };
+            var json = await WebAgent.Post(Urls.Collections.CreateCollectionUrl, data).ConfigureAwait(false);
+            json.ThrowIfHasErrors("Could not create collection.");
+            var result = new Collection(json, WebAgent);
+            return result;
+        }
+
+        public async Task<List<Collection>> GetCollectionsAsync()
+        {
+            var json = await WebAgent.Get(Urls.Collections.SubredditCollectionsUrl(FullName)).ConfigureAwait(false);
+            json.ThrowIfHasErrors("Could not retrieve collections.");
+            var result = Helpers.PopulateObjects<Collection>(json, WebAgent);
+            return result;
         }
 
         #region Static Operations

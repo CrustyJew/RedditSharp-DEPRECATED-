@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace RedditSharp
 {
@@ -8,6 +9,8 @@ namespace RedditSharp
     [Serializable]
     public class RedditException : Exception
     {
+        public JArray Errors { get; }
+
         /// <summary>
         /// Initializes a new instance of the RedditException class.
         /// </summary>
@@ -24,6 +27,17 @@ namespace RedditSharp
             : base(message)
         {
 
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the RedditException class with a specified error message and a JArray of errors
+        /// </summary>
+        /// <param name="message">The message that describes the error.</param>
+        /// <param name="errors">List of errors.</param>
+        public RedditException(string message, JArray errors)
+            : base(message)
+        {
+            Errors = errors;
         }
 
         /// <summary>

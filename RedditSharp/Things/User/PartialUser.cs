@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RedditSharp.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -13,6 +14,14 @@ namespace RedditSharp.Things.User
 		/// <inheritdoc />
 		public PartialUser(IWebAgent agent, JToken json) : base(agent, json)
 		{
+			var data = json["name"] == null ? json["data"] : json;
+			Name = data["name"].ValueOrDefault<string>();
+			var id = data["id"].ValueOrDefault<string>();
+			if (id.Contains("_"))
+			{
+				base.Id = id.Split('_')[1];
+				base.FullName = id;
+			}
 		}
 		#region Properties
 		private string OverviewUrl => $"/user/{Name}.json";

@@ -950,7 +950,7 @@ namespace RedditSharp.Things
             var mods = data["children"].ToArray();
             var result = new ModeratorUser[mods.Length];
             for(var i = 0; i < mods.Length; i++) {
-                var mod = new ModeratorUser(mods[i]);
+                var mod = new ModeratorUser(agent, mods[i]);
                 result[i] = mod;
             }
             return result;

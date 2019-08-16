@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RedditSharp.Extensions;
+using RedditSharp.Things.User;
 using System;
 
 namespace RedditSharp.Things
@@ -8,44 +8,22 @@ namespace RedditSharp.Things
     /// <summary>
     /// A user that is banned in a subreddit.
     /// </summary>
-    public class BannedUser : RedditUser
+    public class BannedUser : RelUser
     {
         /// <inheritdoc />
         public BannedUser(IWebAgent agent, JToken json) : base(agent, json) {
-            var data = json["name"] == null ? json["data"] : json;
-            base.Name = data["name"].ValueOrDefault<string>();
-            var id = data["id"].ValueOrDefault<string>();
-            if (id.Contains("_"))
-            {
-                base.Kind = "t2";
-                base.Id = id.Split('_')[1];
-                base.FullName = id;
-            }
         }
 
         /// <summary>
         /// Date the user was banned.
         /// </summary>
-        [JsonProperty("date")]
-        [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime? BanDate { get; private set; }
+        [Obsolete("User RelUser.Date")]
+        public DateTime? BanDate { get => DateUTC; private set => DateUTC = value; }
 
         /// <summary>
         /// Ban note.
         /// </summary>
         [JsonProperty("note")]
         public string Note { get; private set; }
-
-        /// <summary>
-        /// This will always return 0 for BannedUsers
-        /// </summary>
-        [JsonIgnore]
-        public new int CommentKarma => 0;
-
-        /// <summary>
-        /// This will always return 0 for BannedUsers
-        /// </summary>
-        [JsonIgnore]
-        public new int LinkKarma => 0;
     }
 }

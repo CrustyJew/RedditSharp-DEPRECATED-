@@ -14,10 +14,10 @@ namespace RedditSharp.Things
         public Contributor(IWebAgent agent, JToken json) : base(agent, json) {
         }
 
-		/// <summary>
-		/// Date contributor was added.
-		/// </summary>
-		[Obsolete("User RelUser.Date")]
-		public DateTime? DateAdded { get => DateUTC; private set => DateUTC = value; }
-	}
+        /// <summary>
+        /// Date contributor was added.
+        /// </summary>
+        [Obsolete("User RelUser.Date")]
+        public DateTime? DateAdded { get => DateUTC; private set => DateUTC = value; }
+    }
 }

@@ -164,8 +164,8 @@ namespace RedditSharp.Things
         [JsonIgnore]
         public Thing Parent { get; internal set; }
 
-		/// <inheritdoc/>
-		public override string Shortlink => Permalink.ToString();
+        /// <inheritdoc/>
+        public override string Shortlink => Permalink.ToString();
 
         /// <summary>
         /// Reply to this comment.

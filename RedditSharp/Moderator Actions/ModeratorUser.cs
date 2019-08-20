@@ -9,14 +9,14 @@ namespace RedditSharp
     /// </summary>
     public class ModeratorUser : RelUser
     {
-		public ModeratorUser(IWebAgent agent, JToken json) : base(agent, json)
-		{
-		}
+        public ModeratorUser(IWebAgent agent, JToken json) : base(agent, json)
+        {
+        }
 
-		/// <summary>
-		/// Permissions the moderator has in the subreddit.
-		/// </summary>
-		[JsonProperty("mod_permissions")]
+        /// <summary>
+        /// Permissions the moderator has in the subreddit.
+        /// </summary>
+        [JsonProperty("mod_permissions")]
         [JsonConverter(typeof (ModeratorPermissionConverter))]
         public ModeratorPermission Permissions { get; private set; }
     }

@@ -30,11 +30,11 @@ namespace RedditSharp.Things
         /// <inheritdoc/>
         internal override JToken GetJsonData(JToken json) => json["name"] == null ? json["data"] : json;
 
-		/// <summary>
-		/// This method has no effect.
-		/// </summary>
-		/// <returns>This same <see cref="RedditUser"/>.</returns>
-		public override Task<RedditUser> GetFullUserAsync() => Task.FromResult(this);
+        /// <summary>
+        /// This method has no effect.
+        /// </summary>
+        /// <returns>This same <see cref="RedditUser"/>.</returns>
+        public override Task<RedditUser> GetFullUserAsync() => Task.FromResult(this);
 
         /// <summary>
         /// Returns true if the user has reddit gold.

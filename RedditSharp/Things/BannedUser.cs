@@ -8,7 +8,7 @@ namespace RedditSharp.Things
     /// <summary>
     /// A user that is banned in a subreddit.
     /// </summary>
-    public class BannedUser : RelUser
+    public class BannedUser : NotedUser
     {
         /// <inheritdoc />
         public BannedUser(IWebAgent agent, JToken json) : base(agent, json) {

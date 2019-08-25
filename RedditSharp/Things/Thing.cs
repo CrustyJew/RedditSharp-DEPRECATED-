@@ -43,15 +43,16 @@ namespace RedditSharp.Things
         /// </summary>
         public TimeSpan TimeSinceFetch => DateTime.Now - FetchedAt;
 
-        private JToken RawJson { get; set; }
+        public JToken RawJson { get; private set; }
 
         /// <summary>
-        /// Gets a property of this Thing, without any automatic conversion.
+        /// Gets a property of this Thing without any automatic conversion,
+        /// even to a <see cref="String"/>.
         /// </summary>
         /// <param name="property">The reddit API name of the property</param>
         /// <returns>The property's value as a <see cref="String"/> or null if the property 
         /// doesn't exist or is null.</returns>
-        public String this[String property] => RawJson[property].ValueOrDefault<string>();
+        public JToken this[String property] => RawJson[property];
         #endregion
 
 

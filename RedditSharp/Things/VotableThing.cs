@@ -37,6 +37,8 @@ namespace RedditSharp.Things
         private const string UnsaveUrl = "/api/unsave";
 
         private const string DelUrl = "/api/del";
+        private const string LockUrl = "/api/lock";
+        private const string UnlockUrl = "/api/unlock";
 
         /// <summary>
         /// Css flair class of the item author.
@@ -81,6 +83,14 @@ namespace RedditSharp.Things
         public bool Saved { get; private set; }
 
         /// <summary>
+        /// Whether this <see cref="VotableThing"/> is locked. If <see langword="true""/>,
+        /// only moderators with posts permissions or admins will be able to
+        /// comment.
+        /// </summary>
+        [JsonProperty("locked")]
+        public bool Locked { get; private set; }
+
+        /// <summary>
         /// Shortlink to the item
         /// </summary>
         public virtual string Shortlink => "http://redd.it/" + Id;
@@ -111,6 +121,27 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("gilded")]
         public int Gilded { get; private set; }
+
+        /// <summary>
+        /// Locks this <see cref="VotableThing"/>. If <see langword="true""/>,
+        /// Only moderators with posts permissions or admins will be able to
+        /// comment.
+        /// </summary>
+        public async Task LockAsync()
+        {
+            await SimpleActionAsync(LockUrl);
+            Locked = true;
+        }
+
+        /// <summary>
+        /// Unlocks this <see cref="VotableThing"/>. Users who were previously
+        /// unable to comment because of it being locked are now able to.
+        /// </summary>
+        public async Task UnlockAsync()
+        {
+            await SimpleActionAsync(UnlockUrl);
+            Locked = false;
+        }
 
         /// <summary>
         /// Gets or sets the vote for the current VotableThing.

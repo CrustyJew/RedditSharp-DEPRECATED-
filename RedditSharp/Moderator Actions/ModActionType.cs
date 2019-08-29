@@ -18,6 +18,7 @@ namespace RedditSharp
         AcceptModeratorInvite,
         RemoveModerator,
         AddContributor,
+        RemoveContributor,
         EditSettings,
         EditFlair,
         Distinguish,

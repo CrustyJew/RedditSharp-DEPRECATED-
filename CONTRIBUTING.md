@@ -1,6 +1,6 @@
 # Development
 
-Use a private.config file to pull in config for tests. The required format is as follows
+Use a private.json file to pull in config for tests. The required format is as follows
 
 ```json
 {

@@ -8,7 +8,7 @@ namespace RedditSharp.Things
     /// <summary>
     /// A contributor to a subreddit.
     /// </summary>
-    public class Contributor : RelUser
+    public class Contributor : RelatedUser
     {
         /// <inheritdoc />
         public Contributor(IWebAgent agent, JToken json) : base(agent, json) {

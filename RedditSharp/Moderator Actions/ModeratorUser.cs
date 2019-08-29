@@ -7,7 +7,7 @@ namespace RedditSharp
     /// <summary>
     /// Represents a moderator.
     /// </summary>
-    public class ModeratorUser : RelUser
+    public class ModeratorUser : RelatedUser
     {
         public ModeratorUser(IWebAgent agent, JToken json) : base(agent, json)
         {

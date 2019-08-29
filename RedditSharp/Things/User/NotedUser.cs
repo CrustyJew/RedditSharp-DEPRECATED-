@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace RedditSharp.Things.User
 {
-    public class NotedUser : RelUser
+    public class NotedUser : RelatedUser
     {
         public NotedUser(IWebAgent agent, JToken json) : base(agent, json)
         {

@@ -5,20 +5,20 @@ using Newtonsoft.Json.Linq;
 namespace RedditSharp.Things.User
 {
     /// <summary>
-    /// Represents a user that was added to a user list or listing at a
-    /// time.
+    /// Represents a user that has a relationship formed with another thing, 
+    /// usually with a <see cref="Subreddit"/> or another <see cref="RedditUser"/>.
     /// </summary>
-    public class RelUser : PartialUser
+    public class RelatedUser : PartialUser
     {
-        public RelUser(IWebAgent agent, JToken json) : base(agent, json)
+        public RelatedUser(IWebAgent agent, JToken json) : base(agent, json)
         {
         }
 
         /// <summary>
-        /// The base-36 fullname of the rel item
+        /// The base-36 fullname of the related item
         /// </summary>
         [JsonProperty("rel_id")]
-        public String RelFullName { get; internal set; }
+        public String RelatedFullName { get; internal set; }
 
         /// <summary>
         /// UTC time of when this user was added to the list

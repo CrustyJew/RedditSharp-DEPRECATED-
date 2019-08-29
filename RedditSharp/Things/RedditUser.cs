@@ -31,9 +31,12 @@ namespace RedditSharp.Things
         internal override JToken GetJsonData(JToken json) => json["name"] == null ? json["data"] : json;
 
         /// <summary>
-        /// This method has no effect.
+        /// This method returns itself as the full <see cref="RedditUser"/> is
+        /// already initalized so no more further initialization needs to
+        /// be done.
         /// </summary>
         /// <returns>This same <see cref="RedditUser"/>.</returns>
+        /// <seealso cref="PartialUser.GetFullUserAsync"/>
         public override Task<RedditUser> GetFullUserAsync() => Task.FromResult(this);
 
         /// <summary>

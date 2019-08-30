@@ -15,10 +15,10 @@ namespace RedditSharp.Things.User
         }
 
         /// <summary>
-        /// The base-36 fullname of the related item
+        /// The base-36 fullname of the relationship
         /// </summary>
         [JsonProperty("rel_id")]
-        public String RelatedFullName { get; internal set; }
+        public String RelationFullName { get; internal set; }
 
         /// <summary>
         /// UTC time of when this user was added to the list

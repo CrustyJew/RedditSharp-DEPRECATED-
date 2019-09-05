@@ -116,9 +116,11 @@ namespace RedditSharp
               await RateLimiter.ReadHeadersAsync(response);
               ++tries;
             } while( 
-            //only retry if 500 or 503
+            // only retry if 500, 502, 503, or 504
                 (response.StatusCode == System.Net.HttpStatusCode.InternalServerError || 
-                 response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                 response.StatusCode == System.Net.HttpStatusCode.BadGateway ||
+                 response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
+                 response.StatusCode == System.Net.HttpStatusCode.GatewayTimeout)
                 && tries < maxTries
             );
             if (!response.IsSuccessStatusCode)

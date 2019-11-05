@@ -98,6 +98,12 @@ namespace RedditSharp.Things
         public Uri Thumbnail { get; private set; }
 
         /// <summary>
+        /// Preview image for the post.
+        /// </summary>
+        [JsonProperty("preview")]
+        public Preview Preview { get; private set; }
+
+        /// <summary>
         /// Post title.
         /// </summary>
         [JsonProperty("title")]

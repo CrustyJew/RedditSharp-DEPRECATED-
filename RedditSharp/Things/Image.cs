@@ -27,13 +27,13 @@ namespace RedditSharp.Things
         /// Width of the image.
         /// </summary>
         [JsonProperty("width")]
-        public int Width { get; private set; }
+        public int? Width { get; private set; }
 
         /// <summary>
         /// Height of the image.
         /// </summary>
         [JsonProperty("height")]
-        public int Height { get; private set; }
+        public int? Height { get; private set; }
 
     }
 }

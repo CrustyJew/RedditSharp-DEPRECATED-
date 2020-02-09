@@ -42,6 +42,22 @@ namespace RedditSharpTests.Things
             Assert.Equal(10, comments.Count);
 
         }
+        [Fact]
+        public async Task GetCommentsWithMoresAsync()
+        {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent);
+            var post = (Post)await reddit.GetThingByFullnameAsync("t3_f1bo6u");
+
+            var things = await post.GetCommentsWithMoresAsync(limit: 9, depth: 2);
+            Assert.NotEmpty(things);
+            Assert.Equal(typeof(More), things.Last().GetType());
+            Assert.NotNull(((Comment)things[0]).More);
+            Assert.NotNull(((Comment)things[0]).Comments[0].More);
+
+        }
+
+
 
         [Fact]
         public async Task EnumerateAllComments()
@@ -59,5 +75,7 @@ namespace RedditSharpTests.Things
             Assert.Equal(25, commentsList.Count);
 
         }
+
+ 
     }
 }

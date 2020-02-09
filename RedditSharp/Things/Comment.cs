@@ -102,7 +102,17 @@ namespace RedditSharp.Things
             if (replies != null && replies.Count() > 0)
             {
                 foreach (var comment in replies["data"]["children"])
-                    subComments.Add(new Comment(WebAgent, comment, sender));
+                {
+                    if (comment.Value<string>("kind") != "more")
+                    {
+                        subComments.Add(new Comment(WebAgent, comment, sender));
+                    }
+                    else
+                    {
+                        More = (new More(WebAgent, comment));
+                    }
+                    
+                }
             }
             Comments = subComments.ToArray();
         }

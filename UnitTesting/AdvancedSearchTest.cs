@@ -1,14 +1,18 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RedditSharp.Things;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
 using System.Linq.Expressions;
 using RedditSharp.Search;
-namespace UnitTesting
+namespace RedditSharp.UnitTesting
 {
 
-    [TestClass]
+    
     public class AdvancedSearchTest
     {
-        [TestCategory("AdvancedSearch"),TestMethod]
+        [Fact]
         public void BoolPropertyTest()
         {
             //Arrange
@@ -22,10 +26,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void NOT_BoolPropertyTest()
         {
             //Arrange
@@ -39,10 +43,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void StringPropertyTest()
         {
             //Arrange
@@ -56,10 +60,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void Flipped_StringPropertyTest()
         {
             //Arrange
@@ -73,10 +77,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void Not_StringPropertyTest()
         {
             //Arrange
@@ -90,10 +94,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void AndAlsoTest()
         {
             //Arrange
@@ -107,10 +111,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void TwoString_AndAlsoTest()
         {
             //Arrange
@@ -124,10 +128,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void TwoString_OrElseTest()
         {
             //Arrange
@@ -141,10 +145,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void NotOrElseTest()
         {
             //Arrange
@@ -158,10 +162,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void AndNotOrElseTest()
         {
             //Arrange
@@ -175,10 +179,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void StringVariablePropertyTest()
         {
             //Arrange
@@ -193,10 +197,10 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestCategory("AdvancedSearch"), TestMethod]
+        [Fact]
         public void ClassVariablePropertyTest()
         {
             //Arrange
@@ -212,7 +216,7 @@ namespace UnitTesting
             string actual = searchFormatter.Format(expression);
 
             //Assert
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
         //[TestMethod]
@@ -230,7 +234,7 @@ namespace UnitTesting
         //    string actual = searchFormatter.Format(expression);
 
         //    //Assert
-        //    Assert.AreEqual(expected, actual);
+        //    Assert.Equal(expected, actual);
         //}
 
         private class Test

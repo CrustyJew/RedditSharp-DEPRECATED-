@@ -59,5 +59,20 @@ namespace RedditSharpTests.Things
             Assert.Equal(25, commentsList.Count);
 
         }
+
+        [Fact]
+        public async Task CrosspostParentList()
+        {
+            RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
+            RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent);
+            var post = (Post)await reddit.GetThingByFullnameAsync("t3_f1e0jg");
+
+
+            Assert.NotNull(post.CrossPostParents);
+            Assert.True(post.CrossPostParents.Count > 0);
+            Assert.True(post.CrossPostParents[0].CrossPostParents.Count == 0);
+
+        }
+
     }
 }

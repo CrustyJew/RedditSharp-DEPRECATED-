@@ -153,6 +153,15 @@ namespace RedditSharp.Things
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; private set; }
 
+        [JsonProperty("is_crosspostable")]
+        public bool IsCrossPostable { get; private set; }
+
+        [JsonProperty("num_crossposts")]
+        public int NumberOfCrossposts { get; private set; }
+
+        [JsonProperty("crosspost_parent")]
+        public string CrosspostParent { get; private set; }
+
         /// <summary>
         /// Returns the parent <see cref="Subreddit"/> for this post
         /// </summary>

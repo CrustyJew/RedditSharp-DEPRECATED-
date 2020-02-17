@@ -322,7 +322,7 @@ namespace RedditSharp.Things
         /// </summary>
         /// <param name="limit">Maximum number of comments to return. Returned list may be larger than this number though due to <see cref="More"/></param>
         /// <returns></returns>
-        public async Task<List<Thing>> GetCommentsWithMoresAsync(int limit = 0, CommentSort sort = CommentSort.Best)
+        public async Task<List<Thing>> GetCommentsWithMoresAsync(int limit = 0, CommentSort sort = CommentSort.Best, int depth=0)
         {
             var url = string.Format(GetCommentsUrl, Id);
 
@@ -339,6 +339,11 @@ namespace RedditSharp.Things
             if (limit > 0)
             {
                 url = $"{url}&limit={limit}";
+            }
+
+            if(depth > 0)
+            {
+                url = $"{url}&depth={depth}";
             }
 
             var json = await WebAgent.Get(url).ConfigureAwait(false);

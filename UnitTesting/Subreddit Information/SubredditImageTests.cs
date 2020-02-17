@@ -1,31 +1,36 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using System;
 using RedditSharp;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Xunit;
+using System.Linq.Expressions;
+using Moq;
+using System.Net;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
-namespace RedditSharp.Tests
+namespace RedditSharp.UnitTesting
 {
-    [TestClass()]
+    
     public class SubredditImageTests
     {
-        [TestMethod()]
+        [Fact]
         public void SubredditImageTest()
         {
-            //var sub = new Mock<Things.Subreddit>();
-            Things.Subreddit sub = new Things.Subreddit();
-            sub.FullName = "TestSub";
+            Mock<IWebAgent> mockWebAgent = new Mock<IWebAgent>(MockBehavior.Strict);
+            JObject json = JObject.FromObject(new { data= new { name = "TestSub" }, kind = "t5" });
+
+            Things.Subreddit sub = new Things.Subreddit(mockWebAgent.Object,json);
             
-            var subStyle = new SubredditStyle(null, sub ,null);
+            var subStyle = new SubredditStyle(sub );
 
-            SubredditImage img = new SubredditImage(null, subStyle, "link", "imagename", "12345", null);
-            Assert.IsTrue(img.Url.ToString() == "http://thumbs.reddit.com/TestSub_12345.png");
+            
+            SubredditImage img = new SubredditImage( subStyle, "link", "imagename", "12345");
+            Assert.Equal( "http://thumbs.reddit.com/TestSub_12345.png", img.Url.ToString());
 
-            img = new SubredditImage(null, subStyle, "link", "imagename", "https://testuri.uri/", null);
-            Assert.IsTrue(img.Url.ToString() == "https://testuri.uri/");
+            img = new SubredditImage( subStyle, "link", "imagename", "https://testuri.uri/");
+            Assert.Equal("https://testuri.uri/", img.Url.ToString());
         }
     }
 }

@@ -30,7 +30,7 @@ namespace RedditSharp.Things
                 var context = data["context"].Value<string>();
                 LinkId = context.Split('/')[4];
             }
-            ParseComments(json, sender);
+            ParseComments(json, sender, agent);
         }
 
         /// <inheritdoc />
@@ -94,7 +94,7 @@ namespace RedditSharp.Things
             return this;
         }
 
-        private void ParseComments(JToken data, Thing sender)
+        private void ParseComments(JToken data, Thing sender, IWebAgent agent)
         {
             // Parse sub comments
             var replies = data["data"]["replies"];
@@ -109,7 +109,22 @@ namespace RedditSharp.Things
                     }
                     else
                     {
-                        More = (new More(WebAgent, comment));
+                        /*
+                         * If a comment is in a deep comment chain, reddit sends a single `more` object with name `t1__` in place of the 
+                         * comment's replies. This is the equivalent of seeing a 'Continue this thread' link on the HTML site.
+                         * We get the actual replies by sending another request for this same Comment on it's own
+                        */
+                        if (comment["data"]["name"].ToString() == "t1__")
+                        {
+                            Task<Comment> getFullSelfTask = new Reddit(agent).GetCommentAsync(this.Subreddit, this.Id, this.LinkId);
+                            getFullSelfTask.Wait();
+                            Comment properSelf = (Comment)getFullSelfTask.Result;
+                            subComments.AddRange(properSelf.Comments);
+                        }
+                        else
+                        {
+                            More = (new More(WebAgent, comment));
+                        }
                     }
                     
                 }

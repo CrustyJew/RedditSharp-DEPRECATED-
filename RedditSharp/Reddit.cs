@@ -351,7 +351,7 @@ namespace RedditSharp
                 name = name.Substring(3);
 
             var url = string.Format(GetCommentUrl, subreddit, linkName, name);
-            return GetCommentAsync(new Uri(url));
+            return GetCommentAsync(new Uri(url, UriKind.Relative));
         }
 
         /// <summary>
@@ -361,7 +361,7 @@ namespace RedditSharp
         /// <returns></returns>
         public async Task<Comment> GetCommentAsync(Uri uri)
         {
-            var url = string.Format(GetPostUrl, uri.AbsoluteUri);
+            var url = string.Format(GetPostUrl, uri.ToString());
             var json = await WebAgent.Get(url).ConfigureAwait(false);
             var sender = new Post(WebAgent, json[0]["data"]["children"][0]);
             return new Comment(WebAgent, json[1]["data"]["children"][0], sender);

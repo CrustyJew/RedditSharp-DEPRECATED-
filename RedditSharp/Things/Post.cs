@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Collections.Immutable;
 
 namespace RedditSharp.Things
 {
@@ -53,6 +54,30 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("is_self")]
         public bool IsSelfPost { get; private set; }
+
+        public IReadOnlyList<Post> CrossPostParents 
+        { 
+            get 
+            {
+                if(_crossPostParents == null)
+                {
+                    var builder = ImmutableList.CreateBuilder<Post>();
+                    if (RawJson["crosspost_parent_list"] != null)
+                    {
+                        foreach (JToken token in RawJson["crosspost_parent_list"])
+                        {
+                            Post post = new Post(WebAgent, token);
+                            builder.Add(post);
+                        }
+                    }
+                    _crossPostParents = builder.ToImmutable();
+                }
+                return _crossPostParents;
+            }
+            
+        }
+
+        private ImmutableList<Post> _crossPostParents;
 
         /// <summary>
         /// Css class of the link flair.
@@ -127,6 +152,15 @@ namespace RedditSharp.Things
         [JsonProperty("url")]
         [JsonConverter(typeof(UrlParser))]
         public Uri Url { get; private set; }
+
+        [JsonProperty("is_crosspostable")]
+        public bool IsCrossPostable { get; private set; }
+
+        [JsonProperty("num_crossposts")]
+        public int NumberOfCrossposts { get; private set; }
+
+        [JsonProperty("crosspost_parent")]
+        public string CrosspostParent { get; private set; }
 
         /// <summary>
         /// Returns the parent <see cref="Subreddit"/> for this post

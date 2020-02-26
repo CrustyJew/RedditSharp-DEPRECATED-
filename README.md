@@ -110,14 +110,14 @@ Use ListingStreams to infinitely yeild new Things posted to reddit
 Example:
 
 ```csharp
-// get all new comments as they are posted.
-var comments = subreddit.Comments.GetListingStream();
-
-await comments.Execute();
-foreach (var comment in subreddit.CommentStream)
-{
-    Console.WriteLine(DateTime.Now + "   New Comment posted to /r/example: " + comment.ShortLink);
-}
+// Create the stream
+// Note: Don't set the max in the GetPosts() method, otherwise the stream will
+// stop working as soon as you reach this value.
+ListingStream<Post> postStream = subreddit.GetPosts(Subreddit.Sort.New).Stream();
+// The handling method that will be call on each new post
+postStream.Subscribe(post => logger.LogDebug($"Post : [{post.Title} at {post.CreatedUTC}]"));
+// Start listening
+await postStream.Enumerate(cancellationToken);
 ```
 
 ```csharp

@@ -105,29 +105,39 @@ await reddit.RSlashAll.New.Take(2).ForEachAsync(page => {
 
 **Using ListingStreams**
 
-Use ListingStreams to infinitely yeild new Things posted to reddit
+Use `ListingStreams` to infinitely yield new `Things` posted to reddit
 
 Example:
 
 ```csharp
-// get all new comments as they are posted.
-var comments = subreddit.Comments.GetListingStream();
-
-await comments.Execute();
-foreach (var comment in subreddit.CommentStream)
-{
-    Console.WriteLine(DateTime.Now + "   New Comment posted to /r/example: " + comment.ShortLink);
-}
+// Create the stream
+ListingStream<Post> postStream = subreddit.GetPosts(Subreddit.Sort.New).Stream();
+// Note: Don't set the max in the GetPosts() method, otherwise the stream will
+// stop working as soon as you reach this value.
+// The handling method that will be call on each new post
+postStream.Subscribe(post => logger.LogDebug($"Post : [{post.Title} at {post.CreatedUTC}]"));
+// Start listening
+await postStream.Enumerate(cancellationToken);
 ```
 
 ```csharp
-// get new modmail
-var newModmail = user.ModMail.GetListingStream();
-foreach (var message in newModmail)
-{
-    if (message.FirstMessageName == "")
-        message.Reply("Thanks for the message - we will get back to you soon.");
-}
+// Any properties that returns a Listing<T> has its stream version, another example, new modmail.
+ListingStream<PrivateMessage> modMailStream = reddit.User.GetModMail().Stream();
+modMailStream.Subscribe(message => logger.LogDebug($"ModMail : {message.Subject}"));
+await modMailStream.Enumerate(cancellationToken);
+```
+
+```csharp
+// Need more than one stream at a time ?
+ListingStream<Post> postStream = subreddit.GetPosts(Subreddit.Sort.New).Stream();
+postStream.Subscribe(post => logger.LogDebug($"Post : [{post.Title} at {post.CreatedUTC}]"));
+ListingStream<PrivateMessage> modMailStream = reddit.User.GetModMail().Stream();
+modMailStream.Subscribe(message => logger.LogDebug($"ModMail : {message.Subject}"));
+
+await Task.WhenAll({
+  postStream.Enumerate(cancellationToken),
+  modMailStream.Enumerate(cancellationToken)
+});
 ```
 
 ## Development

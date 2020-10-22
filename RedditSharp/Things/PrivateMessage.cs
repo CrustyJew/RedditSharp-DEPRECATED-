@@ -131,8 +131,8 @@ namespace RedditSharp.Things
                     return null;
             }
             //TODO: Convert this into an async function
-            var firstPage = thread.First();
-            firstPage.Wait();
+            var firstPage = thread.FirstAsync();
+            firstPage.GetAwaiter();
             var firstMessage = firstPage.Result;
             if (firstMessage?.FullName == ParentID)
                 return firstMessage;

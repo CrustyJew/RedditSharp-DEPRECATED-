@@ -173,7 +173,7 @@ namespace RedditSharp
         }
 
         /// <inheritdoc/>
-        public IAsyncEnumerator<T> GetEnumerator()
+        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             return GetEnumerator(LimitPerRequest, MaximumLimit, IsStream);
         }
@@ -365,26 +365,25 @@ namespace RedditSharp
                 Before = json["data"]["before"].Value<string>();
             }
 
-            public void Dispose()
+            public ValueTask DisposeAsync()
             {
-                // ...
+                return new ValueTask();
             }
 
-            public async Task<bool> MoveNext(CancellationToken cancellationToken)
+            public async ValueTask<bool> MoveNextAsync()
             {
                 if (stream)
                 {
-                    return await MoveNextForwardAsync(cancellationToken).ConfigureAwait(false);
+                    return await MoveNextForwardAsync().ConfigureAwait(false);
                 }
                 else
                 {
-                    return await MoveNextBackAsync(cancellationToken).ConfigureAwait(false);
+                    return await MoveNextBackAsync().ConfigureAwait(false);
                 }
             }
 
-            private async Task<bool> MoveNextBackAsync(CancellationToken cancellationToken)
+            private async Task<bool> MoveNextBackAsync()
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 if (CurrentIndex == -1)
                 {
                     //first call, get a page and set CurrentIndex
@@ -421,7 +420,7 @@ namespace RedditSharp
                 return true;
             }
 
-            private async Task<bool> MoveNextForwardAsync(CancellationToken cancellationToken)
+            private async Task<bool> MoveNextForwardAsync()
             {
                 CurrentIndex++;
 
@@ -435,7 +434,6 @@ namespace RedditSharp
                     int tries = 0;
                     while (true)
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
                         tries++;
 
                         try
@@ -446,7 +444,7 @@ namespace RedditSharp
                         catch (Exception ex)
                         {
                             // sleep for a while to see if we can recover
-                            await Sleep(tries, cancellationToken, ex).ConfigureAwait(false);
+                            await Sleep(tries, ex).ConfigureAwait(false);
                         }
 
                         // the page is only populated if there are *new* items to yielded from the listing.
@@ -456,14 +454,14 @@ namespace RedditSharp
                         }
 
                         // No listings were returned in the page.
-                        await Sleep(tries, cancellationToken).ConfigureAwait(false);
+                        await Sleep(tries).ConfigureAwait(false);
                     }
                 }
                 Count++;
                 return true;
             }
 
-            private async Task Sleep(int tries, CancellationToken cancellationToken, Exception ex = null)
+            private async Task Sleep(int tries, Exception ex = null)
             {
                 // wait up to 3 minutes between tries
                 // TODO: Make this configurable
@@ -481,7 +479,7 @@ namespace RedditSharp
                 {
                     seconds = tries * 5;
                 }
-                await Task.Delay(seconds * 1000, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(seconds * 1000).ConfigureAwait(false);
             }
         }
 #pragma warning restore

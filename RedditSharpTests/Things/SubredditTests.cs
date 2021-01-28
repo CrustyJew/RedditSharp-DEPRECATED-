@@ -20,7 +20,7 @@ namespace RedditSharpTests.Things
             RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
             RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent);
             var sub = await reddit.GetSubredditAsync(authFixture.Config["TestSubreddit"]);
-            var contribs = await sub.GetContributors().ToList();
+            var contribs = await sub.GetContributors().ToListAsync();
 
             Assert.NotEmpty(contribs);
             Assert.Contains<string>(authFixture.TestUserName.ToLower(), contribs.Select(c => c.Name.ToLower()));
@@ -56,8 +56,8 @@ namespace RedditSharpTests.Things
             RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
             RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
 
-            var comments = reddit.RSlashAll.GetComments(5);
-            Assert.Equal(5, await comments.Count());
+            var comments = await reddit.RSlashAll.GetComments().Take(5).CountAsync();
+            Assert.Equal(5, comments);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace RedditSharpTests.Things
             RedditSharp.WebAgent agent = new RedditSharp.WebAgent(authFixture.AccessToken);
             RedditSharp.Reddit reddit = new RedditSharp.Reddit(agent, true);
 
-            var comments = await reddit.RSlashAll.GetComments().Take(55).ToList();
+            var comments = await reddit.RSlashAll.GetComments().Take(55).ToListAsync();
 
             Assert.Equal(55, comments.Count);
 
@@ -80,7 +80,7 @@ namespace RedditSharpTests.Things
 
             var count = 0;
             var comments = reddit.RSlashAll.GetComments().GetEnumerator(50, 100, true);
-            while (await comments.MoveNext(CancellationToken.None))
+            while (await comments.MoveNextAsync())
             {
                 count++;
             }

@@ -34,7 +34,7 @@ namespace RedditSharp
         /// Returns <see cref="IAsyncEnumerator{T}"/> for the comments on the <see cref="Post"/>> 
         /// </summary>
         /// <returns></returns>
-        public IAsyncEnumerator<Comment> GetEnumerator()
+        public IAsyncEnumerator<Comment> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             return new CommentsEnumerator(agent, post, limit);
         }
@@ -67,7 +67,7 @@ namespace RedditSharp
                 }
             }
 
-            public async Task<bool> MoveNext(CancellationToken cancellationToken)
+            public async ValueTask<bool> MoveNextAsync()
             {
 
                 if (currentIndex == -1)
@@ -139,9 +139,9 @@ namespace RedditSharp
                 currentBranch = retrieved;
             }
 
-            public void Dispose()
+            public ValueTask DisposeAsync()
             {
-                
+                return new ValueTask();
             }
         }
     }

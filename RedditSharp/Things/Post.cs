@@ -36,6 +36,12 @@ namespace RedditSharp.Things
         /// </summary>
         [JsonProperty("spoiler")]
         public bool IsSpoiler { get; set; }
+
+        /// <summary>
+        /// Returns true if this post is pinned
+        /// </summary>
+        [JsonProperty("pinned")]
+        public bool IsPinned { get; set; }
         
         /// <summary>
         /// Returns true if this post is hidden

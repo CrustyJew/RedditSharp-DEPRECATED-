@@ -1,7 +1,4 @@
-[![redditsharp MyGet Build Status](https://www.myget.org/BuildSource/Badge/redditsharp?identifier=0871c1e1-0ab6-489d-9a7f-ce6c2485cfe5)](https://www.myget.org/) [![NuGet version](https://badge.fury.io/nu/redditsharp.svg)](https://badge.fury.io/nu/redditsharp)
-
-# DEPRECATED
-Due to my own motivation and recent occurences at Reddit, I'm not longer going to be maintaining this repository. If someone has interest in taking this over, feel free to contact me (snoonotes@gmail.com)
+This is my fork of redditsharp based on 2.0-.Net-Core from RedditSharp after it was deprecated.
 
 
 

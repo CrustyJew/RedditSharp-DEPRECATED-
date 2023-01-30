@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>RedditSharp</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>RedditSharp</AssemblyName>
     <PackageId>RedditSharp</PackageId>
     <PackageProjectUrl>https://github.com/CrustyJew/RedditSharp</PackageProjectUrl>
